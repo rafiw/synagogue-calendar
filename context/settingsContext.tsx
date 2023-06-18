@@ -1,0 +1,313 @@
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import NetInfo from '@react-native-community/netinfo';
+import { cities } from 'assets/data';
+import { Settings } from 'utils/defs';
+
+const defaultSettings: Settings = {
+  name: 'בית כנסת לדוגמא',
+  gistId: '',
+  gistFileName: '',
+  githubKey: '',
+  lastUpdateTime: new Date(),
+  language: 'he',
+  city: cities[0].hebrew_name,
+  latitude: 31.7667,
+  longitude: 35.2333,
+  olson: 'Asia/Jerusalem',
+  il: true,
+  background: '../assets/images/background1.png',
+  purimSettings: {
+    regular: true,
+    shushan: false,
+  },
+  enableZmanim: true,
+  enableClasses: true,
+  enableDeceased: true,
+  enableMessages: true,
+  enableSchedule: true,
+  messages: [],
+  classes: [],
+  deceased: [],
+  deceasedSettings: {
+    tableRows: 3,
+    tableColumns: 2,
+    displayMode: 'rotating',
+    defaultTemplate: 'simple',
+    imgbbApiKey: '',
+  },
+};
+
+interface SettingsContextType {
+  settings: Settings;
+  isLoading: boolean;
+  updateSettings: (newSettings: Partial<Settings>) => Promise<void>;
+  refreshSettings: () => Promise<void>;
+}
+
+const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const REMOTE_UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+
+export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [settings, setSettings] = useState<Settings>(defaultSettings);
+  const [isLoading, setIsLoading] = useState(true);
+  const updateTimer = useRef<NodeJS.Timeout | null>(null);
+  const hasUnsavedChanges = useRef(false);
+  const latestSettings = useRef(settings);
+
+  const fetchRemoteSettings = async (gistId: string, key: string, gistFileName: string) => {
+    if (!gistId || gistId.length <= 5) return null;
+    try {
+      const response = await fetch(`https://api.github.com/gists/${gistId}`, {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `Bearer ${key}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const gist = await response.json();
+      const requiredKeys = ['lastUpdateTime', 'name', 'language']; // Add your required keys
+
+      for (const filename of Object.keys(gist.files)) {
+        try {
+          if (filename !== gistFileName) continue;
+          // Parse the file content as JSON
+          const data = JSON.parse(gist.files[filename].content);
+
+          // Check if all required keys are present
+          const hasAllRequiredKeys = requiredKeys.every((requiredKey) => requiredKey in data);
+          if (hasAllRequiredKeys) {
+            // Return the transformed record
+            return {
+              ...data,
+              lastUpdateTime: new Date(data.lastUpdateTime), // Convert timestamp to Date
+            };
+          }
+        } catch (error) {
+          console.error('Failed to parse file content as JSON', gist.files[filename].content, error);
+        }
+      }
+      // Return null if no valid file is found
+      return null;
+    } catch (error) {
+      if (error instanceof TypeError) {
+        console.error('Network error:', error);
+      } else {
+        console.error('Other error:', error);
+      }
+      return null;
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      // Load local settings
+      const localSettingsString = await AsyncStorage.getItem('settings');
+      const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
+
+      // Use local settings values if available, otherwise fall back to current state
+      const gistId = localSettings?.gistId || settings.gistId;
+      const githubKey = localSettings?.githubKey || settings.githubKey;
+      const gistFileName = localSettings?.gistFileName || settings.gistFileName;
+
+      // Try to fetch remote settings
+      const remoteSettings = await fetchRemoteSettings(gistId, githubKey, gistFileName);
+
+      if (!localSettings && !remoteSettings) {
+        // First time use - use defaults
+        setSettings(defaultSettings);
+        return;
+      }
+
+      // Use whichever is newer
+      let finalSettings;
+      if (!remoteSettings) {
+        finalSettings = localSettings;
+      } else if (!localSettings) {
+        finalSettings = remoteSettings;
+      } else {
+        const localDate = new Date(localSettings.lastUpdateTime);
+        const remoteDate = new Date(remoteSettings.lastUpdateTime);
+        finalSettings = remoteDate > localDate ? remoteSettings : localSettings;
+      }
+
+      // Ensure deceased settings are properly initialized
+      if (finalSettings) {
+        finalSettings.deceased = finalSettings.deceased || [];
+        finalSettings.deceasedSettings = {
+          tableRows: 3,
+          tableColumns: 2,
+          displayMode: 'all',
+          defaultTemplate: 'simple',
+          imgbbApiKey: '',
+          ...finalSettings.deceasedSettings,
+        };
+      }
+
+      setSettings(finalSettings || defaultSettings);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateRemoteSettings = async (settings: Settings): Promise<boolean> => {
+    try {
+      const { githubKey, ...settingsWithoutKey } = settings;
+      const response = await fetch(`https://api.github.com/gists/${settings.gistId}`, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          Authorization: `Bearer ${settings.githubKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          files: {
+            [settings.gistFileName]: {
+              content: JSON.stringify(settingsWithoutKey, null, 4),
+            },
+          },
+        }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        console.log('update error ' + error);
+        throw new Error(error.message || 'Failed to upload Gist');
+      }
+      return response.ok;
+    } catch (error) {
+      console.error('Error updating remote settings:', error);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  useEffect(() => {
+    if (!settings.gistId) return;
+
+    const interval = setInterval(async () => {
+      const currentSettings = latestSettings.current;
+      const remoteSettings = await fetchRemoteSettings(
+        currentSettings.gistId,
+        currentSettings.githubKey,
+        currentSettings.gistFileName,
+      );
+      if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
+        setSettings(remoteSettings);
+        latestSettings.current = remoteSettings;
+        await AsyncStorage.setItem('settings', JSON.stringify(remoteSettings));
+      }
+    }, REMOTE_UPDATE_INTERVAL);
+
+    return () => {
+      clearInterval(interval);
+      // Handle any pending updates
+      if (updateTimer.current) {
+        clearTimeout(updateTimer.current);
+        if (hasUnsavedChanges.current) {
+          updateRemoteSettings(latestSettings.current);
+        }
+      }
+    };
+  }, [settings.gistId]);
+
+  // Monitor network connectivity and refresh settings when connection is restored
+  useEffect(() => {
+    if (!settings.gistId) return;
+
+    let wasConnected: boolean | null = true;
+
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      const isConnected = state.isConnected && state.isInternetReachable !== false;
+
+      // If we just reconnected (was offline, now online)
+      if (!wasConnected && isConnected) {
+        console.log('Internet connection restored, refreshing settings...');
+
+        // Fetch and update remote settings
+        const currentSettings = latestSettings.current;
+        fetchRemoteSettings(currentSettings.gistId, currentSettings.githubKey, currentSettings.gistFileName)
+          .then((remoteSettings) => {
+            if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
+              setSettings(remoteSettings);
+              latestSettings.current = remoteSettings;
+              AsyncStorage.setItem('settings', JSON.stringify(remoteSettings));
+              console.log('Settings refreshed from remote after reconnection');
+            }
+          })
+          .catch((error) => {
+            console.error('Error refreshing settings after reconnection:', error);
+          });
+      }
+
+      wasConnected = isConnected;
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [settings.gistId]);
+
+  useEffect(() => {
+    // Cleanup function to clear any existing timer
+    return () => {
+      if (updateTimer.current) {
+        clearTimeout(updateTimer.current);
+        updateTimer.current = null;
+      }
+    };
+  }, []);
+
+  const updateSettings = async (newSettings: Partial<Settings>) => {
+    try {
+      const updatedSettings = {
+        ...settings,
+        ...newSettings,
+        lastUpdateTime: new Date(),
+      };
+
+      await AsyncStorage.setItem('settings', JSON.stringify(updatedSettings));
+      setSettings(updatedSettings);
+      latestSettings.current = updatedSettings;
+      hasUnsavedChanges.current = true;
+
+      // Clear any existing timer
+      if (updateTimer.current) {
+        clearTimeout(updateTimer.current);
+      }
+
+      // Create new timer
+      updateTimer.current = setTimeout(async () => {
+        if (hasUnsavedChanges.current && latestSettings.current.gistId) {
+          const success = await updateRemoteSettings(latestSettings.current);
+          if (success) {
+            hasUnsavedChanges.current = false;
+          }
+        }
+      }, REMOTE_UPDATE_INTERVAL);
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      throw error;
+    }
+  };
+
+  return (
+    <SettingsContext.Provider value={{ settings, updateSettings, isLoading, refreshSettings: loadSettings }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+};
+
+export const useSettings = () => {
+  const context = useContext(SettingsContext);
+  if (context === undefined) {
+    throw new Error('useSettings must be used within a SettingsProvider');
+  }
+  return context;
+};

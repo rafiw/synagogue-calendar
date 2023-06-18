@@ -1,10 +1,29 @@
 {
   "expo": {
-    "scheme": "acme",
+    "scheme": "synagogue-calander",
     "web": {
       "bundler": "metro"
     },
     "name": "synagogue-calander",
-    "slug": "synagogue-calander"
+    "slug": "synagogue-calander",
+    "userInterfaceStyle": "light",
+    "plugins": ["expo-router"],
+    "android": {
+      "package": "com.jewish.synagoguecalander",
+      "intentFilters": [
+        {
+          "action": "android.intent.action.MAIN",
+          "category": ["android.intent.category.LEANBACK_LAUNCHER", "android.intent.category.LAUNCHER"]
+        }
+      ]
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c47ddd1e-5b90-4cf7-aad4-36c1a4910f85"
+      }
+    }
   }
 }

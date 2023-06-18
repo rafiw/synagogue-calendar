@@ -8,7 +8,6 @@ Use [`expo-router`](https://expo.github.io/router) to build native navigation us
 npx create-expo-app -e with-router
 ```
 
-## 📝 Notes
+## Setup a remote settings page
 
-- [Expo Router: Docs](https://expo.github.io/router)
-- [Expo Router: Repo](https://github.com/expo/router)
+I recommend github gist or JSONBin.io.

@@ -1,8 +1,15 @@
 {
   "extends": "./tsconfig.base",
   "include": ["**/*.ts", "**/*.tsx", "app.config.js", "nativewind-env.d.ts"],
+  "exclude": ["**/__tests__/**", "**/__mocks__/**", "**/*.test.ts", "**/*.test.tsx"],
   "compilerOptions": {
     "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "forceConsistentCasingInFileNames": true,
     "baseUrl": "./",
     "jsx": "react-jsx",
     "paths": {

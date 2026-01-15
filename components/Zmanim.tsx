@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { isRTL } from 'utils/utils';
 import { HallelType } from 'utils/zmanim_wrapper';
 
-export function getSubPages() {
-  return 1;
+export async function getSubPages(): Promise<number> {
+  return Promise.resolve(1);
 }
 
 const getTachanunLabel = (

@@ -34,6 +34,6 @@ export function isRTL2(language: 'he' | 'en'): boolean {
 
 export function getNoScreenText(language: 'he' | 'en') {
   // TODO: find a way to put in index.tsx
-  if (language == 'he') return 'לא נמצא מסך. אנא בדוק בהגדרות.';
+  if (language === 'he') return 'לא נמצא מסך. אנא בדוק בהגדרות.';
   return 'No screen found. Please check the settings.';
 }

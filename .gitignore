@@ -16,3 +16,8 @@ ios
 # macOS
 .DS_Store
 nativewind-env.d.ts
+
+# Code quality tools
+.eslintcache
+.type-coverage/
+.nyc_output/

@@ -1,15 +1,15 @@
 {
   "expo": {
-    "scheme": "synagogue-calander",
+    "scheme": "synagogue-calendar",
     "web": {
       "bundler": "metro"
     },
-    "name": "synagogue-calander",
-    "slug": "synagogue-calander",
+    "name": "synagogue-calendar",
+    "slug": "synagogue-calendar",
     "userInterfaceStyle": "light",
     "plugins": ["expo-router"],
     "android": {
-      "package": "com.jewish.synagoguecalander",
+      "package": "com.jewish.synagoguecalendar",
       "intentFilters": [
         {
           "action": "android.intent.action.MAIN",

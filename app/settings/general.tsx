@@ -1,10 +1,18 @@
 import { useState } from 'react';
-import { View, Text, TextInput, ScrollView, ActivityIndicator, TouchableOpacity, Image } from 'react-native';
+import {
+  View,
+  Text,
+  I18nManager,
+  TextInput,
+  ScrollView,
+  ActivityIndicator,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useSettings } from '../../context/settingsContext';
 import { backgroundImages, cities, olsons } from '../../assets/data';
 import { useTranslation } from 'react-i18next';
-import { I18nManager } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import ExternalLink from '../../utils/PressableLink';
 
@@ -24,6 +32,7 @@ const HelpSection = () => {
         <Feather name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color="#2563eb" />
       </TouchableOpacity>
 
+      {/* eslint-disable @typescript-eslint/no-require-imports */}
       {isExpanded && (
         <View className="mt-2 space-y-4">
           <View className="bg-white p-4 rounded-lg shadow-sm">
@@ -101,6 +110,7 @@ const HelpSection = () => {
           </View>
         </View>
       )}
+      {/* eslint-enable @typescript-eslint/no-require-imports */}
     </View>
   );
 };
@@ -239,7 +249,11 @@ const GeneralSettingsTab = () => {
           <View className="space-y-2">
             <Text className="text-sm font-medium text-gray-600">{t('language')}</Text>
             <View className="border border-gray-300 rounded-lg bg-gray-50">
-              <Picker selectedValue={settings.language} onValueChange={handleChangeLanguage} className="h-12">
+              <Picker
+                selectedValue={settings.language}
+                onValueChange={(value) => void handleChangeLanguage(value)}
+                className="h-12"
+              >
                 <Picker.Item label="English" value="en" />
                 <Picker.Item label="עברית" value="he" />
               </Picker>

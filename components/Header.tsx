@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import { isRTL2 } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
 import { ZmanimWrapper } from 'utils/zmanim_wrapper';
-import { I18nManager } from 'react-native';
 
 const getCurrentTime = (locale: string) => {
   const now = new Date(); // cannot use zmanim.greg()

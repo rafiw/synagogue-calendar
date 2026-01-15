@@ -1,1 +1,1 @@
-npm run format
+yarn lint-staged

@@ -21,7 +21,7 @@ function AppContent() {
 
   if (isLoading || !isI18nInitialized) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View className="flex-1 items-center justify-center">
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
@@ -51,7 +51,7 @@ function AppContent() {
 export default function RootLayout() {
   return (
     <StrictMode>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView className="flex-1">
         <SettingsProvider>
           <AppContent />
         </SettingsProvider>

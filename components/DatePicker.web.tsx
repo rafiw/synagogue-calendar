@@ -73,24 +73,14 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
   };
 
   return (
-    <View style={{ marginBottom: 12 }}>
-      <Text style={{ color: '#4b5563', marginBottom: 4, fontSize: 14 }}>{label}</Text>
+    <View className="mb-3">
+      <Text className="text-gray-600 mb-1 text-sm">{label}</Text>
       <Pressable
         ref={buttonRef}
         onPress={handleOpen}
-        style={{
-          borderWidth: 1,
-          borderColor: '#d1d5db',
-          borderRadius: 8,
-          padding: 12,
-          backgroundColor: 'white',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'pointer',
-        }}
+        className="flex-row items-center justify-between rounded-lg border border-gray-300 bg-white p-3 cursor-pointer"
       >
-        <Text style={{ color: value ? '#111827' : '#9ca3af' }}>{value || label}</Text>
+        <Text className={value ? 'text-gray-900' : 'text-gray-400'}>{value || label}</Text>
         <Feather name="calendar" size={20} color="#6B7280" />
       </Pressable>
 

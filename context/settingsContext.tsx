@@ -11,7 +11,7 @@ const defaultSettings: Settings = {
   githubKey: '',
   lastUpdateTime: new Date(),
   language: 'he',
-  city: cities[0].hebrew_name,
+  city: cities[0]?.hebrew_name || '',
   latitude: 31.7667,
   longitude: 35.2333,
   olson: 'Asia/Jerusalem',
@@ -32,7 +32,7 @@ const defaultSettings: Settings = {
   deceasedSettings: {
     tableRows: 3,
     tableColumns: 2,
-    displayMode: 'rotating',
+    displayMode: 'all',
     defaultTemplate: 'simple',
     imgbbApiKey: '',
   },
@@ -51,7 +51,7 @@ const REMOTE_UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
-  const updateTimer = useRef<NodeJS.Timeout | null>(null);
+  const updateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasUnsavedChanges = useRef(false);
   const latestSettings = useRef(settings);
 
@@ -191,18 +191,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   useEffect(() => {
     if (!settings.gistId) return;
 
-    const interval = setInterval(async () => {
-      const currentSettings = latestSettings.current;
-      const remoteSettings = await fetchRemoteSettings(
-        currentSettings.gistId,
-        currentSettings.githubKey,
-        currentSettings.gistFileName,
-      );
-      if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
-        setSettings(remoteSettings);
-        latestSettings.current = remoteSettings;
-        await AsyncStorage.setItem('settings', JSON.stringify(remoteSettings));
-      }
+    const interval = setInterval(() => {
+      void (async () => {
+        const currentSettings = latestSettings.current;
+        const remoteSettings = await fetchRemoteSettings(
+          currentSettings.gistId,
+          currentSettings.githubKey,
+          currentSettings.gistFileName,
+        );
+        if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
+          setSettings(remoteSettings);
+          latestSettings.current = remoteSettings;
+          await AsyncStorage.setItem('settings', JSON.stringify(remoteSettings));
+        }
+      })();
     }, REMOTE_UPDATE_INTERVAL);
 
     return () => {
@@ -283,13 +285,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       // Create new timer
-      updateTimer.current = setTimeout(async () => {
-        if (hasUnsavedChanges.current && latestSettings.current.gistId) {
-          const success = await updateRemoteSettings(latestSettings.current);
-          if (success) {
-            hasUnsavedChanges.current = false;
+      updateTimer.current = setTimeout(() => {
+        void (async () => {
+          if (hasUnsavedChanges.current && latestSettings.current.gistId) {
+            const success = await updateRemoteSettings(latestSettings.current);
+            if (success) {
+              hasUnsavedChanges.current = false;
+            }
           }
-        }
+        })();
       }, REMOTE_UPDATE_INTERVAL);
     } catch (error) {
       console.error('Error saving settings:', error);

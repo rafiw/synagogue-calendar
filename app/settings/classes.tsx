@@ -8,6 +8,18 @@ import { ScrollView } from 'react-native-gesture-handler';
 import { Shiur } from 'utils/defs';
 import { isRTL } from 'utils/utils';
 
+// Checkbox styles - extracted to avoid inline style warnings
+const checkboxStyles = {
+  blue: {
+    iconStyle: { borderColor: '#3b82f6' },
+    innerIconStyle: { borderWidth: 2 },
+  },
+  green: {
+    iconStyle: { borderColor: 'green' },
+    innerIconStyle: { borderWidth: 2 },
+  },
+};
+
 const ClassesSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
@@ -22,9 +34,8 @@ const ClassesSettingsTab = () => {
     checkRTL();
   }, []);
 
-  const saveChecked = async (value: boolean) => {
+  const saveChecked = (value: boolean) => {
     updateSettings({ enableClasses: value });
-    console.log('saveChecked', value);
   };
 
   const defaultShiur: Shiur = {
@@ -43,8 +54,9 @@ const ClassesSettingsTab = () => {
 
   const handleUpdateClass = (index: number, field: keyof Shiur, value: string | number[]) => {
     const updatedClasses = [...settings.classes];
+    const currentClass = updatedClasses[index] ?? defaultShiur;
     updatedClasses[index] = {
-      ...updatedClasses[index],
+      ...currentClass,
       [field]: value,
     };
     updateSettings({ classes: updatedClasses });
@@ -52,18 +64,19 @@ const ClassesSettingsTab = () => {
 
   const handleToggleDay = (classIndex: number, dayNumber: number) => {
     const updatedClasses = [...settings.classes];
-    const currentDays = updatedClasses[classIndex].day;
+    const currentClass = updatedClasses[classIndex] ?? defaultShiur;
+    const currentDays = currentClass.day ?? [];
 
     if (currentDays.includes(dayNumber)) {
       // Remove the day
       updatedClasses[classIndex] = {
-        ...updatedClasses[classIndex],
+        ...currentClass,
         day: currentDays.filter((d) => d !== dayNumber),
       };
     } else {
       // Add the day and sort
       updatedClasses[classIndex] = {
-        ...updatedClasses[classIndex],
+        ...currentClass,
         day: [...currentDays, dayNumber].sort((a, b) => a - b),
       };
     }
@@ -104,8 +117,8 @@ const ClassesSettingsTab = () => {
                   size={25}
                   isChecked={item.day.includes(day.number)}
                   fillColor="#3b82f6"
-                  iconStyle={{ borderColor: '#3b82f6' }}
-                  innerIconStyle={{ borderWidth: 2 }}
+                  iconStyle={checkboxStyles.blue.iconStyle}
+                  innerIconStyle={checkboxStyles.blue.innerIconStyle}
                   onPress={() => handleToggleDay(index, day.number)}
                   textComponent={<Text className={`${rtl ? 'mr-2' : 'ml-2'} text-gray-700`}>{t(day.key)}</Text>}
                 />
@@ -178,8 +191,8 @@ const ClassesSettingsTab = () => {
       <BouncyCheckbox
         isChecked={settings.enableClasses}
         fillColor="green"
-        iconStyle={{ borderColor: 'green' }}
-        innerIconStyle={{ borderWidth: 2 }}
+        iconStyle={checkboxStyles.green.iconStyle}
+        innerIconStyle={checkboxStyles.green.innerIconStyle}
         text={t('enalbe_classes')}
         textComponent={<Text>{t('enalbe_classes')}</Text>}
         onPress={(value) => saveChecked(value)}

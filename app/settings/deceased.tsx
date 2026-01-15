@@ -84,6 +84,11 @@ const uploadImageToImgbb = async (imageUri: string, apiKey: string): Promise<Upl
         try {
           const base64data = (reader.result as string).split(',')[1];
 
+          if (!base64data) {
+            reject(new Error('Failed to extract base64 data from image'));
+            return;
+          }
+
           const formData = new FormData();
           formData.append('image', base64data);
 
@@ -103,7 +108,7 @@ const uploadImageToImgbb = async (imageUri: string, apiKey: string): Promise<Upl
             reject(new Error(result.error?.message || 'Upload failed'));
           }
         } catch (error) {
-          reject(error);
+          reject(error instanceof Error ? error : new Error(String(error)));
         }
       };
       reader.onerror = () => reject(new Error('Failed to read image'));
@@ -132,64 +137,14 @@ const deleteImageFromImgbb = async (deleteUrl: string): Promise<boolean> => {
 // Date Input Component - Platform Specific (auto-resolved by React Native)
 const DateInputComponent = DatePicker;
 
-const HelpSection = () => {
-  const { t } = useTranslation();
-  const [isExpanded, setIsExpanded] = useState(false);
-  return (
-    <View className="mb-4">
-      <TouchableOpacity
-        onPress={() => setIsExpanded(!isExpanded)}
-        className="flex-row items-center justify-between p-3 bg-blue-50 rounded-lg"
-      >
-        <Text className="text-blue-600 font-medium">{t('setup_help')}</Text>
-        <Feather name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color="#2563eb" />
-      </TouchableOpacity>
-
-      {isExpanded && (
-        <View className="mt-2 space-y-4">
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_1')}</Text>
-          </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">
-              {t('help_step_2')}
-              {t('help_step_2_1')}
-            </Text>
-          </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_3')}</Text>
-            <Text className="text-gray-700 mb-2 font-bold">{t('help_step_3_1')}</Text>
-            <Text className="text-gray-700 mb-2">{t('help_step_3_2')}</Text>
-            <Image
-              source={require('../../assets/help/help3.png')}
-              className="w-full h-40 rounded-lg"
-              resizeMode="contain"
-            />
-          </View>
-
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_4')}</Text>
-            <Image
-              source={require('../../assets/help/help4.png')}
-              className="w-full h-40 rounded-lg"
-              resizeMode="contain"
-            />
-          </View>
-        </View>
-      )}
-    </View>
-  );
-};
-
 interface DeceasedPersonFormProps {
   person?: DeceasedPerson;
   onSave: (person: DeceasedPerson) => void;
   onCancel: () => void;
   imgbbApiKey: string;
-  onFormChange?: (hasChanges: boolean) => void;
 }
 
-const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey, onFormChange }: DeceasedPersonFormProps) => {
+const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedPersonFormProps) => {
   const { t, i18n } = useTranslation();
   const [name, setName] = useState(person?.name || '');
   const [isMale, setIsMale] = useState<boolean | undefined>(person?.isMale || false);
@@ -201,14 +156,8 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey, onFormChang
   const [photoUrl, setPhotoUrl] = useState(person?.photo || '');
   const [photoDeleteUrl, setPhotoDeleteUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [personId] = useState(person?.id || Date.now().toString());
+  const [personId] = useState(() => person?.id || Date.now().toString());
   const [tribute, setTribute] = useState(person?.tribute || '');
-
-  // Track if form has unsaved changes
-  useEffect(() => {
-    const hasChanges = name.trim() !== (person?.name || '');
-    onFormChange?.(hasChanges);
-  }, [name, person, onFormChange]);
 
   // Load delete URL from local storage when editing
   useEffect(() => {
@@ -336,12 +285,10 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey, onFormChang
       newPerson.tribute = tribute.trim();
     }
 
-    onFormChange?.(false); // Clear unsaved changes
     onSave(newPerson);
   };
 
   const handleCancel = () => {
-    onFormChange?.(false); // Clear unsaved changes
     onCancel();
   };
 
@@ -518,7 +465,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey, onFormChang
           {photoUrl ? (
             <View className="mb-3 items-center">
               <Image source={{ uri: photoUrl }} className="w-24 h-24 rounded-lg" resizeMode="cover" />
-              <TouchableOpacity onPress={handleRemovePhoto} className="mt-2 px-3 py-1 bg-red-100 rounded">
+              <TouchableOpacity onPress={() => void handleRemovePhoto()} className="mt-2 px-3 py-1 bg-red-100 rounded">
                 <Text className="text-red-600 text-sm">{t('photo_remove')}</Text>
               </TouchableOpacity>
             </View>
@@ -526,7 +473,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey, onFormChang
 
           {/* Upload button */}
           <TouchableOpacity
-            onPress={pickImage}
+            onPress={() => void pickImage()}
             disabled={isUploading}
             className={`flex-row items-center justify-center p-3 rounded-lg border border-dashed ${
               isUploading ? 'bg-gray-100 border-gray-300' : 'bg-blue-50 border-blue-300'
@@ -579,21 +526,12 @@ const DeceasedSettingsTab = () => {
   const { t, i18n } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [editingPerson, setEditingPerson] = useState<DeceasedPerson | undefined>();
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Store reference to unsaved changes for use in navigation
-  useEffect(() => {
-    (global as any).__deceasedFormHasUnsavedChanges = hasUnsavedChanges;
-    return () => {
-      (global as any).__deceasedFormHasUnsavedChanges = false;
-    };
-  }, [hasUnsavedChanges]);
-
-  const saveChecked = async (value: boolean) => {
+  const saveChecked = (value: boolean) => {
     updateSettings({ enableDeceased: value });
   };
 
-  const updateDeceasedSettings = async (newSettings: Partial<DeceasedSettings>) => {
+  const updateDeceasedSettings = (newSettings: Partial<DeceasedSettings>) => {
     const updatedSettings = {
       ...settings.deceasedSettings,
       ...newSettings,
@@ -601,33 +539,32 @@ const DeceasedSettingsTab = () => {
     updateSettings({ deceasedSettings: updatedSettings });
   };
 
-  const addDeceasedPerson = async (person: DeceasedPerson) => {
+  const addDeceasedPerson = (person: DeceasedPerson) => {
     const updatedDeceased = [...settings.deceased, person];
     updateSettings({ deceased: updatedDeceased });
     setShowForm(false);
     setEditingPerson(undefined);
-    setHasUnsavedChanges(false);
   };
 
-  const editDeceasedPerson = async (person: DeceasedPerson) => {
+  const editDeceasedPerson = (person: DeceasedPerson) => {
     const updatedDeceased = settings.deceased.map((p) => (p.id === person.id ? person : p));
     updateSettings({ deceased: updatedDeceased });
     setShowForm(false);
     setEditingPerson(undefined);
-    setHasUnsavedChanges(false);
   };
 
   const deleteDeceasedPerson = (id: string) => {
     showConfirm(
       t('confirm_delete'),
       t('are_you_sure_you_want_to_delete_this_person'),
-      async () => {
+      () => {
         // Clean up uploaded image from imgbb using locally stored delete URL
-        const deleteUrl = await getLocalDeleteUrl(id);
-        if (deleteUrl) {
-          deleteImageFromImgbb(deleteUrl);
-          await removeLocalDeleteUrl(id);
-        }
+        getLocalDeleteUrl(id).then((deleteUrl) => {
+          if (deleteUrl) {
+            deleteImageFromImgbb(deleteUrl);
+            removeLocalDeleteUrl(id);
+          }
+        });
 
         const updatedDeceased = settings.deceased.filter((p) => p.id !== id);
         updateSettings({ deceased: updatedDeceased });
@@ -803,10 +740,8 @@ const DeceasedSettingsTab = () => {
                 onCancel={() => {
                   setShowForm(false);
                   setEditingPerson(undefined);
-                  setHasUnsavedChanges(false);
                 }}
                 imgbbApiKey={settings.deceasedSettings.imgbbApiKey || ''}
-                onFormChange={setHasUnsavedChanges}
               />
             )}
 
@@ -848,7 +783,7 @@ const DeceasedSettingsTab = () => {
                           <Text className="text-white text-sm">{t('deceased_edit')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
-                          onPress={() => deleteDeceasedPerson(item.id)}
+                          onPress={() => void deleteDeceasedPerson(item.id)}
                           className="bg-red-500 px-3 py-1 rounded"
                         >
                           <Text className="text-white text-sm">{t('deceased_delete')}</Text>

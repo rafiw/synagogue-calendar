@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, JSX } from 'react';
 import { Screen } from './defs';
 
 interface UseScreenRotationProps {
@@ -26,7 +26,7 @@ export const useScreenRotation = ({ screens, defaultDisplayTime }: UseScreenRota
       let nextIndex = (currentIndex + 1) % screens.length;
       let loopCount = 0;
 
-      while (screens[nextIndex].content() === null) {
+      while (screens[nextIndex]?.content() === null) {
         nextIndex = (nextIndex + 1) % screens.length;
         loopCount++;
         if (loopCount >= screens.length) return currentIndex; // Prevent infinite loop

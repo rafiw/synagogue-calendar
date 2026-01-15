@@ -1,5 +1,5 @@
 import { ImageBackground, View, Text, ActivityIndicator, I18nManager } from 'react-native';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { router } from 'expo-router';
 
 import Classes, { getSubPages as getClassSubPages } from '../components/Classes';
@@ -31,7 +31,7 @@ export default function App() {
     }
   }, [settings.language]);
 
-  async function createScreens(): Promise<Screen[]> {
+  const createScreens = useCallback(async (): Promise<Screen[]> => {
     const [classSubPages, messagesSubPages, zmanimSubPages, deceasedSubPages] = await Promise.all([
       getClassSubPages(),
       getMessagesSubPages(),
@@ -71,7 +71,7 @@ export default function App() {
       //   presentTime: defaultPageDisplayTime,
       // },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
-  }
+  }, [settings]);
 
   useEffect(() => {
     const loadScreens = async () => {
@@ -84,15 +84,22 @@ export default function App() {
       }
     };
     loadScreens();
-  }, [settings]);
+  }, [createScreens]);
 
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
     if (!isValid) {
-      const timer = setTimeout(() => {
+      timer = setTimeout(() => {
         router.push('/settings');
       }, 1000);
-      return () => clearTimeout(timer);
     }
+
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
   }, [isValid]);
 
   if (isLoadingScreens) {
@@ -112,7 +119,7 @@ export default function App() {
   }
 
   return (
-    <ImageBackground source={{ uri: settings.background }} style={{ flex: 1 }} className="bg-cover bg-center">
+    <ImageBackground source={{ uri: settings.background }} className="flex-1 bg-cover bg-center">
       <View className="flex-1">
         <View className="h-[12%]">
           <Header title={settings.name} />

@@ -16,11 +16,11 @@ export async function getSubPages(): Promise<number> {
 }
 
 const Messages: React.FC = () => {
-  const { settings, updateSettings, isLoading } = useSettings();
+  const { settings } = useSettings();
   const { t, i18n } = useTranslation();
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [PageDisplayTime, setPageDisplayTime] = useState(defaultPageDisplayTime);
+  const [PageDisplayTime] = useState(defaultPageDisplayTime);
 
   useEffect(() => {
     const updatePages = async () => {
@@ -31,15 +31,14 @@ const Messages: React.FC = () => {
   }, [settings.messages.length]);
 
   useEffect(() => {
-    const timer = setInterval(async () => {
-      const subPages = await getSubPages();
-      if (subPages > 0) {
-        setCurrentPage((prev) => (prev + 1) % subPages);
+    const timer = setInterval(() => {
+      if (totalPages > 0) {
+        setCurrentPage((prev) => (prev + 1) % totalPages);
       }
     }, PageDisplayTime * 1000);
 
     return () => clearInterval(timer);
-  }, [PageDisplayTime]);
+  }, [PageDisplayTime, totalPages]);
 
   const getCurrentPageData = () => {
     const startIndex = currentPage * messagesPerPage;

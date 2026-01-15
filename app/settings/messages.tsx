@@ -7,7 +7,7 @@ import BouncyCheckbox from 'react-native-bouncy-checkbox';
 const MessagesSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
-  const saveChecked = async (value: boolean) => {
+  const saveChecked = (value: boolean) => {
     updateSettings({ enableMessages: value });
     console.log('saveChecked', value);
   };
@@ -28,7 +28,7 @@ const MessagesSettingsTab = () => {
         innerIconStyle={{ borderWidth: 2 }}
         text={t('enalbe_messages')}
         textComponent={<Text>{t('enalbe_messages')}</Text>}
-        onPress={(value) => saveChecked(value)}
+        onPress={(value) => void saveChecked(value)}
       />
 
       {settings.enableMessages && (

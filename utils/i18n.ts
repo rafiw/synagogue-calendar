@@ -6,7 +6,9 @@ export const initializeI18n = async (language: Language): Promise<void> => {
   if (!i18n.isInitialized) {
     await i18n.use(initReactI18next).init({
       resources: {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         en: { translation: require('../locales/en.json') },
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         he: { translation: require('../locales/he.json') },
       },
       lng: language,

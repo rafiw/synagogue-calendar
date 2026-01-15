@@ -6,8 +6,6 @@ import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import MemorialCandle from './MemorialCandle';
 import { isRTL2 } from 'utils/utils';
-import { HDate, months } from '@hebcal/core';
-import { getDayMonthYearFromString } from 'utils/classesHelpers';
 import { calculateDeceasedPages } from 'utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -15,7 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export async function getSubPages(): Promise<number> {
   const localSettingsString = await AsyncStorage.getItem('settings');
   const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
-  if (!localSettings || !localSettings.deceasedSettings) return 0;
+  if (!localSettings?.deceasedSettings) return 0;
 
   const { filteredDeceased, totalPages } = calculateDeceasedPages(
     localSettings.deceased || [],

@@ -3,6 +3,7 @@ import { useSettings } from 'context/settingsContext';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
+import { Shiur } from 'utils/defs';
 import { defaultPageDisplayTime, isRTL2 } from 'utils/utils';
 
 const classesPerPage = 3.0;
@@ -14,10 +15,10 @@ export async function getSubPages(): Promise<number> {
 }
 
 const Classes: React.FC = () => {
-  const { settings, updateSettings, isLoading } = useSettings();
-  const { t, i18n } = useTranslation();
+  const { settings } = useSettings();
+  const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(0);
-  const [PageDisplayTime, setPageDisplayTime] = useState(defaultPageDisplayTime);
+  const [PageDisplayTime] = useState(defaultPageDisplayTime);
 
   const daysOfWeek = [
     { number: 0, key: 'sunday' },
@@ -39,11 +40,12 @@ const Classes: React.FC = () => {
       .join(', ');
   };
   useEffect(() => {
-    const timer = setInterval(async () => {
-      const subPages = await getSubPages();
-      if (subPages > 0) {
-        setCurrentPage((prev) => (prev + 1) % subPages);
-      }
+    const timer = setInterval(() => {
+      getSubPages().then((subPages) => {
+        if (subPages > 0) {
+          setCurrentPage((prev) => (prev + 1) % subPages);
+        }
+      });
     }, PageDisplayTime * 1000);
 
     return () => clearInterval(timer);
@@ -77,9 +79,12 @@ const Classes: React.FC = () => {
           {/* Header */}
           <View className="flex-row bg-blue-600 border-b-2 border-blue-800">{header}</View>
           {/* Data Rows */}
-          {getCurrentPageData().map((shiur, index) => {
+          {getCurrentPageData().map((shiur: Shiur, index: number) => {
             const rowData = [
-              <Text key={`${index}_${shiur.day}`} className="flex-1 p-4 text-center text-lg font-bold text-gray-800">
+              <Text
+                key={`${index}_${shiur.day.join(',')}`}
+                className="flex-1 p-4 text-center text-lg font-bold text-gray-800"
+              >
                 {getDayNames(shiur.day)}
               </Text>,
               <Text key={`${index}_${shiur.start}`} className="flex-1 p-4 text-center text-lg font-bold text-gray-800">

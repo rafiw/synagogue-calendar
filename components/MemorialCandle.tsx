@@ -6,62 +6,62 @@ interface MemorialCandleProps {
 }
 
 const MemorialCandle: React.FC<MemorialCandleProps> = ({ size = 40 }) => {
-  const flameScale = useRef(new Animated.Value(1)).current;
-  const flameOpacity = useRef(new Animated.Value(1)).current;
-  const innerFlameScale = useRef(new Animated.Value(1)).current;
-  const glowOpacity = useRef(new Animated.Value(0.5)).current;
+  const flameScale = useRef(new Animated.Value(1));
+  const flameOpacity = useRef(new Animated.Value(1));
+  const innerFlameScale = useRef(new Animated.Value(1));
+  const glowOpacity = useRef(new Animated.Value(0.5));
 
   useEffect(() => {
     // Main flame flickering animation
     const flameAnimation = Animated.loop(
       Animated.sequence([
         Animated.parallel([
-          Animated.timing(flameScale, {
+          Animated.timing(flameScale.current, {
             toValue: 1.1,
             duration: 150 + Math.random() * 100,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: false,
           }),
-          Animated.timing(flameOpacity, {
+          Animated.timing(flameOpacity.current, {
             toValue: 0.85,
             duration: 150 + Math.random() * 100,
             useNativeDriver: false,
           }),
         ]),
         Animated.parallel([
-          Animated.timing(flameScale, {
+          Animated.timing(flameScale.current, {
             toValue: 0.95,
             duration: 100 + Math.random() * 100,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: false,
           }),
-          Animated.timing(flameOpacity, {
+          Animated.timing(flameOpacity.current, {
             toValue: 1,
             duration: 100 + Math.random() * 100,
             useNativeDriver: false,
           }),
         ]),
         Animated.parallel([
-          Animated.timing(flameScale, {
+          Animated.timing(flameScale.current, {
             toValue: 1.05,
             duration: 120 + Math.random() * 80,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: false,
           }),
-          Animated.timing(flameOpacity, {
+          Animated.timing(flameOpacity.current, {
             toValue: 0.9,
             duration: 120 + Math.random() * 80,
             useNativeDriver: false,
           }),
         ]),
         Animated.parallel([
-          Animated.timing(flameScale, {
+          Animated.timing(flameScale.current, {
             toValue: 1,
             duration: 130 + Math.random() * 70,
             easing: Easing.inOut(Easing.ease),
             useNativeDriver: false,
           }),
-          Animated.timing(flameOpacity, {
+          Animated.timing(flameOpacity.current, {
             toValue: 1,
             duration: 130 + Math.random() * 70,
             useNativeDriver: false,
@@ -73,19 +73,19 @@ const MemorialCandle: React.FC<MemorialCandleProps> = ({ size = 40 }) => {
     // Inner flame animation (slightly offset)
     const innerFlameAnimation = Animated.loop(
       Animated.sequence([
-        Animated.timing(innerFlameScale, {
+        Animated.timing(innerFlameScale.current, {
           toValue: 1.15,
           duration: 180,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
         }),
-        Animated.timing(innerFlameScale, {
+        Animated.timing(innerFlameScale.current, {
           toValue: 0.9,
           duration: 120,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
         }),
-        Animated.timing(innerFlameScale, {
+        Animated.timing(innerFlameScale.current, {
           toValue: 1,
           duration: 100,
           easing: Easing.inOut(Easing.ease),
@@ -97,13 +97,13 @@ const MemorialCandle: React.FC<MemorialCandleProps> = ({ size = 40 }) => {
     // Glow pulsing animation
     const glowAnimation = Animated.loop(
       Animated.sequence([
-        Animated.timing(glowOpacity, {
+        Animated.timing(glowOpacity.current, {
           toValue: 0.7,
           duration: 800,
           easing: Easing.inOut(Easing.ease),
           useNativeDriver: false,
         }),
-        Animated.timing(glowOpacity, {
+        Animated.timing(glowOpacity.current, {
           toValue: 0.4,
           duration: 600,
           easing: Easing.inOut(Easing.ease),
@@ -129,7 +129,7 @@ const MemorialCandle: React.FC<MemorialCandleProps> = ({ size = 40 }) => {
   const flameHeight = size * 0.4;
 
   return (
-    <View style={{ alignItems: 'center', height: size, width: size }}>
+    <View className="items-center" style={{ height: size, width: size }}>
       {/* Glow effect behind flame */}
       <Animated.View
         style={{
@@ -139,7 +139,7 @@ const MemorialCandle: React.FC<MemorialCandleProps> = ({ size = 40 }) => {
           height: flameHeight * 1.5,
           borderRadius: flameWidth * 1.25,
           backgroundColor: '#fbbf24',
-          opacity: glowOpacity,
+          opacity: glowOpacity.current,
           ...Platform.select({
             web: {
               boxShadow: '0 0 15px rgba(245, 158, 11, 0.8)',
@@ -165,8 +165,8 @@ const MemorialCandle: React.FC<MemorialCandleProps> = ({ size = 40 }) => {
           borderTopLeftRadius: flameWidth * 0.8,
           borderTopRightRadius: flameWidth * 0.8,
           backgroundColor: '#f97316',
-          transform: [{ scaleY: flameScale }, { scaleX: flameScale }],
-          opacity: flameOpacity,
+          transform: [{ scaleY: flameScale.current }, { scaleX: flameScale.current }],
+          opacity: flameOpacity.current,
         }}
       />
 
@@ -181,7 +181,7 @@ const MemorialCandle: React.FC<MemorialCandleProps> = ({ size = 40 }) => {
           borderTopLeftRadius: flameWidth * 0.5,
           borderTopRightRadius: flameWidth * 0.5,
           backgroundColor: '#fde047',
-          transform: [{ scaleY: innerFlameScale }],
+          transform: [{ scaleY: innerFlameScale.current }],
         }}
       />
 

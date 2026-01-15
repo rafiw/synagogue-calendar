@@ -14,6 +14,7 @@ const defaultSettings: Settings = {
   city: cities[0]?.hebrew_name || '',
   latitude: 31.7667,
   longitude: 35.2333,
+  elevation: 0,
   olson: 'Asia/Jerusalem',
   il: true,
   background: '../assets/images/background1.png',

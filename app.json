@@ -7,7 +7,7 @@
     "name": "synagogue-calendar",
     "slug": "synagogue-calendar",
     "userInterfaceStyle": "light",
-    "plugins": ["expo-router"],
+    "plugins": ["expo-router", "@react-native-community/datetimepicker"],
     "android": {
       "package": "com.jewish.synagoguecalendar",
       "intentFilters": [

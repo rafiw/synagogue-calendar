@@ -598,8 +598,8 @@ const DeceasedSettingsTab = () => {
         fillColor="green"
         iconStyle={{ borderColor: 'green' }}
         innerIconStyle={{ borderWidth: 2 }}
-        text={t('enalbe_deceased')}
-        textComponent={<Text>{t('enalbe_deceased')}</Text>}
+        text={t('enable_deceased')}
+        textComponent={<Text>{t('enable_deceased')}</Text>}
         onPress={(value) => saveChecked(value)}
       />
 

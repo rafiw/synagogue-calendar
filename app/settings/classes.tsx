@@ -193,8 +193,8 @@ const ClassesSettingsTab = () => {
         fillColor="green"
         iconStyle={checkboxStyles.green.iconStyle}
         innerIconStyle={checkboxStyles.green.innerIconStyle}
-        text={t('enalbe_classes')}
-        textComponent={<Text>{t('enalbe_classes')}</Text>}
+        text={t('enable_classes')}
+        textComponent={<Text>{t('enable_classes')}</Text>}
         onPress={(value) => saveChecked(value)}
       />
       {settings.enableClasses && (

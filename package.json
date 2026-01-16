@@ -13,6 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "check-translations": "node scripts/check-translations.js",
+    "audit-translations": "node scripts/audit-translations.js",
     "commitlint": "commitlint"
   },
   "dependencies": {

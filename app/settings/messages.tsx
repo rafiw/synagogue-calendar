@@ -26,8 +26,8 @@ const MessagesSettingsTab = () => {
         fillColor="green"
         iconStyle={{ borderColor: 'green' }}
         innerIconStyle={{ borderWidth: 2 }}
-        text={t('enalbe_messages')}
-        textComponent={<Text>{t('enalbe_messages')}</Text>}
+        text={t('enable_messages')}
+        textComponent={<Text>{t('enable_messages')}</Text>}
         onPress={(value) => void saveChecked(value)}
       />
 

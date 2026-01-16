@@ -8,6 +8,7 @@ import MessagesSettingsTab from './messages';
 import ClassesSettingsTab from './classes';
 import { router } from 'expo-router';
 import DeceasedSettingsTab from './deceased';
+import ScheduleSettingsTab from './schedule';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -65,6 +66,7 @@ export default function SettingsLayout() {
           <Tab.Navigator>
             <Tab.Screen name="general" component={GeneralSettingsTab} options={{ title: t('settings_title') }} />
             <Tab.Screen name="messages" component={MessagesSettingsTab} options={{ title: t('messages_title') }} />
+            <Tab.Screen name="schedule" component={ScheduleSettingsTab} options={{ title: t('schedule_title') }} />
             <Tab.Screen name="classes" component={ClassesSettingsTab} options={{ title: t('classes_title') }} />
             <Tab.Screen name="deceased" component={DeceasedSettingsTab} options={{ title: t('deceased_title') }} />
           </Tab.Navigator>

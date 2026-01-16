@@ -18,14 +18,6 @@ export const cities: City[] = [
   { hebrew_name: 'חולון', name: 'Holon', latitude: 32.0108, longitude: 34.7794 },
 ];
 
-// export const backgroundImages = {
-//   empty: '',
-//   background1: '../assets/images/background1.png',
-//   background2: '../assets/images/background2.png',
-//   background3: '../assets/images/background3.png',
-//   background4: '../assets/images/background4.png',
-// } as const;
-
 export const backgroundImages = [
   {
     label: 'empty',

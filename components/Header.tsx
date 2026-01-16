@@ -17,8 +17,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ title }) => {
-  const { settings, updateSettings, isLoading } = useSettings();
-  const { t, i18n } = useTranslation();
+  const { settings } = useSettings();
+  const { t } = useTranslation();
   const locale = settings.language === 'he' ? 'he-IL' : 'en-US';
   const [currentTime, setCurrentTime] = useState(getCurrentTime(locale));
   const router = useRouter();
@@ -31,9 +31,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     settings.purimSettings,
     settings.elevation,
   );
-  const [dayOfWeek, setDayOfWeek] = useState(
-    t(zmanim.greg().toLocaleString('en-US', { weekday: 'long' }).toLowerCase()),
-  );
+  const [dayOfWeek] = useState(t(zmanim.greg().toLocaleString('en-US', { weekday: 'long' }).toLowerCase()));
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(getCurrentTime(locale));

@@ -37,6 +37,15 @@ const defaultSettings: Settings = {
     defaultTemplate: 'simple',
     imgbbApiKey: '',
   },
+  scheduleSettings: {
+    columns: [
+      {
+        id: '1',
+        title: 'טור-1',
+        prayers: [],
+      },
+    ],
+  },
 };
 
 interface SettingsContextType {
@@ -144,6 +153,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           defaultTemplate: 'simple',
           imgbbApiKey: '',
           ...finalSettings.deceasedSettings,
+        };
+        finalSettings.scheduleSettings = finalSettings.scheduleSettings || {
+          columns: [
+            {
+              id: '1',
+              title: 'Regular Day',
+              prayers: [],
+            },
+            {
+              id: '2',
+              title: 'Holiday',
+              prayers: [],
+            },
+          ],
         };
       }
 

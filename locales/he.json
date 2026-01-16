@@ -149,5 +149,19 @@
   "fast_end": "סוף הצום: {{date}}",
   "optional": "אופציונלי",
   "deceased_template_default_will_be_used": "תבנית ברירת המחדל תשמש אם לא נבחרת",
-  "schedule_title": "זמני תפילות"
+  "schedule_title": "זמני תפילות",
+  "schedule_info1": "יום רגיל",
+  "schedule_info2": "חג",
+  "schedule_column_title": "כותרת עמודה",
+  "schedule_add_column": "הוסף עמודה",
+  "schedule_delete_column": "מחק עמודה",
+  "schedule_add_prayer": "הוסף תפילה",
+  "schedule_prayer_name": "שם התפילה",
+  "schedule_prayer_time": "שעת התפילה",
+  "schedule_no_prayers": "לא נוספו תפילות עדיין",
+  "schedule_edit_column": "ערוך עמודה",
+  "schedule_delete_prayer": "מחק תפילה",
+  "schedule_edit_prayer": "ערוך תפילה",
+  "sure_column_delete": "האם אתם בטוחים שברצונכם למחוק את העמודה?",
+  "sure_prayer_delete": "האם אתם בטוחים שברצונכם למחוק את התפילה?"
 }

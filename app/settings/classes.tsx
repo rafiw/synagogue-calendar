@@ -99,14 +99,14 @@ const ClassesSettingsTab = () => {
     updateSettings({ classes: updatedClasses });
   };
 
-  const renderClassItem = ({ item, index }: { item: Shiur; index: number }) => (
-    <View className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+  const renderClassItem = ({ rtl, item, index }: { rtl: boolean; item: Shiur; index: number }) => (
+    <View className="bg-white rounded-lg p-4 mb-4 shadow-sm  border border-gray-500">
       <View className={`flex-row ${rtl ? 'justify-end' : 'justify-start'}`}>
         <TouchableOpacity onPress={() => handleDeleteClass(index)} className="p-2">
           <Feather name="trash-2" size={24} color="red" />
         </TouchableOpacity>
       </View>
-      <View className="space-y-4">
+      <View className="space-y-4 ">
         {/* Days of the week selection */}
         <View>
           <Text className="text-gray-600 mb-2 text-center font-medium">{t('day')}</Text>
@@ -210,7 +210,7 @@ const ClassesSettingsTab = () => {
 
             <FlatList
               data={settings.classes}
-              renderItem={renderClassItem}
+              renderItem={({ item, index }) => renderClassItem({ rtl, item, index })}
               keyExtractor={(_, index) => index.toString()}
               showsVerticalScrollIndicator={false}
               contentContainerClassName="pb-4"

@@ -149,5 +149,19 @@
   "optional": "optional",
   "deceased_template_default_will_be_used": "Default template will be used if not selected",
   "hftara": "Hftara: {{date}}",
-  "schedule_title": "Schedule"
+  "schedule_title": "Schedule",
+  "schedule_info1": "Regular Day",
+  "schedule_info2": "Holiday",
+  "schedule_column_title": "Column Title",
+  "schedule_add_column": "Add Column",
+  "schedule_delete_column": "Delete Column",
+  "schedule_add_prayer": "Add Prayer",
+  "schedule_prayer_name": "Prayer Name",
+  "schedule_prayer_time": "Prayer Time",
+  "schedule_no_prayers": "No prayers added yet",
+  "schedule_edit_column": "Edit Column",
+  "schedule_delete_prayer": "Delete Prayer",
+  "schedule_edit_prayer": "Edit Prayer",
+  "sure_column_delete": "Are you sure you want to delete the column?",
+  "sure_prayer_delete": "Are you sure you want to delete the prayer?"
 }

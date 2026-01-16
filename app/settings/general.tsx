@@ -125,7 +125,7 @@ const GeneralSettingsTab = () => {
   const [githubKeyUrl, setGithubKeyUrl] = useState(settings.githubKey);
   const [gistFileName, setGistFileName] = useState(settings.gistFileName);
   const [synagogueName, setSynagogueName] = useState(settings.name);
-  const [selectedLocation, setSelectedLocation] = useState(cities[0].name);
+  const [selectedLocation, setSelectedLocation] = useState(cities[0]!.name);
   const [olson, setOlson] = useState(settings.olson);
   const [background, setBackground] = useState(settings.background);
   const [purimSettings, setPurimSettings] = useState(settings.purimSettings || { regular: true, shushan: false });
@@ -157,7 +157,7 @@ const GeneralSettingsTab = () => {
   };
 
   const handleCityChange = (city: string) => {
-    const chosen_city = cities.find((x) => x.name === city || x.hebrew_name === city) || cities[0];
+    const chosen_city = cities.find((x) => x.name === city || x.hebrew_name === city) || cities[0]!;
     setLatitude(chosen_city.latitude.toString());
     setLongitude(chosen_city.longitude.toString());
     setSelectedLocation(city);

@@ -30,6 +30,22 @@ export interface DeceasedSettings {
   imgbbApiKey: string;
 }
 
+export interface Prayer {
+  id: string;
+  name: string;
+  time: string;
+}
+
+export interface ScheduleColumn {
+  id: string;
+  title: string;
+  prayers: Prayer[];
+}
+
+export interface ScheduleSettings {
+  columns: ScheduleColumn[];
+}
+
 export interface Screen {
   id: number;
   name: string;
@@ -68,6 +84,7 @@ export interface Settings {
   classes: Shiur[];
   deceased: DeceasedPerson[];
   deceasedSettings: DeceasedSettings;
+  scheduleSettings: ScheduleSettings;
 }
 
 export interface City {

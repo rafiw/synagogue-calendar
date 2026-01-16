@@ -64,12 +64,12 @@ export default function App() {
         content: () => (settings.enableMessages ? <Messages /> : null),
         presentTime: messagesSubPages * defaultPageDisplayTime,
       },
-      // {
-      //   id: 5,
-      //   name: 'schedule',
-      //   content: () => (settings.enableSchedule ? <Schedule /> : null),
-      //   presentTime: defaultPageDisplayTime,
-      // },
+      {
+        id: 5,
+        name: 'schedule',
+        content: () => (settings.enableSchedule ? <Schedule /> : null),
+        presentTime: defaultPageDisplayTime,
+      },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
   }, [settings]);
 

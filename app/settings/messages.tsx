@@ -51,7 +51,7 @@ const MessagesSettingsTab = () => {
             data={settings.messages}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item, index }) => (
-              <View className="flex-row items-center bg-white p-4 rounded-lg mb-2 shadow-sm">
+              <View className="flex-row items-center bg-white p-4 rounded-lg mb-2 shadow-sm border border-gray-500">
                 <TextInput
                   value={item}
                   onChangeText={(newText) => {

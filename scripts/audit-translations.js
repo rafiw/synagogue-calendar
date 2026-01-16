@@ -41,7 +41,10 @@ const findKeysInCode = (dir, keysSet = new Set()) => {
       const regex = /\bt\(\s*['"`]([^'"`]+)['"`]/g;
       let match;
       while ((match = regex.exec(content)) !== null) {
-        keysSet.add(match[1]);
+        // add on;y if $ not in key
+        if (!match[1].includes('$')) {
+          keysSet.add(match[1]);
+        }
       }
     }
   }
@@ -55,9 +58,27 @@ srcPaths.forEach((p) => {
 
 // 3. Compare and report
 let hasError = false;
+const manualKeysInCode = [
+  'deceased_display_all',
+  'deceased_display_monthly',
+  'deceased_template_card',
+  'deceased_template_photo',
+  'deceased_template_simple',
+  'sunday',
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'no_tachanun',
+  'no_tachanun_in_mincha',
+  'no_tachanun_in_mincha_shabat',
+  'no_tachanun_in_shacharit',
+];
+manualKeysInCode.forEach((key) => usedKeysInCode.add(key));
 
 console.log('--- Translation Audit (vs he.json) ---');
-
 // Missing in JSON (Used in code but not defined in he.json)
 const missingInHe = [...usedKeysInCode].filter((key) => !heKeys.has(key));
 

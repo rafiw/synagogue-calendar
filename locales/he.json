@@ -1,5 +1,4 @@
 {
-  "no_screen_warnning": "לא נמצא מסך. אנא בדוק בהגדרות.",
   "day": "יום",
   "time": "שעה",
   "tutor": "רב",
@@ -25,7 +24,6 @@
   "messages_title": "הודעות",
   "shachar": "עלות השחר  {{date}}",
   "mishayakir": "טלית תפילין  {{date}}",
-  "sunrise": "זריחה  {{date}}",
   "netz": "הנץ  {{date}}",
   "eo_shma": "סוף זמן קריאת שמע מג\"א  {{date}}",
   "eo_shma_gra": "סוף זמן קריאת שמע גר\"א  {{date}}",
@@ -37,14 +35,13 @@
   "plag_mincha": "פלג המנחה  {{date}}",
   "sunset": "שקיעה  {{date}}",
   "stars": "צאת הכוכבים  {{date}}",
-  "stars_rt": "צאת הכוכבים - ר\"ת  {{date}}",
+  "havdala_rt": "צאת השבת - ר\"ת  {{date}}",
   "light_candle": "הדלקת נרות  {{date}}",
   "havdala": "הבדלה  {{date}}",
   "parasha": "{{date}}",
   "hftara": "הפטרה: {{date}}",
   "holiday": "{{date}}",
   "molad": "{{date}}",
-  "hebrew_date": "{{date}}",
   "mevarchim": "השבת שבת מברכים",
   "omer": "{{date}}",
   "daily_info": "מידע יומי",
@@ -152,11 +149,5 @@
   "fast_end": "סוף הצום: {{date}}",
   "optional": "אופציונלי",
   "deceased_template_default_will_be_used": "תבנית ברירת המחדל תשמש אם לא נבחרת",
-  "unsaved_changes": "שינויים שלא נשמרו",
-  "unsaved_changes_message": "יש לך שינויים שלא נשמרו בטופס הנפטר. האם אתה בטוח שברצונך לעזוב?",
-  "unsaved_person_warning": "יש לך נפטר שלא נשמר בטופס. האם תרצה להמשיך בלי לשמור?",
-  "unsaved_person_in_form": "יש שינויים שלא נשמרו בטופס נפטר",
-  "discard": "השלך",
-  "continue_without_saving": "המשך בלי לשמור",
-  "go_back": "חזור"
+  "schedule_title": "זמני תפילות"
 }

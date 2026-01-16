@@ -43,7 +43,7 @@ const MessagesSettingsTab = () => {
             className="flex-row items-center justify-center bg-blue-500 p-3 rounded-lg mb-4"
           >
             <Feather name="plus" size={24} color="white" />
-            <Text className="text-white ml-2 font-medium">{t('')}</Text>
+            <Text className="text-white ml-2 font-medium">{t('add_message')}</Text>
           </TouchableOpacity>
 
           {/* Messages List */}

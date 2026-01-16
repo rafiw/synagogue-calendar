@@ -71,12 +71,12 @@ const Zmanim: React.FC = () => {
   const haveCandleLighting = isFriday || isShabbat || zmanim.isHolidayCandleLighting();
   const fastDay = zmanim.isFastDay();
 
-  const InfoGroup = ({ title, items }: { title: string; items: { label: string; time: string }[] }) => (
+  const InfoGroup = ({ title, items }: { title: string; items: { text: string }[] }) => (
     <View className={`${backgroundColor} rounded-lg p-3 m-1 flex-1 shadow-md`}>
-      <Text className={`text-4xl font-bold mb-2 ${headLineColor} text-center`}>{t(title)}</Text>
+      <Text className={`text-4xl font-bold mb-2 ${headLineColor} text-center`}>{title}</Text>
       {items.map((item, index) => (
         <Text key={index} className={`text-3xl py-3 ${textColor} text-center`}>
-          {t(item.label, { date: item.time })}
+          {item.text}
         </Text>
       ))}
     </View>
@@ -91,14 +91,14 @@ const Zmanim: React.FC = () => {
     checkRTL();
   }, []);
 
-  const TimeGroup = ({ title, items }: { title: string; items: ({ label: string; time: string } | null)[] }) => (
+  const TimeGroup = ({ title, items }: { title: string; items: ({ text: string } | null)[] }) => (
     <View className={`${backgroundColor} rounded-lg p-3 m-1 flex-1 shadow-md`}>
-      <Text className={`text-4xl font-bold mb-2 ${headLineColor} text-center`}>{t(title)}</Text>
+      <Text className={`text-4xl font-bold mb-2 ${headLineColor} text-center`}>{title}</Text>
       <View className={`flex-row${rtl ? '-reverse' : ''} flex-wrap`}>
         {items.map((item, index) =>
           item ? (
             <Text key={index} className={`text-3xl py-3 ${textColor} text-center w-1/2`}>
-              {t(item.label, { date: item.time })}
+              {item.text}
             </Text>
           ) : (
             <View key={index} className="w-1/2 py-3" />
@@ -113,59 +113,63 @@ const Zmanim: React.FC = () => {
       {/* Top Row */}
       <View className="flex-row justify-between mb-1">
         <InfoGroup
-          title="daily_info"
+          title={t('daily_info')}
           items={[
-            ...(zmanim.getParsha() ? [{ label: 'parasha', time: zmanim.getParsha() }] : []),
-            ...(zmanim.getHftara() ? [{ label: 'hftara', time: zmanim.getHftara() }] : []),
-            ...(zmanim.getHoliday() ? zmanim.getHoliday().map((holiday) => ({ label: 'holiday', time: holiday })) : []),
-            ...(zmanim.haveAlHanisim() ? [{ label: 'al_hanisim', time: t('al_hanisim') }] : []),
-            ...(zmanim.haveYaaleVeyavo() ? [{ label: 'yaale_veyavo', time: t('yaale_veyavo') }] : []),
-            ...(zmanim.getMevarchimChodesh() ? [{ label: 'mevarchim', time: zmanim.getMevarchimChodesh() }] : []),
-            ...(zmanim.getMolad() ? [{ label: 'molad', time: zmanim.getMolad() }] : []),
-            ...(zmanim.getOmer() ? [{ label: 'omer', time: zmanim.getOmer() }] : []),
-            ...(zmanim.isMoridHatal()
-              ? [{ label: 'morid_hatal', time: t('morid_hatal') }]
-              : [{ label: 'mashiv_haruach', time: t('mashiv_haruach') }]),
-            ...(zmanim.isVetenBracha()
-              ? [{ label: 'veten_bracha', time: t('veten_bracha') }]
-              : [{ label: 'tal_umatar', time: t('tal_umatar') }]),
-            ...(hallelType === HallelType.WHOLE_HALLEL ? [{ label: 'whole_hallel', time: t('whole_hallel') }] : []),
-            ...(hallelType === HallelType.HALF_HALLEL ? [{ label: 'half_hallel', time: t('half_hallel') }] : []),
-            ...(haveTachanun ? [{ label: haveTachanun, time: '' }] : []),
+            ...(zmanim.getParsha() ? [{ text: t('parasha', { date: zmanim.getParsha() }) }] : []),
+            ...(zmanim.getHftara() ? [{ text: t('hftara', { date: zmanim.getHftara() }) }] : []),
+            ...(zmanim.getHoliday()
+              ? zmanim.getHoliday().map((holiday) => ({ text: t('holiday', { date: holiday }) }))
+              : []),
+            ...(zmanim.haveAlHanisim() ? [{ text: t('al_hanisim') }] : []),
+            ...(zmanim.haveYaaleVeyavo() ? [{ text: t('yaale_veyavo') }] : []),
+            ...(zmanim.getMevarchimChodesh() ? [{ text: t('mevarchim', { date: zmanim.getMevarchimChodesh() }) }] : []),
+            ...(zmanim.getMolad() ? [{ text: t('molad', { date: zmanim.getMolad() }) }] : []),
+            ...(zmanim.getOmer() ? [{ text: t('omer', { date: zmanim.getOmer() }) }] : []),
+            ...(zmanim.isMoridHatal() ? [{ text: t('morid_hatal') }] : [{ text: t('mashiv_haruach') }]),
+            ...(zmanim.isVetenBracha() ? [{ text: t('veten_bracha') }] : [{ text: t('tal_umatar') }]),
+            ...(hallelType === HallelType.WHOLE_HALLEL ? [{ text: t('whole_hallel') }] : []),
+            ...(hallelType === HallelType.HALF_HALLEL ? [{ text: t('half_hallel') }] : []),
+            ...(haveTachanun ? [{ text: t(haveTachanun) }] : []),
           ]}
         />
 
         <TimeGroup
-          title="day_times"
+          title={t('day_times')}
           items={[
             ...(fastDay === FastDayType.MINOR_FAST
               ? [
-                  { label: 'fast_start', time: zmanim.getAlotHaShachar() },
-                  { label: 'fast_end', time: zmanim.getMinorFastEnd() },
+                  { text: t('fast_start', { date: zmanim.getAlotHaShachar() }) },
+                  { text: t('fast_end', { date: zmanim.getMinorFastEnd() }) },
                 ]
               : []),
             ...(fastDay === FastDayType.MAJOR_FAST
               ? [
-                  { label: 'fast_start', time: zmanim.getSunset() },
-                  { label: 'fast_end', time: zmanim.getMajorFastEnd() },
+                  { text: t('fast_start', { date: zmanim.getSunset() }) },
+                  { text: t('fast_end', { date: zmanim.getMajorFastEnd() }) },
                 ]
               : []),
-            ...(haveCandleLighting ? [{ label: 'light_candle', time: zmanim.getCandleLighting() }] : []),
-            ...(haveCandleLighting ? [{ label: 'havdala', time: zmanim.getHavdala() }] : []),
-            { label: 'shachar', time: zmanim.getAlotHaShachar() },
-            { label: 'mishayakir', time: zmanim.getMisheyakir() },
-            { label: 'netz', time: zmanim.getNetz() },
+            ...(haveCandleLighting
+              ? [
+                  { text: t('light_candle', { date: zmanim.getCandleLighting() }) },
+                  { text: t('havdala', { date: zmanim.getHavdala() }) },
+                  { text: t('havdala_rt', { date: zmanim.getHavdalaRT() }) },
+                  null,
+                ]
+              : []),
+            { text: t('shachar', { date: zmanim.getAlotHaShachar() }) },
+            { text: t('mishayakir', { date: zmanim.getMisheyakir() }) },
+            { text: t('netz', { date: zmanim.getNetz() }) },
             null,
-            { label: 'eo_shma', time: zmanim.getSofZmanShma() },
-            { label: 'eo_shma_gra', time: zmanim.getsofZmanShmaMGA() },
-            { label: 'eo_tfila', time: zmanim.getsofZmanTfilla() },
-            { label: 'eo_tfila_gra', time: zmanim.getsofZmanTfillaMGA() },
-            { label: 'chatzot', time: zmanim.getChatzot() },
-            { label: 'mincha_gdola', time: zmanim.getMinchaGdola() },
-            { label: 'mincha_ktana', time: zmanim.getMinchaKtana() },
-            { label: 'plag_mincha', time: zmanim.getPlag() },
-            { label: 'sunset', time: zmanim.getSunset() },
-            { label: 'stars', time: zmanim.gettzeit() },
+            { text: t('eo_shma', { date: zmanim.getSofZmanShma() }) },
+            { text: t('eo_shma_gra', { date: zmanim.getsofZmanShmaMGA() }) },
+            { text: t('eo_tfila', { date: zmanim.getsofZmanTfilla() }) },
+            { text: t('eo_tfila_gra', { date: zmanim.getsofZmanTfillaMGA() }) },
+            { text: t('chatzot', { date: zmanim.getChatzot() }) },
+            { text: t('mincha_gdola', { date: zmanim.getMinchaGdola() }) },
+            { text: t('mincha_ktana', { date: zmanim.getMinchaKtana() }) },
+            { text: t('plag_mincha', { date: zmanim.getPlag() }) },
+            { text: t('sunset', { date: zmanim.getSunset() }) },
+            { text: t('stars', { date: zmanim.gettzeit() }) },
           ]}
         />
       </View>

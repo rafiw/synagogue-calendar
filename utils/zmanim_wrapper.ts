@@ -252,6 +252,19 @@ export class ZmanimWrapper {
     return '';
   }
 
+  getHavdalaRT(): string {
+    const events = this.getEvents();
+    for (const ev of events) {
+      if (ev instanceof HavdalahEvent) {
+        // if we have a havdala event, return the sunset + 72 minutes
+        const sunset = this.zmanim.sunset();
+        sunset.setMinutes(sunset.getMinutes() + 72);
+        return `${sunset.getHours()}:${sunset.getMinutes().toString().padStart(2, '0')}`;
+      }
+    }
+    return '';
+  }
+
   getHebrewDate(): string {
     const events = this.getEvents();
     for (const ev of events) {

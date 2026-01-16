@@ -1,5 +1,4 @@
 {
-  "no_screen_warnning": "No screen found. Please check the settings.",
   "day": "Day",
   "time": "Time",
   "tutor": "Rabbay",
@@ -25,7 +24,6 @@
   "messages_title": "Messages",
   "shachar": "Alot HaShachar: {{date}}",
   "mishayakir": "Earliest talis & tefillin: {{date}}",
-  "sunrise": "Sunrise: {{date}}",
   "netz": "Netz: {{date}}",
   "eo_shma": "Kriyat Shema MGA: {{date}}",
   "eo_shma_gra": "Kriyat Shema GRA: {{date}}",
@@ -37,11 +35,10 @@
   "plag_mincha": "Plag hamincha {{date}}",
   "sunset": "Sunset {{date}}",
   "stars": "Nightfall-3 stars {{date}}",
-  "stars_rt": "Nightfall RT {{date}}",
+  "havdala_rt": "Havdala RT {{date}}",
   "light_candle": "Candle lighting {{date}}",
   "havdala": "Havdala {{date}}",
   "parasha": "Parasha {{date}}",
-  "hebrew_date": "Hebrew date {{date}}",
   "holiday": "Holiday {{date}}",
   "molad": "{{date}}",
   "mevarchim": "Shabat Mevarchim",
@@ -151,12 +148,6 @@
   "fast_end": "Fast ends: {{date}}",
   "optional": "optional",
   "deceased_template_default_will_be_used": "Default template will be used if not selected",
-  "unsaved_changes": "Unsaved Changes",
-  "unsaved_changes_message": "You have unsaved changes in the deceased person form. Are you sure you want to leave?",
-  "unsaved_person_warning": "You have an unsaved deceased person in the form. Do you want to continue without saving?",
-  "unsaved_person_in_form": "You have unsaved changes in deceased person form",
-  "discard": "Discard",
-  "continue_without_saving": "Continue Without Saving",
-  "go_back": "Go Back",
-  "hftara": "Hftara: {{date}}"
+  "hftara": "Hftara: {{date}}",
+  "schedule_title": "Schedule"
 }

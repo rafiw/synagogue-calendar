@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { View, Text, ActivityIndicator, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { ScrollView } from 'react-native-gesture-handler';
+import { daysOfWeek } from 'utils/classesHelpers';
 import { Shiur } from 'utils/defs';
 import { isRTL } from 'utils/utils';
 
@@ -83,16 +84,6 @@ const ClassesSettingsTab = () => {
 
     updateSettings({ classes: updatedClasses });
   };
-
-  const daysOfWeek = [
-    { number: 0, key: 'sunday' },
-    { number: 1, key: 'monday' },
-    { number: 2, key: 'tuesday' },
-    { number: 3, key: 'wednesday' },
-    { number: 4, key: 'thursday' },
-    { number: 5, key: 'friday' },
-    { number: 6, key: 'saturday' },
-  ];
 
   const handleDeleteClass = (index: number) => {
     const updatedClasses = settings.classes.filter((_, i) => i !== index);

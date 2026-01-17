@@ -3,6 +3,7 @@ import { useSettings } from 'context/settingsContext';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
+import { daysOfWeek } from 'utils/classesHelpers';
 import { Shiur } from 'utils/defs';
 import { defaultPageDisplayTime, isRTL2 } from 'utils/utils';
 
@@ -19,16 +20,6 @@ const Classes: React.FC = () => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(0);
   const [PageDisplayTime] = useState(defaultPageDisplayTime);
-
-  const daysOfWeek = [
-    { number: 0, key: 'sunday' },
-    { number: 1, key: 'monday' },
-    { number: 2, key: 'tuesday' },
-    { number: 3, key: 'wednesday' },
-    { number: 4, key: 'thursday' },
-    { number: 5, key: 'friday' },
-    { number: 6, key: 'saturday' },
-  ];
 
   const getDayNames = (dayNumbers: number[]): string => {
     return dayNumbers

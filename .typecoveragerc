@@ -1,0 +1,18 @@
+{
+  "atLeast": 85,
+  "cache": true,
+  "detail": true,
+  "strict": false,
+  "ignoreCatch": false,
+  "ignoreFiles": [
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**",
+    "**/__mocks__/**",
+    "node_modules/**",
+    "coverage/**"
+  ]
+}
+
+
+

@@ -511,7 +511,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
 
       <View className="flex-row space-x-2">
         <TouchableOpacity onPress={handleSave} className="flex-1 bg-blue-500 p-3 rounded-lg">
-          <Text className="text-white text-center font-medium">{t('save')}</Text>
+          <Text className="text-white text-center font-medium">{t('deceased_save')}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={handleCancel} className="flex-1 bg-gray-300 p-3 rounded-lg">
           <Text className="text-gray-700 text-center font-medium">{t('deceased_cancel')}</Text>

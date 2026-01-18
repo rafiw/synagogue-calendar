@@ -101,6 +101,7 @@
   "deceased_date_of_death": "Date of Death",
   "deceased_template": "Template",
   "deceased_photo_url": "Photo URL (optional)",
+  "deceased_save": "Save",
   "deceased_cancel": "Cancel",
   "deceased_edit": "Edit",
   "deceased_delete": "Delete",

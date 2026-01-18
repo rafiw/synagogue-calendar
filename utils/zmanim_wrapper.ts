@@ -206,7 +206,10 @@ export class ZmanimWrapper {
   }
 
   getHftara(): string {
-    // const reading = getLeyningOnDate(this.hdate, this.il, false, this.language) as Leyning;
+    if (this.language === 'he') {
+      // https://github.com/hebcal/hebcal-leyning/pull/711
+      return '';
+    }
     const reading = getLeyningOnDate(this.hdate, this.il, false) as Leyning | undefined;
     return reading?.haftara || '';
   }

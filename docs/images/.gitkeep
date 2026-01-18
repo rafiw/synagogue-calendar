@@ -1,0 +1,31 @@
+# Images Directory
+
+Place your documentation images here:
+
+## App Screenshots
+- `app-logo.png` - App logo
+- `main-screen.png` - Main screen with Zmanim
+- `settings.png` - Settings interface
+- `classes.png` - Classes schedule
+- `memorial.png` - Memorial/yahrzeit page
+- `schedule.png` - Prayer schedule
+- `backgrounds.png` - Background customization options
+- `messages.png` - Messages/announcements
+- `zmanim.png` - Zmanim display
+- `hebrew-calendar.png` - Hebrew calendar features
+
+## Setup Screenshots
+- `create-gist.png` - Creating a GitHub Gist
+- `token-scopes.png` - Token permission scopes
+- `app-gist-settings.png` - App Gist configuration
+
+## Recommended Sizes
+- App logo: 512x512px
+- Screenshots: 1080x1920px (portrait) or 1920x1080px (landscape)
+- Keep file sizes under 1MB each
+
+## Format
+- Use PNG for screenshots (better quality)
+- Use WebP for smaller file sizes
+- Optimize images before committing
+

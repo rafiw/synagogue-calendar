@@ -96,5 +96,5 @@
   "name": "synagogue-calendar",
   "version": "1.0.0",
   "private": true,
-  "license": "GPL2"
+  "license": "GPL-2.0-or-later"
 }

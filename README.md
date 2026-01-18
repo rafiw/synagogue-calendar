@@ -138,6 +138,13 @@ For questions, suggestions, or support, please open an issue on GitHub.
 - The React Native and Expo communities
 - All contributors and users
 
+## License
+
+This project is licensed under the GNU General Public License v2.0
+or later (GPL-2.0-or-later).
+
+This project uses Hebcal, which is licensed under GPL-2.0+.
+
 ---
 
 <div align="center">

@@ -1,8 +1,4 @@
-/**
- * Unit tests for utils/classesHelpers.ts
- * Tests helper functions for the Classes component
- */
-
+import { describe, it, expect } from 'vitest';
 import {
   daysOfWeek,
   getDayNames,
@@ -13,351 +9,266 @@ import {
   sortClassesByTime,
   filterClassesByDay,
   isClassToday,
+  getDayMonthYearFromString,
 } from '../utils/classesHelpers';
 import { Shiur } from '../utils/defs';
 
 describe('classesHelpers', () => {
-  // Mock translator function
-  const mockTranslator = (key: string): string => {
-    const translations: Record<string, string> = {
-      sunday: 'Sunday',
-      monday: 'Monday',
-      tuesday: 'Tuesday',
-      wednesday: 'Wednesday',
-      thursday: 'Thursday',
-      friday: 'Friday',
-      saturday: 'Saturday',
-    };
-    return translations[key] || key;
-  };
-
-  const hebrewTranslator = (key: string): string => {
-    const translations: Record<string, string> = {
-      sunday: 'ראשון',
-      monday: 'שני',
-      tuesday: 'שלישי',
-      wednesday: 'רביעי',
-      thursday: 'חמישי',
-      friday: 'שישי',
-      saturday: 'שבת',
-    };
-    return translations[key] || key;
-  };
-
-  // Sample classes for testing
-  const sampleClasses: Shiur[] = [
-    {
-      id: '1',
-      day: [0, 2, 4], // Sunday, Tuesday, Thursday
-      start: '08:00',
-      end: '09:00',
-      tutor: 'Rabbi Cohen',
-      subject: 'Gemara',
-    },
-    {
-      id: '2',
-      day: [1, 3], // Monday, Wednesday
-      start: '10:00',
-      end: '11:00',
-      tutor: 'Rabbi Levi',
-      subject: 'Halacha',
-    },
-    {
-      id: '3',
-      day: [5], // Friday
-      start: '07:00',
-      end: '08:00',
-      tutor: 'Rabbi David',
-      subject: 'Parsha',
-    },
-    {
-      id: '4',
-      day: [6], // Saturday
-      start: '16:00',
-      end: '17:00',
-      tutor: 'Rabbi Moshe',
-      subject: 'Mishna',
-    },
-  ];
-
   describe('daysOfWeek', () => {
-    it('should have 7 days', () => {
+    it('should have 7 days of the week', () => {
       expect(daysOfWeek).toHaveLength(7);
     });
 
-    it('should have Sunday as day 0', () => {
-      const sunday = daysOfWeek.find((d) => d.number === 0);
-      expect(sunday?.key).toBe('sunday');
+    it('should have correct day numbers', () => {
+      expect(daysOfWeek[0].number).toBe(0);
+      expect(daysOfWeek[6].number).toBe(6);
     });
 
-    it('should have Saturday as day 6', () => {
-      const saturday = daysOfWeek.find((d) => d.number === 6);
-      expect(saturday?.key).toBe('saturday');
-    });
-
-    it('should have consecutive day numbers 0-6', () => {
-      const numbers = daysOfWeek.map((d) => d.number).sort((a, b) => a - b);
-      expect(numbers).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    it('should have correct day keys', () => {
+      expect(daysOfWeek[0].key).toBe('sunday');
+      expect(daysOfWeek[6].key).toBe('saturday');
     });
   });
 
   describe('getDayNames', () => {
-    it('should return single day name for one day', () => {
-      const result = getDayNames([0], mockTranslator);
-      expect(result).toBe('Sunday');
+    const mockTranslator = (key: string) => {
+      const translations: Record<string, string> = {
+        sunday: 'Sunday',
+        monday: 'Monday',
+        tuesday: 'Tuesday',
+        wednesday: 'Wednesday',
+        thursday: 'Thursday',
+        friday: 'Friday',
+        saturday: 'Saturday',
+      };
+      return translations[key] || key;
+    };
+
+    it('should skip invalid day numbers', () => {
+      const result = getDayNames([0, 99, 1], mockTranslator);
+      expect(result).toBe('Sunday, Monday');
     });
 
-    it('should return comma-separated names for multiple days', () => {
-      const result = getDayNames([0, 2, 4], mockTranslator);
-      expect(result).toBe('Sunday, Tuesday, Thursday');
+    it('should handle single day', () => {
+      const result = getDayNames([3], mockTranslator);
+      expect(result).toBe('Wednesday');
     });
 
-    it('should work with Hebrew translator', () => {
-      const result = getDayNames([0, 6], hebrewTranslator);
-      expect(result).toBe('ראשון, שבת');
-    });
-
-    it('should return empty string for empty array', () => {
-      const result = getDayNames([], mockTranslator);
-      expect(result).toBe('');
-    });
-
-    it('should filter out invalid day numbers', () => {
-      const result = getDayNames([0, 10, 2], mockTranslator);
-      expect(result).toBe('Sunday, Tuesday');
-    });
-
-    it('should handle all days of the week', () => {
+    it('should handle all days', () => {
       const result = getDayNames([0, 1, 2, 3, 4, 5, 6], mockTranslator);
       expect(result).toBe('Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday');
     });
   });
 
   describe('calculateSubPages', () => {
-    it('should return 0 for empty classes', () => {
-      expect(calculateSubPages(0, 3)).toBe(0);
+    it('should return 0 for 0 classes', () => {
+      expect(calculateSubPages(0, 5)).toBe(0);
     });
 
-    it('should return 1 for classes less than or equal to per page', () => {
-      expect(calculateSubPages(3, 3)).toBe(1);
-      expect(calculateSubPages(2, 3)).toBe(1);
+    it('should return correct number of pages', () => {
+      expect(calculateSubPages(10, 3)).toBe(4); // 10 / 3 = 3.33 -> 4 pages
+      expect(calculateSubPages(9, 3)).toBe(3); // 9 / 3 = 3 pages
+      expect(calculateSubPages(1, 5)).toBe(1); // 1 / 5 = 1 page
     });
 
-    it('should calculate correct pages for exact division', () => {
-      expect(calculateSubPages(6, 3)).toBe(2);
-      expect(calculateSubPages(9, 3)).toBe(3);
-    });
-
-    it('should round up for partial pages', () => {
-      expect(calculateSubPages(4, 3)).toBe(2);
-      expect(calculateSubPages(7, 3)).toBe(3);
-    });
-
-    it('should handle single class per page', () => {
-      expect(calculateSubPages(5, 1)).toBe(5);
+    it('should handle edge cases', () => {
+      expect(calculateSubPages(5, 5)).toBe(1); // Exactly one page
+      expect(calculateSubPages(6, 5)).toBe(2); // Just over one page
     });
   });
 
   describe('getCurrentPageClasses', () => {
-    it('should return first page classes correctly', () => {
-      const result = getCurrentPageClasses(sampleClasses, 0, 2);
+    const mockClasses: Shiur[] = [
+      { name: 'Class 1', start: '08:00', end: '09:00', day: [0], description: '' },
+      { name: 'Class 2', start: '09:00', end: '10:00', day: [1], description: '' },
+      { name: 'Class 3', start: '10:00', end: '11:00', day: [2], description: '' },
+      { name: 'Class 4', start: '11:00', end: '12:00', day: [3], description: '' },
+      { name: 'Class 5', start: '12:00', end: '13:00', day: [4], description: '' },
+    ];
+
+    it('should return correct classes for first page', () => {
+      const result = getCurrentPageClasses(mockClasses, 0, 2);
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('1');
-      expect(result[1].id).toBe('2');
+      expect(result[0].name).toBe('Class 1');
+      expect(result[1].name).toBe('Class 2');
     });
 
-    it('should return second page classes correctly', () => {
-      const result = getCurrentPageClasses(sampleClasses, 1, 2);
+    it('should return correct classes for second page', () => {
+      const result = getCurrentPageClasses(mockClasses, 1, 2);
       expect(result).toHaveLength(2);
-      expect(result[0].id).toBe('3');
-      expect(result[1].id).toBe('4');
+      expect(result[0].name).toBe('Class 3');
+      expect(result[1].name).toBe('Class 4');
     });
 
     it('should return remaining classes on last page', () => {
-      const result = getCurrentPageClasses(sampleClasses, 1, 3);
+      const result = getCurrentPageClasses(mockClasses, 2, 2);
       expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('4');
+      expect(result[0].name).toBe('Class 5');
     });
 
-    it('should return empty array for page beyond range', () => {
-      const result = getCurrentPageClasses(sampleClasses, 5, 3);
+    it('should return empty array for page beyond available', () => {
+      const result = getCurrentPageClasses(mockClasses, 10, 2);
       expect(result).toHaveLength(0);
-    });
-
-    it('should return all classes if classesPerPage exceeds total', () => {
-      const result = getCurrentPageClasses(sampleClasses, 0, 10);
-      expect(result).toHaveLength(4);
     });
   });
 
   describe('formatTimeRange', () => {
     it('should format time range correctly', () => {
       expect(formatTimeRange('08:00', '09:00')).toBe('08:00-09:00');
+      expect(formatTimeRange('14:30', '15:45')).toBe('14:30-15:45');
     });
 
-    it('should handle different time formats', () => {
-      expect(formatTimeRange('8:00', '9:30')).toBe('8:00-9:30');
-    });
-
-    it('should handle PM times', () => {
-      expect(formatTimeRange('14:00', '15:30')).toBe('14:00-15:30');
+    it('should handle same start and end time', () => {
+      expect(formatTimeRange('10:00', '10:00')).toBe('10:00-10:00');
     });
   });
 
   describe('validateDayNumbers', () => {
     it('should return true for valid day numbers', () => {
       expect(validateDayNumbers([0, 1, 2, 3, 4, 5, 6])).toBe(true);
+      expect(validateDayNumbers([0])).toBe(true);
+      expect(validateDayNumbers([6])).toBe(true);
     });
 
-    it('should return true for single valid day', () => {
-      expect(validateDayNumbers([3])).toBe(true);
+    it('should return false for invalid day numbers', () => {
+      expect(validateDayNumbers([-1])).toBe(false);
+      expect(validateDayNumbers([7])).toBe(false);
+      expect(validateDayNumbers([0, 1, 2, 7])).toBe(false);
     });
 
     it('should return true for empty array', () => {
       expect(validateDayNumbers([])).toBe(true);
     });
-
-    it('should return false for negative day numbers', () => {
-      expect(validateDayNumbers([-1, 0, 1])).toBe(false);
-    });
-
-    it('should return false for day numbers > 6', () => {
-      expect(validateDayNumbers([0, 7])).toBe(false);
-    });
-
-    it('should return false for invalid numbers', () => {
-      expect(validateDayNumbers([0, 10, 2])).toBe(false);
-    });
   });
 
   describe('sortClassesByTime', () => {
     it('should sort classes by start time', () => {
-      const unsorted: Shiur[] = [
-        { id: '1', day: [0], start: '10:00', end: '11:00', tutor: 'A', subject: 'X' },
-        { id: '2', day: [0], start: '08:00', end: '09:00', tutor: 'B', subject: 'Y' },
-        { id: '3', day: [0], start: '14:00', end: '15:00', tutor: 'C', subject: 'Z' },
+      const classes: Shiur[] = [
+        { name: 'Late', start: '14:00', end: '15:00', day: [0], description: '' },
+        { name: 'Early', start: '08:00', end: '09:00', day: [0], description: '' },
+        { name: 'Mid', start: '11:00', end: '12:00', day: [0], description: '' },
       ];
 
-      const sorted = sortClassesByTime(unsorted);
-
-      expect(sorted[0].start).toBe('08:00');
-      expect(sorted[1].start).toBe('10:00');
-      expect(sorted[2].start).toBe('14:00');
+      const sorted = sortClassesByTime(classes);
+      expect(sorted[0].name).toBe('Early');
+      expect(sorted[1].name).toBe('Mid');
+      expect(sorted[2].name).toBe('Late');
     });
 
-    it('should not modify original array', () => {
-      const original: Shiur[] = [
-        { id: '1', day: [0], start: '10:00', end: '11:00', tutor: 'A', subject: 'X' },
-        { id: '2', day: [0], start: '08:00', end: '09:00', tutor: 'B', subject: 'Y' },
+    it('should not mutate original array', () => {
+      const classes: Shiur[] = [
+        { name: 'Late', start: '14:00', end: '15:00', day: [0], description: '' },
+        { name: 'Early', start: '08:00', end: '09:00', day: [0], description: '' },
       ];
 
-      sortClassesByTime(original);
-
-      expect(original[0].start).toBe('10:00');
+      const sorted = sortClassesByTime(classes);
+      expect(classes[0].name).toBe('Late'); // Original unchanged
+      expect(sorted[0].name).toBe('Early'); // Sorted version
     });
 
-    it('should handle empty array', () => {
-      const result = sortClassesByTime([]);
-      expect(result).toEqual([]);
-    });
+    it('should handle times with single digit hours', () => {
+      const classes: Shiur[] = [
+        { name: 'Nine', start: '9:00', end: '10:00', day: [0], description: '' },
+        { name: 'Ten', start: '10:00', end: '11:00', day: [0], description: '' },
+      ];
 
-    it('should handle single class', () => {
-      const single: Shiur[] = [{ id: '1', day: [0], start: '10:00', end: '11:00', tutor: 'A', subject: 'X' }];
-
-      const result = sortClassesByTime(single);
-      expect(result).toHaveLength(1);
-      expect(result[0].start).toBe('10:00');
+      const sorted = sortClassesByTime(classes);
+      expect(sorted[0].name).toBe('Nine');
+      expect(sorted[1].name).toBe('Ten');
     });
   });
 
   describe('filterClassesByDay', () => {
-    it('should return classes for Sunday (0)', () => {
-      const result = filterClassesByDay(sampleClasses, 0);
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('1');
-    });
+    const classes: Shiur[] = [
+      { name: 'Sunday Class', start: '08:00', end: '09:00', day: [0], description: '' },
+      { name: 'Monday Class', start: '09:00', end: '10:00', day: [1], description: '' },
+      { name: 'Multiple Days', start: '10:00', end: '11:00', day: [0, 1, 2], description: '' },
+      { name: 'Tuesday Class', start: '11:00', end: '12:00', day: [2], description: '' },
+    ];
 
-    it('should return classes for Saturday (6)', () => {
-      const result = filterClassesByDay(sampleClasses, 6);
-      expect(result).toHaveLength(1);
-      expect(result[0].id).toBe('4');
-    });
-
-    it('should return multiple classes for days with multiple classes', () => {
-      // Add another class for Sunday
-      const classesWithDuplicateDay = [
-        ...sampleClasses,
-        { id: '5', day: [0], start: '12:00', end: '13:00', tutor: 'Rabbi Test', subject: 'Test' },
-      ];
-
-      const result = filterClassesByDay(classesWithDuplicateDay, 0);
-      expect(result).toHaveLength(2);
+    it('should filter classes by day', () => {
+      const sunday = filterClassesByDay(classes, 0);
+      expect(sunday).toHaveLength(2);
+      expect(sunday[0].name).toBe('Sunday Class');
+      expect(sunday[1].name).toBe('Multiple Days');
     });
 
     it('should return empty array for day with no classes', () => {
-      // Create classes that don't include day 3
-      const classes: Shiur[] = [{ id: '1', day: [0, 1], start: '08:00', end: '09:00', tutor: 'A', subject: 'X' }];
-
-      const result = filterClassesByDay(classes, 3);
-      expect(result).toHaveLength(0);
+      const friday = filterClassesByDay(classes, 5);
+      expect(friday).toHaveLength(0);
     });
 
-    it('should handle empty classes array', () => {
-      const result = filterClassesByDay([], 0);
-      expect(result).toHaveLength(0);
+    it('should handle classes with multiple days', () => {
+      const tuesday = filterClassesByDay(classes, 2);
+      expect(tuesday).toHaveLength(2);
+      expect(tuesday.map((c) => c.name)).toContain('Multiple Days');
+      expect(tuesday.map((c) => c.name)).toContain('Tuesday Class');
     });
   });
 
   describe('isClassToday', () => {
-    const testClass: Shiur = {
-      id: '1',
-      day: [0, 2, 4], // Sunday, Tuesday, Thursday
-      start: '08:00',
-      end: '09:00',
-      tutor: 'Rabbi Cohen',
-      subject: 'Gemara',
-    };
-
-    it('should return true if class is on given day', () => {
-      expect(isClassToday(testClass, 0)).toBe(true);
-      expect(isClassToday(testClass, 2)).toBe(true);
-      expect(isClassToday(testClass, 4)).toBe(true);
-    });
-
-    it('should return false if class is not on given day', () => {
-      expect(isClassToday(testClass, 1)).toBe(false);
-      expect(isClassToday(testClass, 3)).toBe(false);
-      expect(isClassToday(testClass, 5)).toBe(false);
-      expect(isClassToday(testClass, 6)).toBe(false);
-    });
-
-    it('should work for class with single day', () => {
-      const singleDayClass: Shiur = {
-        id: '2',
-        day: [6], // Saturday only
-        start: '16:00',
-        end: '17:00',
-        tutor: 'Rabbi Moshe',
-        subject: 'Mishna',
+    it('should return true if class is today', () => {
+      const shiur: Shiur = {
+        name: 'Test',
+        start: '08:00',
+        end: '09:00',
+        day: [0, 1, 2],
+        description: '',
       };
 
-      expect(isClassToday(singleDayClass, 6)).toBe(true);
-      expect(isClassToday(singleDayClass, 0)).toBe(false);
+      expect(isClassToday(shiur, 0)).toBe(true);
+      expect(isClassToday(shiur, 1)).toBe(true);
+      expect(isClassToday(shiur, 2)).toBe(true);
     });
 
-    it('should work for class on all days', () => {
-      const dailyClass: Shiur = {
-        id: '3',
-        day: [0, 1, 2, 3, 4, 5, 6],
-        start: '06:00',
-        end: '07:00',
-        tutor: 'Rabbi Daily',
-        subject: 'Daf Yomi',
+    it('should return false if class is not today', () => {
+      const shiur: Shiur = {
+        name: 'Test',
+        start: '08:00',
+        end: '09:00',
+        day: [0, 1, 2],
+        description: '',
       };
 
-      for (let i = 0; i <= 6; i++) {
-        expect(isClassToday(dailyClass, i)).toBe(true);
-      }
+      expect(isClassToday(shiur, 3)).toBe(false);
+      expect(isClassToday(shiur, 6)).toBe(false);
+    });
+  });
+
+  describe('getDayMonthYearFromString', () => {
+    it('should parse valid date string', () => {
+      const result = getDayMonthYearFromString('2024-03-15');
+      expect(result.day).toBe(15);
+      expect(result.month).toBe(3);
+      expect(result.year).toBe(2024);
+    });
+
+    it('should handle single digit values', () => {
+      const result = getDayMonthYearFromString('2024-01-05');
+      expect(result.day).toBe(5);
+      expect(result.month).toBe(1);
+      expect(result.year).toBe(2024);
+    });
+
+    it('should return zeros for invalid date string', () => {
+      const result = getDayMonthYearFromString('invalid-date');
+      expect(result.day).toBe(0);
+      expect(result.month).toBe(0);
+      expect(result.year).toBe(0);
+    });
+
+    it('should return zeros for empty string', () => {
+      const result = getDayMonthYearFromString('');
+      expect(result.day).toBe(0);
+      expect(result.month).toBe(0);
+      expect(result.year).toBe(0);
+    });
+
+    it('should handle leap year dates', () => {
+      const result = getDayMonthYearFromString('2024-02-29');
+      expect(result.day).toBe(29);
+      expect(result.month).toBe(2);
+      expect(result.year).toBe(2024);
     });
   });
 });

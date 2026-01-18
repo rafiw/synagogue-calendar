@@ -1,4 +1,5 @@
 .vscode
+.cursor/
 node_modules/
 .expo/
 dist/
@@ -21,3 +22,11 @@ nativewind-env.d.ts
 .eslintcache
 .type-coverage/
 .nyc_output/
+
+# Test coverage
+coverage/
+
+# Yarn
+.yarn/*
+
+.pnp.*

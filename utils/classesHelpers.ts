@@ -111,6 +111,9 @@ export function getDayMonthYearFromString(dateString: string): { day: number; mo
   // dateString is in the format of YYYY-MM-DD
   try {
     const [yearStr, monthStr, dayStr] = dateString.split('-');
+    if (!dayStr || !monthStr || !yearStr) {
+      return { day: 0, month: 0, year: 0 };
+    }
     const day = parseInt(dayStr, 10);
     const month = parseInt(monthStr, 10);
     const year = parseInt(yearStr, 10);

@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.base",
+  "include": ["__tests__/**/*.ts", "__tests__/**/*.tsx", "vitest.setup.ts"],
+  "compilerOptions": {
+    "strict": true,
+    "types": ["vitest/globals"],
+    "baseUrl": "./",
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["app/*", "app/settings/*", "components/*", "utils/"]
+    }
+  }
+}

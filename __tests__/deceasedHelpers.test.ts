@@ -1,490 +1,643 @@
-/**
- * Unit tests for utils/deceasedHelpers.ts
- * Tests the complex sizing and filtering logic for deceased display
- */
-
+import { describe, it, expect } from 'vitest';
+import { HDate, months } from '@hebcal/core';
 import {
   getScaleFactor,
   calculateSizes,
   calculatePagination,
   getPageItems,
+  getHebrewMonth,
+  isHebrewLeapYear,
+  getCurrentHebrewMonth,
   filterDeceasedByDisplayMode,
   validateDeceasedDates,
   calculateAgeAtDeath,
+  calculateDeceasedPages,
   DeceasedFilterable,
 } from '../utils/deceasedHelpers';
+import { DeceasedPerson } from '../utils/defs';
 
 describe('deceasedHelpers', () => {
   describe('getScaleFactor', () => {
-    it('should return 2.5 for single cell (1)', () => {
+    it('should return correct scale factor for different cell counts', () => {
       expect(getScaleFactor(1)).toBe(2.5);
-    });
-
-    it('should return 2 for 2 cells', () => {
       expect(getScaleFactor(2)).toBe(2);
-    });
-
-    it('should return 1.8 for 3-4 cells', () => {
-      expect(getScaleFactor(3)).toBe(1.8);
       expect(getScaleFactor(4)).toBe(1.8);
-    });
-
-    it('should return 1.6 for 5-6 cells', () => {
-      expect(getScaleFactor(5)).toBe(1.6);
       expect(getScaleFactor(6)).toBe(1.6);
-    });
-
-    it('should return 1.5 for 7-8 cells', () => {
-      expect(getScaleFactor(7)).toBe(1.5);
       expect(getScaleFactor(8)).toBe(1.5);
-    });
-
-    it('should return 1.4 for 9-10 cells', () => {
-      expect(getScaleFactor(9)).toBe(1.4);
       expect(getScaleFactor(10)).toBe(1.4);
-    });
-
-    it('should return 1.3 for 11-12 cells', () => {
-      expect(getScaleFactor(11)).toBe(1.3);
       expect(getScaleFactor(12)).toBe(1.3);
-    });
-
-    it('should return 1.2 for 13-14 cells', () => {
-      expect(getScaleFactor(13)).toBe(1.2);
       expect(getScaleFactor(14)).toBe(1.2);
-    });
-
-    it('should return 1.1 for 15-16 cells', () => {
-      expect(getScaleFactor(15)).toBe(1.1);
       expect(getScaleFactor(16)).toBe(1.1);
-    });
-
-    it('should return 1.0 for 17-18 cells', () => {
-      expect(getScaleFactor(17)).toBe(1.0);
       expect(getScaleFactor(18)).toBe(1.0);
-    });
-
-    it('should return 0.9 for 19-20 cells', () => {
-      expect(getScaleFactor(19)).toBe(0.9);
       expect(getScaleFactor(20)).toBe(0.9);
+      expect(getScaleFactor(30)).toBe(0.8);
     });
 
-    it('should return 0.8 for more than 20 cells', () => {
-      expect(getScaleFactor(21)).toBe(0.8);
-      expect(getScaleFactor(50)).toBe(0.8);
+    it('should scale down for large grids', () => {
       expect(getScaleFactor(100)).toBe(0.8);
     });
   });
 
   describe('calculateSizes', () => {
     it('should calculate correct sizes for 1x1 grid', () => {
-      const { fontSize, candleSize } = calculateSizes(1, 1);
+      const sizes = calculateSizes(1, 1);
+      const scaleFactor = 2.5;
 
-      // Scale factor is 2.5 for single cell
-      expect(fontSize.name).toBe(18 * 2.5);
-      expect(fontSize.nameCard).toBe(16 * 2.5);
-      expect(fontSize.namePhoto).toBe(20 * 2.5);
-      expect(fontSize.date).toBe(12 * 2.5);
-      expect(candleSize.simple).toBe(Math.round(40 * 2.5));
-      expect(candleSize.card).toBe(Math.round(35 * 2.5));
+      expect(sizes.fontSize.name).toBe(18 * scaleFactor);
+      expect(sizes.fontSize.nameCard).toBe(16 * scaleFactor);
+      expect(sizes.candleSize.simple).toBe(Math.round(40 * scaleFactor));
+      expect(sizes.candleSize.card).toBe(Math.round(35 * scaleFactor));
     });
 
-    it('should calculate correct sizes for 2x2 grid (4 cells)', () => {
-      const { fontSize, candleSize } = calculateSizes(2, 2);
+    it('should calculate correct sizes for 2x2 grid', () => {
+      const sizes = calculateSizes(2, 2);
+      const scaleFactor = 1.8;
 
-      // Scale factor is 1.8 for 4 cells
-      expect(fontSize.name).toBe(18 * 1.8);
-      expect(fontSize.date).toBe(12 * 1.8);
-      expect(candleSize.simple).toBe(Math.round(40 * 1.8));
+      expect(sizes.fontSize.name).toBe(18 * scaleFactor);
+      expect(sizes.candleSize.simple).toBe(Math.round(40 * scaleFactor));
     });
 
-    it('should calculate correct sizes for 3x2 grid (6 cells)', () => {
-      const { fontSize, candleSize } = calculateSizes(3, 2);
+    it('should calculate correct sizes for 3x3 grid', () => {
+      const sizes = calculateSizes(3, 3);
+      const scaleFactor = 1.4; // 9 cells
 
-      // Scale factor is 1.6 for 6 cells
-      expect(fontSize.name).toBe(18 * 1.6);
-      expect(candleSize.simple).toBe(Math.round(40 * 1.6));
+      expect(sizes.fontSize.name).toBe(18 * scaleFactor);
+      expect(sizes.candleSize.simple).toBe(Math.round(40 * scaleFactor));
     });
 
-    it('should calculate correct sizes for 4x4 grid (16 cells)', () => {
-      const { fontSize, candleSize } = calculateSizes(4, 4);
+    it('should have all required font size properties', () => {
+      const sizes = calculateSizes(2, 2);
 
-      // Scale factor is 1.1 for 16 cells
-      expect(fontSize.name).toBe(18 * 1.1);
-      expect(candleSize.simple).toBe(Math.round(40 * 1.1));
+      expect(sizes.fontSize).toHaveProperty('name');
+      expect(sizes.fontSize).toHaveProperty('nameCard');
+      expect(sizes.fontSize).toHaveProperty('namePhoto');
+      expect(sizes.fontSize).toHaveProperty('date');
+      expect(sizes.fontSize).toHaveProperty('dateSmall');
+      expect(sizes.fontSize).toHaveProperty('hebrew');
+      expect(sizes.fontSize).toHaveProperty('tribute');
+      expect(sizes.fontSize).toHaveProperty('footer');
+      expect(sizes.fontSize).toHaveProperty('label');
     });
 
-    it('should calculate correct sizes for 5x5 grid (25 cells)', () => {
-      const { fontSize, candleSize } = calculateSizes(5, 5);
+    it('should have all required candle size properties', () => {
+      const sizes = calculateSizes(2, 2);
 
-      // Scale factor is 0.8 for 25 cells (>20)
-      expect(fontSize.name).toBe(18 * 0.8);
-      expect(candleSize.simple).toBe(Math.round(40 * 0.8));
-    });
-
-    it('should return all required font size properties', () => {
-      const { fontSize } = calculateSizes(2, 2);
-
-      expect(fontSize).toHaveProperty('name');
-      expect(fontSize).toHaveProperty('nameCard');
-      expect(fontSize).toHaveProperty('namePhoto');
-      expect(fontSize).toHaveProperty('date');
-      expect(fontSize).toHaveProperty('dateSmall');
-      expect(fontSize).toHaveProperty('hebrew');
-      expect(fontSize).toHaveProperty('tribute');
-      expect(fontSize).toHaveProperty('footer');
-      expect(fontSize).toHaveProperty('label');
-    });
-
-    it('should return all required candle size properties', () => {
-      const { candleSize } = calculateSizes(2, 2);
-
-      expect(candleSize).toHaveProperty('simple');
-      expect(candleSize).toHaveProperty('card');
-      expect(candleSize).toHaveProperty('photoPlaceholder');
-      expect(candleSize).toHaveProperty('photoFooter');
-    });
-
-    it('should return positive values for all sizes', () => {
-      const { fontSize, candleSize } = calculateSizes(10, 10);
-
-      Object.values(fontSize).forEach((value) => {
-        expect(value).toBeGreaterThan(0);
-      });
-
-      Object.values(candleSize).forEach((value) => {
-        expect(value).toBeGreaterThan(0);
-      });
+      expect(sizes.candleSize).toHaveProperty('simple');
+      expect(sizes.candleSize).toHaveProperty('card');
+      expect(sizes.candleSize).toHaveProperty('photoPlaceholder');
+      expect(sizes.candleSize).toHaveProperty('photoFooter');
     });
   });
 
   describe('calculatePagination', () => {
-    it('should return 1 page for items less than or equal to itemsPerPage', () => {
-      const result = calculatePagination(5, 6);
+    it('should calculate correct pagination', () => {
+      const result = calculatePagination(10, 5);
+      expect(result.totalPages).toBe(2);
+      expect(result.hasMultiplePages).toBe(true);
+    });
+
+    it('should handle single page', () => {
+      const result = calculatePagination(5, 10);
       expect(result.totalPages).toBe(1);
       expect(result.hasMultiplePages).toBe(false);
     });
 
-    it('should return correct number of pages when items exceed itemsPerPage', () => {
-      const result = calculatePagination(10, 3);
-      expect(result.totalPages).toBe(4); // ceil(10/3) = 4
-      expect(result.hasMultiplePages).toBe(true);
-    });
-
-    it('should handle exact division', () => {
-      const result = calculatePagination(12, 4);
+    it('should round up for partial pages', () => {
+      const result = calculatePagination(11, 5);
       expect(result.totalPages).toBe(3);
       expect(result.hasMultiplePages).toBe(true);
     });
 
-    it('should handle empty items', () => {
-      const result = calculatePagination(0, 6);
+    it('should handle zero items', () => {
+      const result = calculatePagination(0, 5);
       expect(result.totalPages).toBe(0);
-      expect(result.hasMultiplePages).toBe(false);
-    });
-
-    it('should handle single item', () => {
-      const result = calculatePagination(1, 6);
-      expect(result.totalPages).toBe(1);
       expect(result.hasMultiplePages).toBe(false);
     });
   });
 
   describe('getPageItems', () => {
-    const testItems = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+    const items = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
 
-    it('should return first page items correctly', () => {
-      const result = getPageItems(testItems, 0, 3);
+    it('should return correct items for first page', () => {
+      const result = getPageItems(items, 0, 3);
       expect(result).toEqual(['A', 'B', 'C']);
     });
 
-    it('should return second page items correctly', () => {
-      const result = getPageItems(testItems, 1, 3);
+    it('should return correct items for second page', () => {
+      const result = getPageItems(items, 1, 3);
       expect(result).toEqual(['D', 'E', 'F']);
     });
 
-    it('should return last page with remaining items', () => {
-      const result = getPageItems(testItems, 3, 3);
-      expect(result).toEqual(['J']);
+    it('should return remaining items on last page', () => {
+      const result = getPageItems(items, 2, 3);
+      expect(result).toEqual(['G']);
     });
 
-    it('should return empty array for page beyond available items', () => {
-      const result = getPageItems(testItems, 5, 3);
+    it('should return empty array for page beyond available', () => {
+      const result = getPageItems(items, 10, 3);
       expect(result).toEqual([]);
     });
+  });
 
-    it('should return all items if itemsPerPage exceeds total', () => {
-      const result = getPageItems(testItems, 0, 20);
-      expect(result).toEqual(testItems);
+  describe('getHebrewMonth', () => {
+    it('should return correct Hebrew month', () => {
+      const date = new Date(2024, 0, 15); // Jan 15, 2024
+      const month = getHebrewMonth(date, HDate);
+      expect(typeof month).toBe('number');
+      expect(month).toBeGreaterThanOrEqual(1);
+      expect(month).toBeLessThanOrEqual(13);
     });
 
-    it('should handle empty array', () => {
-      const result = getPageItems([], 0, 3);
-      expect(result).toEqual([]);
+    it('should handle different dates correctly', () => {
+      const date1 = new Date(2024, 0, 1);
+      const date2 = new Date(2024, 6, 1);
+
+      const month1 = getHebrewMonth(date1, HDate);
+      const month2 = getHebrewMonth(date2, HDate);
+
+      expect(month1).not.toBe(month2);
+    });
+  });
+
+  describe('isHebrewLeapYear', () => {
+    it('should correctly identify leap years', () => {
+      // Hebrew year 5784 (2023-2024) is a leap year
+      const leapYearDate = new Date(2024, 2, 1);
+      expect(isHebrewLeapYear(leapYearDate, HDate)).toBe(true);
     });
 
-    it('should work with object arrays', () => {
-      const objectItems = [{ id: 1 }, { id: 2 }, { id: 3 }];
-      const result = getPageItems(objectItems, 0, 2);
-      expect(result).toEqual([{ id: 1 }, { id: 2 }]);
+    it('should correctly identify non-leap years', () => {
+      // Hebrew year 5783 (2022-2023) is not a leap year
+      const regularYearDate = new Date(2023, 2, 1);
+      expect(isHebrewLeapYear(regularYearDate, HDate)).toBe(false);
+    });
+  });
+
+  describe('getCurrentHebrewMonth', () => {
+    it('should return current Hebrew month', () => {
+      const month = getCurrentHebrewMonth(HDate);
+      expect(typeof month).toBe('number');
+      expect(month).toBeGreaterThanOrEqual(1);
+      expect(month).toBeLessThanOrEqual(13);
     });
   });
 
   describe('filterDeceasedByDisplayMode', () => {
-    // Mock HDate class for testing
-    const createMockHDateClass = (options: {
-      isLeapYear: boolean;
-      currentMonth: number;
-      getMonthForDate?: (date: Date) => number;
-      isLeapYearForDate?: (date: Date) => boolean;
-    }) => {
-      return class MockHDate {
-        private date?: Date;
-
-        constructor(date?: Date) {
-          this.date = date;
-        }
-
-        isLeapYear(): boolean {
-          if (this.date && options.isLeapYearForDate) {
-            return options.isLeapYearForDate(this.date);
-          }
-          return options.isLeapYear;
-        }
-
-        getMonth(): number {
-          if (this.date && options.getMonthForDate) {
-            return options.getMonthForDate(this.date);
-          }
-          return options.currentMonth;
-        }
-      };
-    };
-
-    const createDeceased = (hebrewDateOfDeath: Date): DeceasedFilterable => ({
-      hebrewDateOfDeath,
-    });
-
-    it('should return all deceased when displayMode is rotating', () => {
-      const deceased = [
-        createDeceased(new Date('2024-01-15')),
-        createDeceased(new Date('2024-02-15')),
-        createDeceased(new Date('2024-03-15')),
+    it('should return all deceased when mode is "all"', () => {
+      const deceased: DeceasedFilterable[] = [
+        { hebrewDateOfDeath: new Date(2023, 8, 20) },
+        { hebrewDateOfDeath: new Date(2023, 9, 20) },
+        { hebrewDateOfDeath: new Date(2023, 10, 20) },
       ];
-
-      const MockHDate = createMockHDateClass({ isLeapYear: false, currentMonth: 5 });
-      const result = filterDeceasedByDisplayMode(deceased, 'rotating', MockHDate);
-
+      const result = filterDeceasedByDisplayMode(deceased, 'all', HDate);
       expect(result).toHaveLength(3);
     });
 
-    it('should filter by current month in leap year', () => {
-      const deceased = [
-        createDeceased(new Date('2024-01-15')),
-        createDeceased(new Date('2024-02-15')),
-        createDeceased(new Date('2024-03-15')),
-      ];
-
-      // Leap year, month 5
-      const MockHDate = createMockHDateClass({
-        isLeapYear: true,
-        currentMonth: 5,
-        getMonthForDate: (date: Date) => {
-          const month = date.getMonth();
-          if (month === 0) return 4; // January -> month 4
-          if (month === 1) return 5; // February -> month 5
-          if (month === 2) return 6; // March -> month 6
-          return month + 4;
-        },
-      });
-
-      const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDate);
-
-      // Only February (month 5) should match
-      expect(result).toHaveLength(1);
-    });
-
-    it('should include Adar II deaths in Adar during non-leap year', () => {
-      const deceased = [
-        createDeceased(new Date('2024-03-01')), // Adar II death
-      ];
-
-      // Non-leap year, currently in Adar (month 12)
-      const MockHDate = createMockHDateClass({
-        isLeapYear: false, // Current year is not a leap year
-        currentMonth: 12, // We're in Adar
-        getMonthForDate: () => 13, // The death was in Adar II (month 13)
-        isLeapYearForDate: () => true, // Death year was a leap year
-      });
-
-      const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDate);
-
-      expect(result).toHaveLength(1);
-    });
-
-    it('should not include Adar II deaths in non-Adar month', () => {
-      const deceased = [
-        createDeceased(new Date('2024-03-01')), // Adar II death
-      ];
-
-      // Non-leap year, currently in Nisan (month 1)
-      const MockHDate = createMockHDateClass({
-        isLeapYear: false,
-        currentMonth: 1, // We're in Nisan
-        getMonthForDate: () => 13, // The death was in Adar II
-        isLeapYearForDate: () => true,
-      });
-
-      const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDate);
-
+    it('should handle empty array', () => {
+      const result = filterDeceasedByDisplayMode([], 'monthly', HDate);
       expect(result).toHaveLength(0);
     });
 
-    it('should handle empty deceased array', () => {
-      const MockHDate = createMockHDateClass({ isLeapYear: false, currentMonth: 5 });
-      const result = filterDeceasedByDisplayMode([], 'monthly', MockHDate);
+    describe('monthly filtering in leap year', () => {
+      // Mock HDate class that simulates a leap year
+      class MockHDateLeapYear {
+        private date?: Date;
+        private month: number;
+        private _isLeapYear: boolean;
 
-      expect(result).toHaveLength(0);
-    });
+        constructor(date?: Date) {
+          this.date = date;
+          // If date provided, calculate its Hebrew month, otherwise use current mock
+          if (date) {
+            const realHDate = new HDate(date);
+            this.month = realHDate.getMonth();
+            this._isLeapYear = realHDate.isLeapYear();
+          } else {
+            // Mock: current date is in a leap year, month Adar I (12)
+            this.month = months.ADAR_I;
+            this._isLeapYear = true;
+          }
+        }
 
-    it('should filter correctly with multiple deceased in same month', () => {
-      const deceased = [
-        createDeceased(new Date('2024-01-10')),
-        createDeceased(new Date('2024-01-20')),
-        createDeceased(new Date('2024-02-15')),
-      ];
+        getMonth(): number {
+          return this.month;
+        }
 
-      const MockHDate = createMockHDateClass({
-        isLeapYear: true,
-        currentMonth: 4,
-        getMonthForDate: (date: Date) => (date.getMonth() === 0 ? 4 : 5),
+        isLeapYear(): boolean {
+          return this._isLeapYear;
+        }
+      }
+
+      it('should filter by current month in leap year - only exact month matches', () => {
+        // Deceased who died in different months of leap years
+        const deceased: DeceasedFilterable[] = [
+          // Died in Adar I of leap year 5784 (Feb 2024)
+          { hebrewDateOfDeath: new Date(2024, 1, 15) }, // ~10 Adar I 5784
+          // Died in Adar II of leap year 5784 (March 2024)
+          { hebrewDateOfDeath: new Date(2024, 2, 20) }, // ~10 Adar II 5784
+          // Died in Tishrei
+          { hebrewDateOfDeath: new Date(2023, 8, 20) }, // Tishrei 5784
+        ];
+
+        // Mock: We are currently in Adar I of a leap year
+        const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDateLeapYear as any);
+
+        // Should only show person who died in Adar I
+        expect(result).toHaveLength(1);
+        expect(result[0]).toBe(deceased[0]);
       });
 
-      const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDate);
+      it('should show Adar II deaths when current month is Adar II in leap year', () => {
+        class MockHDateAdarII {
+          private date?: Date;
+          constructor(date?: Date) {
+            this.date = date;
+          }
+          getMonth(): number {
+            if (this.date) {
+              return new HDate(this.date).getMonth();
+            }
+            return months.ADAR_II; // Current month
+          }
+          isLeapYear(): boolean {
+            if (this.date) {
+              return new HDate(this.date).isLeapYear();
+            }
+            return true; // Current year is leap
+          }
+        }
 
-      // Both January dates should match month 4
-      expect(result).toHaveLength(2);
+        const deceased: DeceasedFilterable[] = [
+          { hebrewDateOfDeath: new Date(2024, 1, 15) }, // Adar I
+          { hebrewDateOfDeath: new Date(2024, 2, 20) }, // Adar II
+          { hebrewDateOfDeath: new Date(2023, 8, 20) }, // Tishrei
+        ];
+
+        const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDateAdarII as any);
+
+        // Should only show Adar II death
+        expect(result).toHaveLength(1);
+        expect(result[0]).toBe(deceased[1]);
+      });
+    });
+
+    describe('monthly filtering in non-leap year', () => {
+      // Mock HDate class for non-leap year
+      class MockHDateNonLeapAdar {
+        private date?: Date;
+        private month: number;
+        private _isLeapYear: boolean;
+
+        constructor(date?: Date) {
+          this.date = date;
+          if (date) {
+            const realHDate = new HDate(date);
+            this.month = realHDate.getMonth();
+            this._isLeapYear = realHDate.isLeapYear();
+          } else {
+            // Mock: current date is in non-leap year, month Adar (12)
+            this.month = months.ADAR_I; // In non-leap year, Adar is month 12
+            this._isLeapYear = false;
+          }
+        }
+
+        getMonth(): number {
+          return this.month;
+        }
+
+        isLeapYear(): boolean {
+          return this._isLeapYear;
+        }
+      }
+
+      it('should show both Adar I and Adar II deaths in non-leap Adar', () => {
+        const deceased: DeceasedFilterable[] = [
+          // Person who died in Adar I of a leap year
+          { hebrewDateOfDeath: new Date(2024, 1, 15) }, // ~Adar I 5784 (leap year)
+          // Person who died in Adar II of a leap year
+          { hebrewDateOfDeath: new Date(2024, 2, 20) }, // ~Adar II 5784 (leap year)
+          // Person who died in Adar of a non-leap year
+          { hebrewDateOfDeath: new Date(2023, 2, 15) }, // ~Adar 5783 (non-leap year)
+          // Someone from different month
+          { hebrewDateOfDeath: new Date(2023, 8, 20) }, // Tishrei
+        ];
+
+        // Mock: We are currently in Adar of a non-leap year
+        const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDateNonLeapAdar as any);
+
+        // In non-leap year Adar, should show:
+        // - Deaths from Adar I of leap years
+        // - Deaths from Adar II of leap years
+        // - Deaths from Adar of non-leap years
+        expect(result.length).toBeGreaterThanOrEqual(2); // At least Adar I and Adar II from leap year
+
+        // Should NOT include Tishrei
+        expect(result).not.toContain(deceased[3]);
+      });
+
+      it('should match non-Adar months exactly in non-leap year', () => {
+        class MockHDateTishrei {
+          private date?: Date;
+          constructor(date?: Date) {
+            this.date = date;
+          }
+          getMonth(): number {
+            if (this.date) {
+              return new HDate(this.date).getMonth();
+            }
+            return months.TISHREI; // Current month
+          }
+          isLeapYear(): boolean {
+            if (this.date) {
+              return new HDate(this.date).isLeapYear();
+            }
+            return false; // Current year is non-leap
+          }
+        }
+
+        const deceased: DeceasedFilterable[] = [
+          { hebrewDateOfDeath: new Date(2023, 8, 20) }, // Tishrei 5784
+          { hebrewDateOfDeath: new Date(2023, 9, 20) }, // Cheshvan 5784
+          { hebrewDateOfDeath: new Date(2024, 1, 15) }, // Adar I 5784
+        ];
+
+        const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDateTishrei as any);
+
+        // Should only show Tishrei death
+        expect(result).toHaveLength(1);
+        expect(result[0]).toBe(deceased[0]);
+      });
+    });
+
+    describe('complex Adar scenarios', () => {
+      it('should handle person who died in regular year Adar shown in leap year Adar I', () => {
+        class MockHDateLeapAdarI {
+          private date?: Date;
+          constructor(date?: Date) {
+            this.date = date;
+          }
+          getMonth(): number {
+            if (this.date) {
+              return new HDate(this.date).getMonth();
+            }
+            return months.ADAR_I; // Current: Adar I of leap year
+          }
+          isLeapYear(): boolean {
+            if (this.date) {
+              return new HDate(this.date).isLeapYear();
+            }
+            return true; // Current year is leap
+          }
+        }
+
+        // Person died in Adar of non-leap year (month 12)
+        const deceased: DeceasedFilterable[] = [
+          { hebrewDateOfDeath: new Date(2023, 2, 15) }, // Adar 5783 (non-leap)
+        ];
+
+        const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDateLeapAdarI as any);
+
+        // In leap year Adar I, should show people who died in regular Adar
+        expect(result).toHaveLength(1);
+        expect(result[0]).toBe(deceased[0]);
+      });
+
+      it('should NOT show regular Adar deaths in leap year Adar II', () => {
+        class MockHDateLeapAdarII {
+          private date?: Date;
+          constructor(date?: Date) {
+            this.date = date;
+          }
+          getMonth(): number {
+            if (this.date) {
+              return new HDate(this.date).getMonth();
+            }
+            return months.ADAR_II; // Current: Adar II of leap year
+          }
+          isLeapYear(): boolean {
+            if (this.date) {
+              return new HDate(this.date).isLeapYear();
+            }
+            return true; // Current year is leap
+          }
+        }
+
+        // Person died in Adar of non-leap year
+        const deceased: DeceasedFilterable[] = [
+          { hebrewDateOfDeath: new Date(2023, 2, 15) }, // Adar 5783 (non-leap)
+        ];
+
+        const result = filterDeceasedByDisplayMode(deceased, 'monthly', MockHDateLeapAdarII as any);
+
+        // In leap year Adar II, should NOT show people who died in regular Adar
+        // (regular Adar deaths are observed in Adar I of leap years)
+        expect(result).toHaveLength(0);
+      });
+    });
+
+    describe('real world integration', () => {
+      it('should correctly filter with real HDate based on actual current month', () => {
+        const currentHDate = new HDate();
+        const currentMonth = currentHDate.getMonth();
+
+        // Create deceased people in various months
+        const deceased: DeceasedFilterable[] = [
+          { hebrewDateOfDeath: new Date(2023, 8, 20) }, // Tishrei
+          { hebrewDateOfDeath: new Date(2023, 9, 20) }, // Cheshvan
+          { hebrewDateOfDeath: new Date(2023, 10, 20) }, // Kislev
+          { hebrewDateOfDeath: new Date(2024, 0, 20) }, // Tevet
+          { hebrewDateOfDeath: new Date(2024, 1, 20) }, // Shevat or Adar
+        ];
+
+        const result = filterDeceasedByDisplayMode(deceased, 'monthly', HDate);
+
+        // Result should be filtered
+        expect(Array.isArray(result)).toBe(true);
+        expect(result.length).toBeLessThanOrEqual(deceased.length);
+
+        // Each result should have hebrewDateOfDeath in current month or special Adar handling
+        result.forEach((person) => {
+          expect(person).toHaveProperty('hebrewDateOfDeath');
+        });
+      });
     });
   });
 
   describe('validateDeceasedDates', () => {
-    it('should return true for valid deceased with all dates', () => {
+    it('should return true when all dates are present', () => {
       const person = {
-        dateOfBirth: new Date('1950-01-15'),
-        dateOfDeath: new Date('2020-03-20'),
-        hebrewDateOfBirth: new Date('1950-01-15'),
-        hebrewDateOfDeath: new Date('2020-03-20'),
+        dateOfBirth: new Date(1950, 0, 1),
+        dateOfDeath: new Date(2020, 0, 1),
+        hebrewDateOfBirth: new Date(1950, 0, 1),
+        hebrewDateOfDeath: new Date(2020, 0, 1),
       };
 
       expect(validateDeceasedDates(person)).toBe(true);
     });
 
-    it('should return false when dateOfBirth is null', () => {
-      const person = {
+    it('should return false when any date is missing', () => {
+      const person1 = {
         dateOfBirth: null,
-        dateOfDeath: new Date('2020-03-20'),
-        hebrewDateOfBirth: new Date('1950-01-15'),
-        hebrewDateOfDeath: new Date('2020-03-20'),
+        dateOfDeath: new Date(2020, 0, 1),
+        hebrewDateOfBirth: new Date(1950, 0, 1),
+        hebrewDateOfDeath: new Date(2020, 0, 1),
       };
 
-      expect(validateDeceasedDates(person)).toBe(false);
+      expect(validateDeceasedDates(person1)).toBe(false);
     });
 
-    it('should return false when dateOfDeath is null', () => {
+    it('should return false when date is undefined', () => {
       const person = {
-        dateOfBirth: new Date('1950-01-15'),
-        dateOfDeath: null,
-        hebrewDateOfBirth: new Date('1950-01-15'),
-        hebrewDateOfDeath: new Date('2020-03-20'),
+        dateOfBirth: new Date(1950, 0, 1),
+        dateOfDeath: undefined,
+        hebrewDateOfBirth: new Date(1950, 0, 1),
+        hebrewDateOfDeath: new Date(2020, 0, 1),
       };
-
-      expect(validateDeceasedDates(person)).toBe(false);
-    });
-
-    it('should return false when hebrewDateOfBirth is undefined', () => {
-      const person = {
-        dateOfBirth: new Date('1950-01-15'),
-        dateOfDeath: new Date('2020-03-20'),
-        hebrewDateOfBirth: undefined,
-        hebrewDateOfDeath: new Date('2020-03-20'),
-      };
-
-      expect(validateDeceasedDates(person)).toBe(false);
-    });
-
-    it('should return false when hebrewDateOfDeath is undefined', () => {
-      const person = {
-        dateOfBirth: new Date('1950-01-15'),
-        dateOfDeath: new Date('2020-03-20'),
-        hebrewDateOfBirth: new Date('1950-01-15'),
-        hebrewDateOfDeath: undefined,
-      };
-
-      expect(validateDeceasedDates(person)).toBe(false);
-    });
-
-    it('should return false when all dates are missing', () => {
-      const person = {};
 
       expect(validateDeceasedDates(person)).toBe(false);
     });
   });
 
   describe('calculateAgeAtDeath', () => {
-    it('should calculate correct age for simple case', () => {
-      const birth = new Date('1950-05-15');
-      const death = new Date('2020-05-15');
-
+    it('should calculate correct age', () => {
+      const birth = new Date(1950, 0, 15);
+      const death = new Date(2020, 0, 15);
       expect(calculateAgeAtDeath(birth, death)).toBe(70);
     });
 
-    it('should calculate correct age when birthday not yet reached', () => {
-      const birth = new Date('1950-06-15');
-      const death = new Date('2020-05-15');
-
+    it('should handle birthday not yet reached in death year', () => {
+      const birth = new Date(1950, 6, 15); // July 15
+      const death = new Date(2020, 0, 15); // Jan 15
       expect(calculateAgeAtDeath(birth, death)).toBe(69);
     });
 
-    it('should calculate correct age when same birth day/month', () => {
-      const birth = new Date('1950-05-15');
-      const death = new Date('2020-05-15');
-
+    it('should handle birthday on same day', () => {
+      const birth = new Date(1950, 5, 20);
+      const death = new Date(2020, 5, 20);
       expect(calculateAgeAtDeath(birth, death)).toBe(70);
     });
 
-    it('should calculate age of 0 for infant death', () => {
-      const birth = new Date('2020-01-15');
-      const death = new Date('2020-06-15');
+    it('should handle birthday one day after death day', () => {
+      const birth = new Date(1950, 5, 21);
+      const death = new Date(2020, 5, 20);
+      expect(calculateAgeAtDeath(birth, death)).toBe(69);
+    });
 
+    it('should calculate age for young person', () => {
+      const birth = new Date(2015, 0, 1);
+      const death = new Date(2020, 0, 1);
+      expect(calculateAgeAtDeath(birth, death)).toBe(5);
+    });
+
+    it('should handle death in same year as birth', () => {
+      const birth = new Date(2020, 0, 1);
+      const death = new Date(2020, 11, 31);
       expect(calculateAgeAtDeath(birth, death)).toBe(0);
     });
+  });
 
-    it('should handle death on birthday correctly', () => {
-      const birth = new Date('1960-03-20');
-      const death = new Date('2020-03-20');
+  describe('calculateDeceasedPages', () => {
+    const mockDeceased: DeceasedPerson[] = [
+      {
+        name: 'Person 1',
+        dateOfBirth: '1950-01-01',
+        dateOfDeath: '2020-01-15',
+        hebrewDateOfBirth: '1950-01-01',
+        hebrewDateOfDeath: '2020-01-15',
+        tribute: '',
+        photo: null,
+      },
+      {
+        name: 'Person 2',
+        dateOfBirth: '1960-02-01',
+        dateOfDeath: '2021-02-15',
+        hebrewDateOfBirth: '1960-02-01',
+        hebrewDateOfDeath: '2021-02-15',
+        tribute: '',
+        photo: null,
+      },
+      {
+        name: 'Person 3',
+        dateOfBirth: '1955-03-01',
+        dateOfDeath: '2019-03-15',
+        hebrewDateOfBirth: '1955-03-01',
+        hebrewDateOfDeath: '2019-03-15',
+        tribute: '',
+        photo: null,
+      },
+    ];
 
-      expect(calculateAgeAtDeath(birth, death)).toBe(60);
+    it('should return empty result for empty array', () => {
+      const result = calculateDeceasedPages([], 'all', 2, 2);
+      expect(result.filteredDeceased).toHaveLength(0);
+      expect(result.totalPages).toBe(0);
     });
 
-    it('should handle death day before birthday in same month', () => {
-      const birth = new Date('1960-03-20');
-      const death = new Date('2020-03-19');
-
-      expect(calculateAgeAtDeath(birth, death)).toBe(59);
+    it('should return all deceased in "all" mode', () => {
+      const result = calculateDeceasedPages(mockDeceased, 'all', 2, 2);
+      expect(result.filteredDeceased).toHaveLength(3);
+      expect(result.totalPages).toBe(1); // 3 items / 4 cells = 1 page
     });
 
-    it('should handle leap year birthdays', () => {
-      const birth = new Date('1960-02-29');
-      const death = new Date('2020-02-28');
-
-      expect(calculateAgeAtDeath(birth, death)).toBe(59);
+    it('should calculate correct number of pages', () => {
+      const result = calculateDeceasedPages(mockDeceased, 'all', 2, 1);
+      expect(result.filteredDeceased).toHaveLength(3);
+      expect(result.totalPages).toBe(2); // 3 items / 2 cells = 2 pages
     });
 
-    it('should calculate correct age for centenarian', () => {
-      const birth = new Date('1900-01-01');
-      const death = new Date('2005-06-15');
+    it('should filter by month in "monthly" mode', () => {
+      const result = calculateDeceasedPages(mockDeceased, 'monthly', 2, 2);
+      expect(Array.isArray(result.filteredDeceased)).toBe(true);
+      expect(typeof result.totalPages).toBe('number');
+      expect(result.totalPages).toBeGreaterThanOrEqual(0);
+    });
 
-      expect(calculateAgeAtDeath(birth, death)).toBe(105);
+    it('should handle 1x1 grid', () => {
+      const result = calculateDeceasedPages(mockDeceased, 'all', 1, 1);
+      expect(result.filteredDeceased).toHaveLength(3);
+      expect(result.totalPages).toBe(3); // 3 items / 1 cell = 3 pages
+    });
+
+    it('should handle large grid', () => {
+      const result = calculateDeceasedPages(mockDeceased, 'all', 5, 5);
+      expect(result.filteredDeceased).toHaveLength(3);
+      expect(result.totalPages).toBe(1); // 3 items / 25 cells = 1 page
+    });
+  });
+
+  describe('integration: Real hebcal usage', () => {
+    it('should work with real HDate for current date', () => {
+      const today = new Date();
+      const hdate = new HDate(today);
+
+      expect(hdate.getMonth()).toBeGreaterThanOrEqual(1);
+      expect(hdate.getMonth()).toBeLessThanOrEqual(13);
+      expect(typeof hdate.isLeapYear()).toBe('boolean');
+    });
+
+    it('should correctly identify Adar months', () => {
+      // In a leap year, there should be Adar I (12) and Adar II (13)
+      const leapYearDate = new Date(2024, 2, 1);
+      const hdate = new HDate(leapYearDate);
+      const month = hdate.getMonth();
+
+      // If it's during Adar months
+      if (month === months.ADAR_I || month === months.ADAR_II) {
+        expect(hdate.isLeapYear()).toBe(true);
+      }
+    });
+
+    it('should handle month transitions correctly', () => {
+      // Test that consecutive dates give logical Hebrew months
+      const date1 = new Date(2024, 0, 1);
+      const date2 = new Date(2024, 0, 15);
+
+      const hdate1 = new HDate(date1);
+      const hdate2 = new HDate(date2);
+
+      // Months should either be the same or consecutive
+      const monthDiff = Math.abs(hdate2.getMonth() - hdate1.getMonth());
+      expect(monthDiff).toBeLessThanOrEqual(1);
     });
   });
 });

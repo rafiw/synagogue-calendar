@@ -272,6 +272,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Ensure githubKey is included in settings state
       settingsToSet.githubKey = githubKey;
       setSettings(settingsToSet);
+      latestSettings.current = settingsToSet;
+
+      // Save the resolved settings to AsyncStorage (without githubKey)
+      const { githubKey: _, ...settingsWithoutKey } = settingsToSet;
+      await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
     } catch (error) {
       console.error('Error loading settings:', error);
     } finally {

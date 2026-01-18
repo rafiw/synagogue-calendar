@@ -107,7 +107,7 @@ const Classes: React.FC = () => {
                 className="flex-1 text-center font-bold text-gray-900"
                 style={{ fontSize: textSize, padding }}
               >
-                {`${shiur.start}-${shiur.end}`}
+                {isRTL2(settings.language) ? `${shiur.end}-${shiur.start}` : `${shiur.start}-${shiur.end}`}
               </Text>,
               <Text
                 key={`${shiur.id}_tutor`}

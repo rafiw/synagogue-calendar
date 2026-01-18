@@ -88,7 +88,6 @@ export interface Settings {
   elevation: number;
   olson: string;
   il: boolean;
-  background: string; // Kept for backwards compatibility
   backgroundSettings?: BackgroundSettings;
   purimSettings: PurimSettings;
   enableZmanim: boolean;

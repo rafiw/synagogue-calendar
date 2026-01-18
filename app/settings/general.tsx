@@ -130,7 +130,7 @@ const GeneralSettingsTab = () => {
   const [synagogueName, setSynagogueName] = useState(settings.name);
   const [selectedLocation, setSelectedLocation] = useState(cities[0]!.name);
   const [olson, setOlson] = useState(settings.olson);
-  const [background, setBackground] = useState(settings.background);
+  const [background, setBackground] = useState(settings.backgroundSettings?.imageUrl || '');
   const [purimSettings, setPurimSettings] = useState(settings.purimSettings || { regular: true, shushan: false });
 
   // New background settings state

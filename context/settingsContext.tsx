@@ -34,14 +34,13 @@ const defaultSettings: Settings = {
   elevation: 0,
   olson: 'Asia/Jerusalem',
   il: true,
-  background: '../assets/images/background1.png',
   backgroundSettings: {
-    mode: 'image',
-    imageUrl: '../assets/images/background1.png',
+    mode: 'gradient',
+    imageUrl: '',
     solidColor: '#E3F2FD',
     gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
-    gradientStart: { x: 0, y: 0 },
-    gradientEnd: { x: 1, y: 1 },
+    gradientStart: { x: 1, y: 1 },
+    gradientEnd: { x: 0, y: 0 },
   },
   purimSettings: {
     regular: true,
@@ -52,8 +51,37 @@ const defaultSettings: Settings = {
   enableDeceased: true,
   enableMessages: true,
   enableSchedule: true,
-  messages: [],
-  classes: [],
+  messages: [
+    'מזל טוב למשפחת כהן לרגל הולדת הבן 👶 יהי רצון שיגדל לתורה, לחופה ולמעשים טובים.',
+    'אנו שמחים לברך את המתפללים והאורחים החדשים שהצטרפו אלינו היום. תרגישו בבית',
+    'החל מהשבוע: שיעור בגמרא עם הרב לוי כל יום שלישי בשעה 20:30 בבית הכנסת.',
+  ],
+  classes: [
+    {
+      id: 'class_1768698520454_52xjbtgq6',
+      day: [0, 1, 2, 3, 4, 6],
+      start: '22:00',
+      end: '21:00',
+      tutor: 'משה כהן',
+      subject: 'דף יומי',
+    },
+    {
+      id: 'class_1768767659451_j99pmr5ea',
+      day: [5],
+      start: '12:00',
+      end: '13:00',
+      tutor: 'משה כהן',
+      subject: 'דף יומי',
+    },
+    {
+      id: 'class_1768767679349_gyuwn19ix',
+      day: [0, 3],
+      start: '21:00',
+      end: '21:00',
+      tutor: 'הרב יפרח',
+      subject: 'מסילת ישרים',
+    },
+  ],
   deceased: [],
   deceasedSettings: {
     tableRows: 3,
@@ -65,9 +93,56 @@ const defaultSettings: Settings = {
   scheduleSettings: {
     columns: [
       {
-        id: '1',
-        title: 'טור-1',
-        prayers: [],
+        id: '1768569282274',
+        title: 'שבת',
+        prayers: [
+          {
+            id: '1768569315318',
+            name: 'מנחה ערב שבת',
+            time: "10 דק' אחרי כניסת שבת",
+          },
+          {
+            id: '1768569329105',
+            name: 'שחרית',
+            time: '8:30',
+          },
+          {
+            id: '1768569339611',
+            name: 'מנחה שבת',
+            time: '16:00',
+          },
+        ],
+      },
+      {
+        id: '1768768271286',
+        title: 'ימי חול',
+        prayers: [
+          {
+            id: '1768768280476',
+            name: 'שחרית',
+            time: '6:00',
+          },
+          {
+            id: '1768768287501',
+            name: 'שחרית',
+            time: '7:00',
+          },
+          {
+            id: '1768768296689',
+            name: 'מנחה',
+            time: '20 דק לפני שקיעה',
+          },
+          {
+            id: '1768768306304',
+            name: 'ערבית',
+            time: 'סמוך למנחה',
+          },
+          {
+            id: '1768768313552',
+            name: 'ערבית',
+            time: '20:00',
+          },
+        ],
       },
     ],
   },
@@ -260,11 +335,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Ensure background settings are properly initialized
         finalSettings.backgroundSettings = finalSettings.backgroundSettings || {
           mode: 'image',
-          imageUrl: finalSettings.background || '../assets/images/background1.png',
+          imageUrl: '',
           solidColor: '#E3F2FD',
           gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
-          gradientStart: { x: 0, y: 0 },
-          gradientEnd: { x: 1, y: 1 },
+          gradientStart: { x: 1, y: 1 },
+          gradientEnd: { x: 0, y: 0 },
         };
       }
 

@@ -141,7 +141,7 @@ export default function App() {
 
   const backgroundSettings = settings.backgroundSettings || {
     mode: 'image' as const,
-    imageUrl: settings.background || '../assets/images/background1.png',
+    imageUrl: '',
     solidColor: '#E3F2FD',
     gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
     gradientStart: { x: 0, y: 0 },

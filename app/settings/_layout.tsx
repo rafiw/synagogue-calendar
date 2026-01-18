@@ -79,8 +79,11 @@ export default function SettingsLayout() {
       </View>
       {settingsSaved && (
         <Animated.View
-          className="absolute bottom-12 bg-green-600 p-2.5 rounded-lg"
-          style={{ opacity: fadeAnim.current }}
+          className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-green-600 p-2.5 rounded-lg z-50"
+          style={{ 
+            opacity: fadeAnim.current,
+            pointerEvents: 'none'
+          }}
         >
           <Text className="text-white text-base">{t('settings_saved')}</Text>
         </Animated.View>

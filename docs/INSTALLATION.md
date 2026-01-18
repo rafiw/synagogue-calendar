@@ -12,18 +12,6 @@ Before you begin, ensure you have the following installed:
 
 ### Platform-Specific (Optional):
 
-#### For Android Development:
-
-- **Android Studio** - For building Android apps ([Download](https://developer.android.com/studio))
-- **Android SDK** - Installed via Android Studio
-- **Java Development Kit (JDK)** - Version 11 or higher
-
-#### For iOS Development (macOS only):
-
-- **Xcode** - For building iOS apps ([Mac App Store](https://apps.apple.com/app/xcode/id497799835))
-- **CocoaPods** - iOS dependency manager (installed via Xcode)
-- **Apple Developer Account** - For distribution
-
 ---
 
 ## Quick Installation
@@ -31,8 +19,8 @@ Before you begin, ensure you have the following installed:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/synagogue-calander.git
-cd synagogue-calander
+git clone https://github.com/rafiw/synagogue-calendar.git
+cd synagogue-calendar
 ```
 
 ### 2. Install Dependencies
@@ -90,26 +78,6 @@ This will start the Expo development server and show you a QR code.
    ```bash
    yarn android
    ```
-
----
-
-### 🍎 Running on iOS (macOS only)
-
-#### Option 1: Using Expo Go (Easiest)
-
-1. Install **Expo Go** app on your iOS device from [App Store](https://apps.apple.com/app/expo-go/id982107779)
-2. Run `yarn start` on your Mac
-3. Scan the QR code with Camera app
-4. Open with Expo Go
-
-#### Option 2: iOS Simulator
-
-1. Install Xcode from Mac App Store
-2. Run:
-   ```bash
-   yarn ios
-   ```
-3. The iOS simulator will launch automatically
 
 ---
 
@@ -318,7 +286,7 @@ yarn audit-translations  # Audit translation files
 After installation, here's what you'll see:
 
 ```
-synagogue-calander/
+synagogue-calendar/
 ├── app/                # Expo Router pages
 │   ├── index.tsx      # Main screen
 │   └── settings/      # Settings pages
@@ -359,8 +327,8 @@ After successful installation:
 If you encounter issues:
 
 1. Check the [Troubleshooting](#troubleshooting) section above
-2. Search [existing GitHub issues](https://github.com/yourusername/synagogue-calander/issues)
-3. Open a [new issue](https://github.com/yourusername/synagogue-calander/issues/new) with:
+2. Search [existing GitHub issues](https://github.com/rafiw/synagogue-calendar/issues)
+3. Open a [new issue](https://github.com/rafiw/synagogue-calendar/issues/new) with:
    - Your Node.js version (`node --version`)
    - Your Yarn version (`yarn --version`)
    - Your operating system

@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![App Logo](./docs/images/app-logo.png)
+<img src="./docs/images/app-logo.png" alt="App Logo" width="180">
 
 **A comprehensive digital calendar solution for synagogues**  
 **פתרון לוח שנה דיגיטלי מקיף לבתי כנסת**
@@ -52,8 +52,8 @@ Synagogue Calendar is a modern, feature-rich application designed to help synago
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/synagogue-calander.git
-cd synagogue-calander
+git clone https://github.com/yourusername/synagogue-calendar.git
+cd synagogue-calendar
 
 # Install dependencies
 yarn install

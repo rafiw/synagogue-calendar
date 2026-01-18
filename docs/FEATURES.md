@@ -20,7 +20,7 @@ The app provides accurate Zmanim (Jewish prayer times) calculations based on you
 - **Candle Lighting** - Shabbat and holiday candle lighting times
 - **Havdala** - End of Shabbat times (including Rabbeinu Tam)
 
-![Zmanim Display](./images/zmanim.png)
+<img src="./images/zmanim.png" alt="Zmanim Display" width="1000">
 
 ---
 
@@ -54,7 +54,7 @@ Comprehensive Hebrew calendar features with automatic updates:
 - **Fast Days** - Fast start and end times
 - **Purim** - Regular Purim or Shushan Purim
 
-![Hebrew Calendar](./images/hebrew-calendar.png)
+<img src="./images/zmanim2.png" alt="Zmanim Display" width="1000">
 
 ---
 
@@ -68,7 +68,6 @@ Organize and display your synagogue's learning schedule (Shiurim).
 - **Teacher/Rabbi Names** - Display who's teaching
 - **Subject/Topic** - What's being taught
 - **Time Management** - Set specific times for each class
-- **Enable/Disable** - Toggle the entire classes page on/off
 - **Easy Management** - Add, edit, or remove classes anytime
 
 ### Use Cases:
@@ -79,7 +78,11 @@ Organize and display your synagogue's learning schedule (Shiurim).
 - Women's learning groups
 - Youth programs
 
-![Classes Schedule](./images/classes.png)
+<img src="./images/classes.png" alt="Classes Schedule" width="1000">
+
+### Settings page:
+
+<img src="./images/classes2.png" alt="Classes Schedule settings" width="500">
 
 ---
 
@@ -90,10 +93,7 @@ Keep your community informed with time-based announcements.
 ### Features:
 
 - **Custom Messages** - Add any text announcement
-- **Time-based Display** - Set start and end times for messages
-- **Multiple Messages** - Display several announcements simultaneously
 - **Easy Management** - Add, edit, or delete messages
-- **Enable/Disable** - Toggle the messages page on/off
 
 ### Use Cases:
 
@@ -103,9 +103,11 @@ Keep your community informed with time-based announcements.
 - Important notices
 - Holiday greetings
 
-![Messages Board](./images/messages.png)
+<img src="./images/messages.png" alt="Messages Board" width="1000">
 
----
+### Settings page:
+
+## <img src="./images/messages2.png" alt="Messages Board settings" width="500">
 
 ## 🕯️ Memorial Page (Yahrzeit)
 
@@ -134,7 +136,11 @@ Honor the memory of departed community members with a dedicated memorial page.
 - Photo URL or upload
 - Birth and death dates (Hebrew or English)
 
-![Memorial Page](./images/memorial.png)
+<img src="./images/memorial.png" alt="Memorial Page" width="1000">
+
+### Settings page:
+
+<img src="./images/memorial2.png" alt="Memorial Page settings" width="500">
 
 ---
 
@@ -161,7 +167,11 @@ Create and display custom prayer time schedules.
 - Special holiday schedules
 - Seasonal time changes
 
-![Prayer Schedule](./images/schedule.png)
+<img src="./images/schedule.png" alt="Prayer Schedule" width="1000">
+
+### Settings page:
+
+<img src="./images/schedule2.png" alt="Prayer Schedule settings" width="500">
 
 ---
 
@@ -173,7 +183,7 @@ Make the display uniquely yours with extensive customization options.
 
 #### 1. Image Backgrounds
 
-- 4 pre-included beautiful backgrounds
+- 4 pre-included backgrounds
 - Upload your own images
 - Perfect for creating a branded look
 

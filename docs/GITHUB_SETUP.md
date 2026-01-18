@@ -39,11 +39,7 @@ A Gist is a simple way to store snippets of data on GitHub.
    - Visit [https://gist.github.com](https://gist.github.com)
    - Make sure you're logged in
 
-2. **Click the + Icon**
-   - In the top right corner
-   - Or go directly to [https://gist.github.com/new](https://gist.github.com/new)
-
-3. **Fill in the Gist Details**
+2. **Fill in the Gist Details**
 
    **Gist description:**
 
@@ -65,11 +61,11 @@ A Gist is a simple way to store snippets of data on GitHub.
 
    _(Just two curly braces - this creates an empty JSON object)_
 
-4. **Create Secret Gist**
+3. **Create Secret Gist**
    - **IMPORTANT:** Click **"Create secret gist"** (not public!)
    - Secret gists are private and only accessible to you
 
-![Create Gist](./images/create-gist.png)
+![Create Gist](./images/gist1.png)
 
 ### Step 3: Copy the Gist ID
 
@@ -92,7 +88,6 @@ GitHub tokens are like passwords that give specific permissions.
 
 1. **Go to Token Settings**
    - Visit [https://github.com/settings/tokens](https://github.com/settings/tokens)
-   - Or: Click your profile picture → Settings → Developer settings → Personal access tokens → Tokens (classic)
 
 2. **Generate New Token**
    - Click **"Generate new token"**
@@ -309,14 +304,6 @@ The Gist stores all your app settings:
 
 ## 🎯 Advanced Tips
 
-### Multiple Synagogues
-
-Want to manage multiple synagogues?
-
-1. Create a different Gist for each synagogue
-2. Use different tokens (recommended)
-3. Switch between configurations by changing the Gist ID
-
 ### Backup Your Backup
 
 1. Go to your Gist on GitHub
@@ -332,20 +319,6 @@ To see what's stored:
 1. Go to your Gist: `https://gist.github.com/yourusername/YOUR_GIST_ID`
 2. You'll see all your settings in JSON format
 3. You can even edit directly on GitHub!
-
----
-
-## 🔄 Migration from Other Systems
-
-### Coming from JSONBin.io?
-
-The app previously supported JSONBin. To migrate:
-
-1. Export your data from JSONBin
-2. Copy the JSON content
-3. Create a GitHub Gist (follow steps above)
-4. Paste your JSON into the Gist
-5. Update app settings to use GitHub instead
 
 ---
 
@@ -377,7 +350,7 @@ If you're stuck:
 
 1. Check the [troubleshooting section](#-troubleshooting) above
 2. Watch the help images in Settings → Help
-3. Open an issue on [GitHub](https://github.com/yourusername/synagogue-calander/issues)
+3. Open an issue on [GitHub](https://github.com/rafiw/synagogue-calendar/issues)
 4. Include:
    - What step you're on
    - What error message you see

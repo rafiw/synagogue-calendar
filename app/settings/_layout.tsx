@@ -1,12 +1,13 @@
-import { useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, Animated } from 'react-native';
+import { useRef, useState, useCallback } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Animated } from 'react-native';
+import { router } from 'expo-router';
+
 import { useSettings } from '../../context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import GeneralSettingsTab from './general';
 import MessagesSettingsTab from './messages';
 import ClassesSettingsTab from './classes';
-import { router } from 'expo-router';
 import DeceasedSettingsTab from './deceased';
 import ScheduleSettingsTab from './schedule';
 
@@ -14,26 +15,27 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function SettingsLayout() {
   const { isLoading } = useSettings();
+  // const { t, i18n } = useTranslation(undefined, { useSuspense: false });
   const { t } = useTranslation();
   const [settingsSaved, setSettingsSaved] = useState(false);
-  const fadeAnim = useRef(new Animated.Value(0));
+  const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity set to 0
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     // Simulate saving the settings
     setSettingsSaved(true);
 
     // Reset the animation value
-    fadeAnim.current.setValue(0);
+    fadeAnim.setValue(0);
 
     // Start the blinking effect
     Animated.loop(
       Animated.sequence([
-        Animated.timing(fadeAnim.current, {
+        Animated.timing(fadeAnim, {
           toValue: 1,
           duration: 500,
           useNativeDriver: false,
         }),
-        Animated.timing(fadeAnim.current, {
+        Animated.timing(fadeAnim, {
           toValue: 0,
           duration: 500,
           useNativeDriver: false,
@@ -45,7 +47,7 @@ export default function SettingsLayout() {
       setSettingsSaved(false);
       router.navigate('/');
     });
-  };
+  }, [fadeAnim]);
 
   if (isLoading) {
     return (
@@ -78,16 +80,20 @@ export default function SettingsLayout() {
         </View>
       </View>
       {settingsSaved && (
-        <Animated.View
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 bg-green-600 p-2.5 rounded-lg z-50"
-          style={{ 
-            opacity: fadeAnim.current,
-            pointerEvents: 'none'
-          }}
-        >
+        <Animated.View style={[styles.banner, { opacity: fadeAnim }]}>
           <Text className="text-white text-base">{t('settings_saved')}</Text>
         </Animated.View>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  banner: {
+    position: 'absolute',
+    bottom: 50,
+    backgroundColor: 'green',
+    padding: 10,
+    borderRadius: 10,
+  },
+});

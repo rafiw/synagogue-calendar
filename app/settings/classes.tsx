@@ -48,7 +48,12 @@ const ClassesSettingsTab = () => {
   };
 
   const handleAddClass = () => {
-    const updatedClasses = [...settings.classes, defaultShiur];
+    // Generate unique ID for new class to prevent duplicate keys
+    const newClass: Shiur = {
+      ...defaultShiur,
+      id: `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    };
+    const updatedClasses = [...settings.classes, newClass];
     updateSettings({ classes: updatedClasses });
   };
 
@@ -192,7 +197,7 @@ const ClassesSettingsTab = () => {
           <FlatList
             data={settings.classes}
             renderItem={({ item, index }) => renderClassItem({ rtl, item, index })}
-            keyExtractor={(_, index) => index.toString()}
+            keyExtractor={(item, index) => item.id || index.toString()}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 16 }}
             ListHeaderComponent={

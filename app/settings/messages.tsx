@@ -9,7 +9,6 @@ const MessagesSettingsTab = () => {
   const { t, i18n } = useTranslation();
   const saveChecked = (value: boolean) => {
     updateSettings({ enableMessages: value });
-    console.log('saveChecked', value);
   };
 
   if (isLoading || !i18n?.isInitialized) {

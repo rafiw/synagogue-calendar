@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import Classes, { getSubPages as getClassSubPages } from '../components/Classes';
 import Deceased, { getSubPages as getDeceasedSubPages } from '../components/Deceased';
 import Messages, { getSubPages as getMessagesSubPages } from '../components/Messages';
-import Zmanim, { getSubPages as getZmanimSubPages } from '../components/Zmanim';
+import Zmanim from '../components/Zmanim';
 import Header from '../components/Header';
 // import Footer from '../components/Footer';
 import { useSettings } from '../context/settingsContext';
@@ -45,10 +45,9 @@ export default function App() {
   }, [settings.language]);
 
   const createScreens = useCallback(async (): Promise<Screen[]> => {
-    const [classSubPages, messagesSubPages, zmanimSubPages, deceasedSubPages] = await Promise.all([
+    const [classSubPages, messagesSubPages, deceasedSubPages] = await Promise.all([
       getClassSubPages(),
       getMessagesSubPages(),
-      getZmanimSubPages(),
       getDeceasedSubPages(),
     ]);
 
@@ -57,7 +56,7 @@ export default function App() {
         id: 1,
         name: 'zmanim',
         content: () => (settings.enableZmanim ? <Zmanim /> : null),
-        presentTime: zmanimSubPages * defaultPageDisplayTime,
+        presentTime: defaultPageDisplayTime,
       },
       {
         id: 2,

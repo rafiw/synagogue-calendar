@@ -7,10 +7,6 @@ import { isRTL } from 'utils/utils';
 import { HallelType } from 'utils/zmanim_wrapper';
 import { useResponsiveFontSize, useResponsiveSpacing } from 'utils/responsive';
 
-export async function getSubPages(): Promise<number> {
-  return Promise.resolve(1);
-}
-
 const getTachanunLabel = (
   haveTachanunShacharit: boolean,
   haveTachanunMincha: boolean,

@@ -95,13 +95,13 @@ We welcome contributions from developers! Whether you're fixing bugs, adding fea
 
 <div align="center">
 
-|              Main Display              |                Settings                 |                Classes                |
-| :------------------------------------: | :-------------------------------------: | :-----------------------------------: |
-| ![Main](./docs/images/main-screen.png) | ![Settings](./docs/images/settings.png) | ![Classes](./docs/images/classes.png) |
+|           Main Display            |                Settings                 |                Classes                |
+| :-------------------------------: | :-------------------------------------: | :-----------------------------------: |
+| ![Main](./docs/images/zmanim.png) | ![Settings](./docs/images/classes2.png) | ![Classes](./docs/images/classes.png) |
 
-|              Memorial Page              |             Prayer Schedule             |              Background Options               |
-| :-------------------------------------: | :-------------------------------------: | :-------------------------------------------: |
-| ![Memorial](./docs/images/memorial.png) | ![Schedule](./docs/images/schedule.png) | ![Backgrounds](./docs/images/backgrounds.png) |
+|              Memorial Page              |             Prayer Schedule             |
+| :-------------------------------------: | :-------------------------------------: |
+| ![Memorial](./docs/images/memorial.png) | ![Schedule](./docs/images/schedule.png) |
 
 </div>
 

@@ -1,11 +1,27 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 import NetInfo from '@react-native-community/netinfo';
 import { cities } from 'assets/data';
 import { Settings } from 'utils/defs';
 
+// Type definition for EncryptedStorage
+interface IEncryptedStorage {
+  setItem: (key: string, value: string) => Promise<void>;
+  getItem: (key: string) => Promise<string | null>;
+  removeItem: (key: string) => Promise<void>;
+}
+
+// Dynamically load EncryptedStorage only on native platforms
+let EncryptedStorage: IEncryptedStorage | null = null;
+if (Platform.OS !== 'web') {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  EncryptedStorage = require('react-native-encrypted-storage').default as IEncryptedStorage;
+}
+const defaultName = 'בית כנסת לדוגמא';
+
 const defaultSettings: Settings = {
-  name: 'בית כנסת לדוגמא',
+  name: defaultName,
   gistId: '',
   gistFileName: 'synagogue-settings.json',
   githubKey: '',
@@ -66,6 +82,53 @@ interface SettingsContextType {
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 const REMOTE_UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const GITHUB_KEY_STORAGE_KEY = 'github_token';
+
+// Helper functions for encrypted storage with web fallback
+const getEncryptedGithubKey = async (): Promise<string> => {
+  try {
+    if (Platform.OS === 'web') {
+      // On web, fall back to AsyncStorage (not encrypted, but works for development)
+      const key = await AsyncStorage.getItem(GITHUB_KEY_STORAGE_KEY);
+      return key || '';
+    } else {
+      // On native platforms, use encrypted storage
+      if (!EncryptedStorage) {
+        throw new Error('EncryptedStorage is not available');
+      }
+      const key = await EncryptedStorage.getItem(GITHUB_KEY_STORAGE_KEY);
+      return key || '';
+    }
+  } catch (error) {
+    console.error('Error retrieving GitHub key:', error);
+    return '';
+  }
+};
+
+const setEncryptedGithubKey = async (key: string): Promise<void> => {
+  try {
+    if (Platform.OS === 'web') {
+      // On web, fall back to AsyncStorage (not encrypted, but works for development)
+      if (key) {
+        await AsyncStorage.setItem(GITHUB_KEY_STORAGE_KEY, key);
+      } else {
+        await AsyncStorage.removeItem(GITHUB_KEY_STORAGE_KEY);
+      }
+    } else {
+      // On native platforms, use encrypted storage
+      if (!EncryptedStorage) {
+        throw new Error('EncryptedStorage is not available');
+      }
+      if (key) {
+        await EncryptedStorage.setItem(GITHUB_KEY_STORAGE_KEY, key);
+      } else {
+        await EncryptedStorage.removeItem(GITHUB_KEY_STORAGE_KEY);
+      }
+    }
+  } catch (error) {
+    console.error('Error storing GitHub key:', error);
+  }
+};
 
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
@@ -126,9 +189,19 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const localSettingsString = await AsyncStorage.getItem('settings');
       const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
 
+      // Migrate githubKey from AsyncStorage to encrypted storage if it exists
+      if (localSettings?.githubKey) {
+        await setEncryptedGithubKey(localSettings.githubKey);
+        // Remove githubKey from AsyncStorage
+        delete localSettings.githubKey;
+        await AsyncStorage.setItem('settings', JSON.stringify(localSettings));
+      }
+
+      // Load GitHub key from encrypted storage
+      const githubKey = await getEncryptedGithubKey();
+
       // Use local settings values if available, otherwise fall back to current state
       const gistId = localSettings?.gistId || settings.gistId;
-      const githubKey = localSettings?.githubKey || settings.githubKey;
       const gistFileName = localSettings?.gistFileName || settings.gistFileName;
 
       // Try to fetch remote settings
@@ -158,6 +231,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
       // Ensure deceased settings are properly initialized
       if (finalSettings) {
+        // Add githubKey from encrypted storage
+        finalSettings.githubKey = githubKey;
+
         finalSettings.deceased = finalSettings.deceased || [];
         finalSettings.deceasedSettings = {
           tableRows: 3,
@@ -192,7 +268,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         };
       }
 
-      setSettings(finalSettings || defaultSettings);
+      const settingsToSet = finalSettings || defaultSettings;
+      // Ensure githubKey is included in settings state
+      settingsToSet.githubKey = githubKey;
+      setSettings(settingsToSet);
     } catch (error) {
       console.error('Error loading settings:', error);
     } finally {
@@ -246,9 +325,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           currentSettings.gistFileName,
         );
         if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
-          setSettings(remoteSettings);
-          latestSettings.current = remoteSettings;
-          await AsyncStorage.setItem('settings', JSON.stringify(remoteSettings));
+          // Add githubKey from encrypted storage
+          const githubKey = await getEncryptedGithubKey();
+          const settingsWithKey = { ...remoteSettings, githubKey };
+
+          setSettings(settingsWithKey);
+          latestSettings.current = settingsWithKey;
+
+          // Store without githubKey in AsyncStorage
+          const { githubKey: _, ...settingsWithoutKey } = settingsWithKey;
+          await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
         }
       })();
     }, REMOTE_UPDATE_INTERVAL);
@@ -281,11 +367,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Fetch and update remote settings
         const currentSettings = latestSettings.current;
         fetchRemoteSettings(currentSettings.gistId, currentSettings.githubKey, currentSettings.gistFileName)
-          .then((remoteSettings) => {
+          .then(async (remoteSettings) => {
             if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
-              setSettings(remoteSettings);
-              latestSettings.current = remoteSettings;
-              AsyncStorage.setItem('settings', JSON.stringify(remoteSettings));
+              // Add githubKey from encrypted storage
+              const githubKey = await getEncryptedGithubKey();
+              const settingsWithKey = { ...remoteSettings, githubKey };
+
+              setSettings(settingsWithKey);
+              latestSettings.current = settingsWithKey;
+
+              // Store without githubKey in AsyncStorage
+              const { githubKey: _, ...settingsWithoutKey } = settingsWithKey;
+              await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
               console.log('Settings refreshed from remote after reconnection');
             }
           })
@@ -320,7 +413,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         lastUpdateTime: new Date(),
       };
 
-      await AsyncStorage.setItem('settings', JSON.stringify(updatedSettings));
+      // If githubKey is being updated, store it in encrypted storage
+      if ('githubKey' in newSettings) {
+        await setEncryptedGithubKey(newSettings.githubKey || '');
+      }
+
+      // Remove githubKey from settings before storing in AsyncStorage
+      const { githubKey, ...settingsWithoutKey } = updatedSettings;
+
+      await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
       setSettings(updatedSettings);
       latestSettings.current = updatedSettings;
       hasUnsavedChanges.current = true;

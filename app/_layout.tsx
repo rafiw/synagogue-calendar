@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { SettingsProvider, useSettings } from '../context/settingsContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nextProvider } from 'react-i18next';
 import { useState, useEffect, StrictMode } from 'react';
 import { View, ActivityIndicator } from 'react-native';
@@ -50,12 +51,14 @@ function AppContent() {
 
 export default function RootLayout() {
   return (
-    <StrictMode>
+    // <StrictMode>
+    <SafeAreaProvider>
       <GestureHandlerRootView className="flex-1">
         <SettingsProvider>
           <AppContent />
         </SettingsProvider>
       </GestureHandlerRootView>
-    </StrictMode>
+    </SafeAreaProvider>
+    // </StrictMode>
   );
 }

@@ -163,5 +163,18 @@
   "schedule_delete_prayer": "Delete Prayer",
   "schedule_edit_prayer": "Edit Prayer",
   "sure_column_delete": "Are you sure you want to delete the column?",
-  "sure_prayer_delete": "Are you sure you want to delete the prayer?"
+  "sure_prayer_delete": "Are you sure you want to delete the prayer?",
+  "background_mode": "Background Mode",
+  "background_mode_image": "Image",
+  "background_mode_solid": "Solid Color",
+  "background_mode_gradient": "Gradient",
+  "background_solid_color": "Solid Color",
+  "background_gradient_colors": "Gradient Colors",
+  "background_gradient_direction": "Gradient Direction",
+  "background_gradient_direction_vertical": "Vertical",
+  "background_gradient_direction_horizontal": "Horizontal",
+  "background_gradient_direction_diagonal": "Diagonal",
+  "background_gradient_add_color": "Add Color",
+  "background_gradient_remove_color": "Remove Color",
+  "choose_color": "Choose Color"
 }

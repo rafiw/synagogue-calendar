@@ -60,6 +60,17 @@ export interface PurimSettings {
   shushan: boolean;
 }
 
+export type BackgroundMode = 'image' | 'solid' | 'gradient';
+
+export interface BackgroundSettings {
+  mode: BackgroundMode;
+  imageUrl: string;
+  solidColor: string;
+  gradientColors: string[];
+  gradientStart?: { x: number; y: number };
+  gradientEnd?: { x: number; y: number };
+}
+
 export interface Settings {
   name: string;
   gistId: string;
@@ -73,7 +84,8 @@ export interface Settings {
   elevation: number;
   olson: string;
   il: boolean;
-  background: string;
+  background: string; // Kept for backwards compatibility
+  backgroundSettings?: BackgroundSettings;
   purimSettings: PurimSettings;
   enableZmanim: boolean;
   enableClasses: boolean;

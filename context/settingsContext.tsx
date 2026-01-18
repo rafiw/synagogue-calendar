@@ -18,6 +18,14 @@ const defaultSettings: Settings = {
   olson: 'Asia/Jerusalem',
   il: true,
   background: '../assets/images/background1.png',
+  backgroundSettings: {
+    mode: 'image',
+    imageUrl: '../assets/images/background1.png',
+    solidColor: '#E3F2FD',
+    gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
+    gradientStart: { x: 0, y: 0 },
+    gradientEnd: { x: 1, y: 1 },
+  },
   purimSettings: {
     regular: true,
     shushan: false,
@@ -167,6 +175,15 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               prayers: [],
             },
           ],
+        };
+        // Ensure background settings are properly initialized
+        finalSettings.backgroundSettings = finalSettings.backgroundSettings || {
+          mode: 'image',
+          imageUrl: finalSettings.background || '../assets/images/background1.png',
+          solidColor: '#E3F2FD',
+          gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
+          gradientStart: { x: 0, y: 0 },
+          gradientEnd: { x: 1, y: 1 },
         };
       }
 

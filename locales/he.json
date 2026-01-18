@@ -163,5 +163,18 @@
   "schedule_delete_prayer": "מחק תפילה",
   "schedule_edit_prayer": "ערוך תפילה",
   "sure_column_delete": "האם אתם בטוחים שברצונכם למחוק את העמודה?",
-  "sure_prayer_delete": "האם אתם בטוחים שברצונכם למחוק את התפילה?"
+  "sure_prayer_delete": "האם אתם בטוחים שברצונכם למחוק את התפילה?",
+  "background_mode": "מצב רקע",
+  "background_mode_image": "תמונה",
+  "background_mode_solid": "צבע אחיד",
+  "background_mode_gradient": "גרדיאנט",
+  "background_solid_color": "צבע אחיד",
+  "background_gradient_colors": "צבעי גרדיאנט",
+  "background_gradient_direction": "כיוון הגרדיאנט",
+  "background_gradient_direction_vertical": "אנכי",
+  "background_gradient_direction_horizontal": "אופקי",
+  "background_gradient_direction_diagonal": "אלכסוני",
+  "background_gradient_add_color": "הוסף צבע",
+  "background_gradient_remove_color": "הסר צבע",
+  "choose_color": "בחר צבע"
 }

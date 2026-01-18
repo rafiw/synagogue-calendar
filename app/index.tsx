@@ -1,4 +1,4 @@
-import { ImageBackground, View, Text, ActivityIndicator, I18nManager } from 'react-native';
+import { View, Text, ActivityIndicator, I18nManager } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { router } from 'expo-router';
 
@@ -14,6 +14,7 @@ import { useScreenRotation } from '../utils/useScreenRotation';
 import { Screen } from '../utils/defs';
 import Schedule from '../components/Schedule';
 import { useResponsiveSpacing, useDeviceType } from '../utils/responsive';
+import BackgroundWrapper from '../components/BackgroundWrapper';
 
 export default function App() {
   const [isLoadingScreens, setIsLoadingScreens] = useState(true);
@@ -130,8 +131,17 @@ export default function App() {
     );
   }
 
+  const backgroundSettings = settings.backgroundSettings || {
+    mode: 'image' as const,
+    imageUrl: settings.background || '../assets/images/background1.png',
+    solidColor: '#E3F2FD',
+    gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
+    gradientStart: { x: 0, y: 0 },
+    gradientEnd: { x: 1, y: 1 },
+  };
+
   return (
-    <ImageBackground source={{ uri: settings.background }} className="flex-1" resizeMode="cover">
+    <BackgroundWrapper settings={backgroundSettings}>
       {/* Subtle overlay for better content visibility */}
       <View className="absolute inset-0 bg-black/10" />
 
@@ -163,6 +173,6 @@ export default function App() {
           <Footer />
         </View> */}
       </View>
-    </ImageBackground>
+    </BackgroundWrapper>
   );
 }

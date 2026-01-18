@@ -15,6 +15,7 @@ import { backgroundImages, cities, olsons } from '../../assets/data';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
 import ExternalLink from '../../utils/PressableLink';
+import ColorPickerModal from '../../components/ColorPickerModal';
 
 const HelpSection = () => {
   const { t } = useTranslation();
@@ -130,6 +131,29 @@ const GeneralSettingsTab = () => {
   const [background, setBackground] = useState(settings.background);
   const [purimSettings, setPurimSettings] = useState(settings.purimSettings || { regular: true, shushan: false });
 
+  // New background settings state
+  const [backgroundMode, setBackgroundMode] = useState(settings.backgroundSettings?.mode || 'image');
+  const [solidColor, setSolidColor] = useState(settings.backgroundSettings?.solidColor || '#E3F2FD');
+  const [gradientColors, setGradientColors] = useState(
+    settings.backgroundSettings?.gradientColors || ['#E3F2FD', '#BBDEFB', '#90CAF9'],
+  );
+  const [gradientDirection, setGradientDirection] = useState<'vertical' | 'horizontal' | 'diagonal'>(
+    settings.backgroundSettings?.gradientStart?.x === 0 &&
+      settings.backgroundSettings?.gradientStart?.y === 0 &&
+      settings.backgroundSettings?.gradientEnd?.x === 0
+      ? 'vertical'
+      : settings.backgroundSettings?.gradientStart?.x === 0 &&
+          settings.backgroundSettings?.gradientStart?.y === 0 &&
+          settings.backgroundSettings?.gradientEnd?.y === 0
+        ? 'horizontal'
+        : 'diagonal',
+  );
+
+  // Color picker modal states
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [editingColorIndex, setEditingColorIndex] = useState<number | null>(null);
+  const [tempColor, setTempColor] = useState('#E3F2FD');
+
   const handleSynagogueName = (synagogueName: string) => {
     setSynagogueName(synagogueName);
     updateSettings({ name: synagogueName });
@@ -193,6 +217,128 @@ const GeneralSettingsTab = () => {
     const newSettings = { ...purimSettings, [type]: !purimSettings[type] };
     setPurimSettings(newSettings);
     updateSettings({ purimSettings: newSettings });
+  };
+
+  const handleBackgroundModeChange = (mode: 'image' | 'solid' | 'gradient') => {
+    setBackgroundMode(mode);
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode,
+      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      solidColor,
+      gradientColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
+    };
+    updateSettings({ backgroundSettings: newBackgroundSettings });
+  };
+
+  const handleSolidColorChange = (color: string) => {
+    setSolidColor(color);
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode: backgroundMode,
+      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      solidColor: color,
+      gradientColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
+    };
+    updateSettings({ backgroundSettings: newBackgroundSettings });
+  };
+
+  const openColorPicker = (colorIndex: number | null, currentColor: string) => {
+    setEditingColorIndex(colorIndex);
+    setTempColor(currentColor);
+    setShowColorPicker(true);
+  };
+
+  const handleColorPickerSelect = (color: string) => {
+    if (editingColorIndex === null) {
+      // Solid color mode
+      handleSolidColorChange(color);
+    } else {
+      // Gradient color mode
+      handleGradientColorChange(editingColorIndex, color);
+    }
+  };
+
+  const handleGradientColorChange = (index: number, color: string) => {
+    const newColors = [...gradientColors];
+    newColors[index] = color;
+    setGradientColors(newColors);
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode: backgroundMode,
+      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      solidColor,
+      gradientColors: newColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
+    };
+    updateSettings({ backgroundSettings: newBackgroundSettings });
+  };
+
+  const handleAddGradientColor = () => {
+    const newColors = [...gradientColors, '#90CAF9'];
+    setGradientColors(newColors);
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode: backgroundMode,
+      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      solidColor,
+      gradientColors: newColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
+    };
+    updateSettings({ backgroundSettings: newBackgroundSettings });
+  };
+
+  const handleRemoveGradientColor = (index: number) => {
+    if (gradientColors.length <= 2) return; // Need at least 2 colors for gradient
+    const newColors = gradientColors.filter((_, i) => i !== index);
+    setGradientColors(newColors);
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode: backgroundMode,
+      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      solidColor,
+      gradientColors: newColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
+    };
+    updateSettings({ backgroundSettings: newBackgroundSettings });
+  };
+
+  const handleGradientDirectionChange = (direction: 'vertical' | 'horizontal' | 'diagonal') => {
+    setGradientDirection(direction);
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode: backgroundMode,
+      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      solidColor,
+      gradientColors,
+      gradientStart: getGradientStart(direction),
+      gradientEnd: getGradientEnd(direction),
+    };
+    updateSettings({ backgroundSettings: newBackgroundSettings });
+  };
+
+  const getGradientStart = (_direction: 'vertical' | 'horizontal' | 'diagonal') => {
+    return { x: 0, y: 0 };
+  };
+
+  const getGradientEnd = (direction: 'vertical' | 'horizontal' | 'diagonal') => {
+    switch (direction) {
+      case 'vertical':
+        return { x: 0, y: 1 };
+      case 'horizontal':
+        return { x: 1, y: 0 };
+      case 'diagonal':
+        return { x: 1, y: 1 };
+      default:
+        return { x: 1, y: 1 };
+    }
   };
   if (isLoading) {
     return (
@@ -351,16 +497,175 @@ const GeneralSettingsTab = () => {
             </View>
           </View>
           {/* background */}
-          <View className="space-y-2">
+          <View className="space-y-4">
             <Text className="text-sm font-medium text-gray-600">{t('background')}</Text>
-            <Picker selectedValue={background} onValueChange={handleBackgroundChange} className="h-12">
-              {backgroundImages.map((bimg) => (
-                <Picker.Item key={bimg.label} label={bimg.label} value={bimg.value}></Picker.Item>
-              ))}
-            </Picker>
+
+            {/* Background Mode Selection */}
+            <View className="space-y-2">
+              <Text className="text-xs font-medium text-gray-500">{t('background_mode')}</Text>
+              <View className="flex-row space-x-2">
+                <TouchableOpacity
+                  className={`flex-1 p-3 border rounded-lg ${backgroundMode === 'image' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  onPress={() => handleBackgroundModeChange('image')}
+                >
+                  <Text
+                    className={`text-center ${backgroundMode === 'image' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                  >
+                    {t('background_mode_image')}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 p-3 border rounded-lg ${backgroundMode === 'solid' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  onPress={() => handleBackgroundModeChange('solid')}
+                >
+                  <Text
+                    className={`text-center ${backgroundMode === 'solid' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                  >
+                    {t('background_mode_solid')}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 p-3 border rounded-lg ${backgroundMode === 'gradient' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  onPress={() => handleBackgroundModeChange('gradient')}
+                >
+                  <Text
+                    className={`text-center ${backgroundMode === 'gradient' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                  >
+                    {t('background_mode_gradient')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Image Background Settings */}
+            {backgroundMode === 'image' && (
+              <View className="space-y-2">
+                <Picker selectedValue={background} onValueChange={handleBackgroundChange} className="h-12">
+                  {backgroundImages.map((bimg) => (
+                    <Picker.Item key={bimg.label} label={bimg.label} value={bimg.value}></Picker.Item>
+                  ))}
+                </Picker>
+              </View>
+            )}
+
+            {/* Solid Color Background Settings */}
+            {backgroundMode === 'solid' && (
+              <View className="space-y-2">
+                <Text className="text-xs font-medium text-gray-500">{t('background_solid_color')}</Text>
+                <TouchableOpacity
+                  className="flex-row items-center space-x-2 p-4 border border-gray-300 rounded-lg bg-gray-50"
+                  onPress={() => openColorPicker(null, solidColor)}
+                >
+                  <View
+                    className="w-16 h-16 rounded border-2 border-gray-400"
+                    style={{ backgroundColor: solidColor }}
+                  />
+                  <View className="flex-1">
+                    <Text className="text-gray-700 font-semibold">{solidColor.toUpperCase()}</Text>
+                    <Text className="text-gray-500 text-sm">{t('optional')}</Text>
+                  </View>
+                  <Feather name="edit-2" size={20} color="#666" />
+                </TouchableOpacity>
+                {/* Preset Colors */}
+                <View className="flex-row flex-wrap gap-2">
+                  {['#E3F2FD', '#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5', '#2196F3', '#1E88E5', '#1976D2'].map(
+                    (color) => (
+                      <TouchableOpacity
+                        key={color}
+                        className="w-10 h-10 rounded border border-gray-300"
+                        style={{ backgroundColor: color }}
+                        onPress={() => handleSolidColorChange(color)}
+                      />
+                    ),
+                  )}
+                </View>
+              </View>
+            )}
+
+            {/* Gradient Background Settings */}
+            {backgroundMode === 'gradient' && (
+              <View className="space-y-3">
+                <Text className="text-xs font-medium text-gray-500">{t('background_gradient_colors')}</Text>
+                {gradientColors.map((color, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    className="flex-row items-center space-x-2 p-3 border border-gray-300 rounded-lg bg-gray-50"
+                    onPress={() => openColorPicker(index, color)}
+                  >
+                    <View className="w-12 h-12 rounded border-2 border-gray-400" style={{ backgroundColor: color }} />
+                    <View className="flex-1">
+                      <Text className="text-gray-700 font-semibold">{color.toUpperCase()}</Text>
+                      <Text className="text-gray-500 text-xs">Color {index + 1}</Text>
+                    </View>
+                    <Feather name="edit-2" size={18} color="#666" />
+                    {gradientColors.length > 2 && (
+                      <TouchableOpacity
+                        className="p-2 bg-red-500 rounded ml-2"
+                        onPress={() => handleRemoveGradientColor(index)}
+                      >
+                        <Feather name="x" size={18} color="white" />
+                      </TouchableOpacity>
+                    )}
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity className="p-3 bg-blue-500 rounded-lg" onPress={handleAddGradientColor}>
+                  <Text className="text-center text-white font-semibold">{t('background_gradient_add_color')}</Text>
+                </TouchableOpacity>
+
+                {/* Gradient Direction */}
+                <View className="space-y-2">
+                  <Text className="text-xs font-medium text-gray-500">{t('background_gradient_direction')}</Text>
+                  <View className="flex-row space-x-2">
+                    <TouchableOpacity
+                      className={`flex-1 p-3 border rounded-lg ${gradientDirection === 'vertical' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      onPress={() => handleGradientDirectionChange('vertical')}
+                    >
+                      <Text
+                        className={`text-center ${gradientDirection === 'vertical' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                      >
+                        {t('background_gradient_direction_vertical')}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className={`flex-1 p-3 border rounded-lg ${gradientDirection === 'horizontal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      onPress={() => handleGradientDirectionChange('horizontal')}
+                    >
+                      <Text
+                        className={`text-center ${gradientDirection === 'horizontal' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                      >
+                        {t('background_gradient_direction_horizontal')}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      className={`flex-1 p-3 border rounded-lg ${gradientDirection === 'diagonal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      onPress={() => handleGradientDirectionChange('diagonal')}
+                    >
+                      <Text
+                        className={`text-center ${gradientDirection === 'diagonal' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                      >
+                        {t('background_gradient_direction_diagonal')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            )}
           </View>
         </View>
       </View>
+
+      {/* Color Picker Modal */}
+      <ColorPickerModal
+        visible={showColorPicker}
+        initialColor={tempColor}
+        onClose={() => setShowColorPicker(false)}
+        onSelectColor={handleColorPickerSelect}
+        title={
+          editingColorIndex === null
+            ? t('background_solid_color')
+            : `${t('background_gradient_colors')} ${editingColorIndex + 1}`
+        }
+      />
     </ScrollView>
   );
 };

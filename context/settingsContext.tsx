@@ -147,9 +147,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       } else if (!localSettings) {
         finalSettings = remoteSettings;
       } else {
-        const localDate = new Date(localSettings.lastUpdateTime);
-        const remoteDate = new Date(remoteSettings.lastUpdateTime);
-        finalSettings = remoteDate > localDate ? remoteSettings : localSettings;
+        if (localSettings.name === defaultName && remoteSettings.name !== defaultName) {
+          finalSettings = remoteSettings;
+        } else {
+          const localDate = new Date(localSettings.lastUpdateTime);
+          const remoteDate = new Date(remoteSettings.lastUpdateTime);
+          finalSettings = remoteDate > localDate ? remoteSettings : localSettings;
+        }
       }
 
       // Ensure deceased settings are properly initialized

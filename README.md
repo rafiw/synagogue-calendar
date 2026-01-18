@@ -11,7 +11,7 @@
 [![React Native](https://img.shields.io/badge/React%20Native-0.81.5-blue)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-~54.0-000020.svg?style=flat&logo=expo&logoColor=white)](https://expo.dev/)
 
-[English](#english) | [עברית](./docs/README_HE.md)
+[🌐 **Live Demo**](https://rafiw.github.io/synagogue-calendar/) | [English](#english) | [עברית](./docs/README_HE.md)
 
 </div>
 

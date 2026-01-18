@@ -2,8 +2,14 @@
   "expo": {
     "scheme": "synagogue-calendar",
     "web": {
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./docs/images/app-logo.png"
     },
+    "experiments": {
+      "baseUrl": "/synagogue-calendar"
+    },
+    "assetBundlePatterns": ["**/*"],
     "name": "synagogue-calendar",
     "slug": "synagogue-calendar",
     "userInterfaceStyle": "light",

@@ -8,7 +8,7 @@
 
 **פתרון לוח שנה דיגיטלי מקיף לבתי כנסת**
 
-[עברית](#עברית) | [English](../README.md)
+[🌐 **הדגמה חיה**](https://rafiw.github.io/synagogue-calendar/) | [עברית](#עברית) | [English](../README.md)
 
 </div>
 

@@ -7,7 +7,7 @@ import { Settings } from 'utils/defs';
 const defaultSettings: Settings = {
   name: 'בית כנסת לדוגמא',
   gistId: '',
-  gistFileName: '',
+  gistFileName: 'synagogue-settings.json',
   githubKey: '',
   lastUpdateTime: new Date(),
   language: 'he',

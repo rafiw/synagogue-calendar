@@ -455,6 +455,7 @@ const GeneralSettingsTab = () => {
               className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
               value={gistFileName}
               onChangeText={handleGistFileName}
+              placeholder="synagogue-settings.json"
             />
           </View>
           {/* access */}

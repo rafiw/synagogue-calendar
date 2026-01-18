@@ -20,8 +20,9 @@ import {
   ChanukahEvent,
   RoshChodeshEvent,
 } from '@hebcal/core';
-import { PurimSettings } from './defs';
-import { getLeyningOnDate, formatAliyahWithBook, Leyning } from '@hebcal/leyning';
+import { Nusach, PurimSettings } from './defs';
+import { getLeyningOnDate, Leyning } from '@hebcal/leyning';
+
 export enum HallelType {
   NO_HALLEL = 0,
   HALF_HALLEL = 1,
@@ -35,14 +36,17 @@ export enum FastDayType {
 }
 
 export class ZmanimWrapper {
+  private now: Date;
   private hdate: HDate;
   private il: boolean;
   private location: Location;
+  private nusach: Nusach;
   private zmanim: Zmanim;
   private language: string;
   private purimSettings: PurimSettings;
 
   constructor(
+    nusach: Nusach,
     latitude: number,
     longitude: number,
     tzid: string,
@@ -50,17 +54,18 @@ export class ZmanimWrapper {
     purimSettings: PurimSettings,
     elevation?: number,
   ) {
-    const now = new Date();
+    this.now = new Date();
     const DEBUG = false;
     // for debugging purposes, set the date to other date than today
     if (DEBUG) {
-      now.setDate(now.getDate() + 68);
-      now.setHours(11);
+      this.now.setDate(this.now.getDate() + 236);
+      this.now.setHours(8);
     }
+    this.nusach = nusach;
     // Create a location object based on provided latitude, longitude, and timezone
     this.il = tzid?.toLowerCase().includes('jerusalem');
     this.location = new Location(latitude, longitude, this.il, tzid, undefined, undefined, undefined, elevation);
-    this.hdate = Zmanim.makeSunsetAwareHDate(this.location, now, false);
+    this.hdate = Zmanim.makeSunsetAwareHDate(this.location, this.now, false);
     // this.hdate = new HDate(now);
 
     // Create a Zmanim object based on today's Hebrew date and the location
@@ -231,8 +236,6 @@ export class ZmanimWrapper {
   getCandleLighting(): string {
     const events = this.getEvents();
     for (const ev of events) {
-      const hd = ev.getDate();
-      const date = hd.greg();
       if (ev instanceof CandleLightingEvent) {
         return ev.eventTimeStr;
       }
@@ -244,7 +247,6 @@ export class ZmanimWrapper {
     const events = this.getEvents();
     for (const ev of events) {
       const hd = ev.getDate();
-      const date = hd.greg();
       if (ev instanceof HavdalahEvent) {
         return ev.eventTimeStr;
       }
@@ -283,6 +285,7 @@ export class ZmanimWrapper {
       'Herzl Day',
       'Jabotinsky Day',
       'Yom HaAliyah School Observance',
+      'Leil Selichot', // taken care of by isSlichotTonight
     ];
     const events = this.getEvents(0);
     const holidays = [];
@@ -344,7 +347,7 @@ export class ZmanimWrapper {
     const today = this.hdate;
     const todayDay = today.getDate();
     const todayMonth = today.getMonth();
-    const hourNow = new Date().getHours();
+    const hourNow = this.now.getHours();
     const sunsetHour = this.zmanim.sunset().getHours();
 
     if (todayMonth === startMonth) {
@@ -468,6 +471,38 @@ export class ZmanimWrapper {
       }
     }
     return '';
+  }
+
+  isSlichotTonight(): boolean {
+    const month = this.hdate.getMonth();
+    const day = this.hdate.getDate();
+    const hour = this.now.getHours();
+
+    if (month !== months.ELUL && month !== months.TISHREI) {
+      return false;
+    }
+    if (month === months.TISHREI) {
+      if (day <= 8 && day >= 2) {
+        return true;
+      }
+      // return hour before 9:00
+      if (hour < 9) {
+        return true;
+      }
+      return false;
+    }
+    if (month === months.ELUL && day === 29) {
+      if (hour < 9) {
+        return true;
+      }
+      return false;
+    }
+    if (this.nusach === 'ashkenaz') {
+      const year = this.hdate.getFullYear() + 1;
+      const slichotStart = new HDate(HDate.dayOnOrBefore(6, new HDate(1, months.TISHREI, year).abs() - 4));
+      return this.hdate.abs() >= slichotStart.abs() && this.hdate.abs() <= slichotStart.abs() + 11;
+    }
+    return month === months.ELUL && day >= 2;
   }
 
   getDOE(): number {

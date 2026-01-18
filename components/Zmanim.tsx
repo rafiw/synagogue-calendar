@@ -52,6 +52,7 @@ const Zmanim: React.FC = () => {
 
   const [rtl, setRtl] = useState(false);
   const zmanim = new ZmanimWrapper(
+    settings.nusach,
     settings.latitude,
     settings.longitude,
     settings.olson,
@@ -145,6 +146,7 @@ const Zmanim: React.FC = () => {
             ...(hallelType === HallelType.WHOLE_HALLEL ? [{ text: t('whole_hallel') }] : []),
             ...(hallelType === HallelType.HALF_HALLEL ? [{ text: t('half_hallel') }] : []),
             ...(haveTachanun ? [{ text: t(haveTachanun) }] : []),
+            ...(zmanim.isSlichotTonight() ? [{ text: t('slichot') }] : []),
           ]}
         />
 

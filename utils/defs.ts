@@ -60,6 +60,8 @@ export interface PurimSettings {
   shushan: boolean;
 }
 
+export type Nusach = 'ashkenaz' | 'sephardic';
+
 export type BackgroundMode = 'image' | 'solid' | 'gradient';
 
 export interface BackgroundSettings {
@@ -78,6 +80,7 @@ export interface Settings {
   githubKey: string;
   lastUpdateTime: Date;
   language: Language;
+  nusach: Nusach;
   city: string;
   latitude: number;
   longitude: number;

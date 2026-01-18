@@ -11,6 +11,7 @@ const defaultSettings: Settings = {
   githubKey: '',
   lastUpdateTime: new Date(),
   language: 'he',
+  nusach: 'ashkenaz',
   city: cities[0]?.hebrew_name || '',
   latitude: 31.7667,
   longitude: 35.2333,

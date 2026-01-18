@@ -173,11 +173,16 @@ const GeneralSettingsTab = () => {
     setGithubKeyUrl(githubKey);
     updateSettings({ githubKey: githubKey });
   };
+
   const handleChangeLanguage = async (newLanguage: 'he' | 'en') => {
     updateSettings({ language: newLanguage });
     if (i18n) await i18n.changeLanguage(newLanguage);
     const isRTL = newLanguage === 'he';
     I18nManager.forceRTL(isRTL);
+  };
+
+  const handleChangeNusach = (newNusach: 'ashkenaz' | 'sephardic') => {
+    updateSettings({ nusach: newNusach });
   };
 
   const handleCityChange = (city: string) => {
@@ -405,7 +410,16 @@ const GeneralSettingsTab = () => {
               </Picker>
             </View>
           </View>
-
+          {/* nusach */}
+          <View className="space-y-2">
+            <Text className="text-sm font-medium text-gray-600">{t('nusach')}</Text>
+            <View className="border border-gray-300 rounded-lg bg-gray-50">
+              <Picker selectedValue={settings.nusach} onValueChange={handleChangeNusach} className="h-12">
+                <Picker.Item label={t('nusach_ashkenaz')} value="ashkenaz" />
+                <Picker.Item label={t('nusach_sephardic')} value="sephardic" />
+              </Picker>
+            </View>
+          </View>
           {/* Location */}
           <View className="space-y-2">
             <Text className="text-sm font-medium text-gray-600">{t('location')}</Text>

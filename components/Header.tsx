@@ -37,6 +37,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const padding = useResponsiveSpacing(6);
 
   const zmanim = new ZmanimWrapper(
+    settings.nusach,
     settings.latitude,
     settings.longitude,
     settings.olson,

@@ -179,5 +179,10 @@
   "background_gradient_direction_diagonal": "Diagonal",
   "background_gradient_add_color": "Add Color",
   "background_gradient_remove_color": "Remove Color",
-  "choose_color": "Choose Color"
+  "choose_color": "Choose Color",
+  "background_custom_image": "Custom Image",
+  "background_upload_custom": "Upload Custom Background",
+  "background_choose_from_library": "Choose from Library",
+  "background_remove_custom": "Remove Custom Image",
+  "background_permission_required": "Permission to access photos is required"
 }

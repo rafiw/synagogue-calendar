@@ -10,12 +10,14 @@ import {
   Image,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
 import { useSettings } from '../../context/settingsContext';
 import { backgroundImages, cities, olsons } from '../../assets/data';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
 import ExternalLink from '../../utils/PressableLink';
 import ColorPickerModal from '../../components/ColorPickerModal';
+import { showAlert } from '../../utils/alert';
 
 const HelpSection = () => {
   const { t } = useTranslation();
@@ -148,6 +150,7 @@ const GeneralSettingsTab = () => {
         ? 'horizontal'
         : 'diagonal',
   );
+  const [customImageUri, setCustomImageUri] = useState(settings.backgroundSettings?.customImageUri || '');
 
   // Color picker modal states
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -215,7 +218,18 @@ const GeneralSettingsTab = () => {
 
   const handleBackgroundChange = (background: string) => {
     setBackground(background);
-    updateSettings({ background: background });
+    setCustomImageUri(''); // Clear custom image when selecting predefined background
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode: 'image' as const,
+      imageUrl: background,
+      customImageUri: '',
+      solidColor,
+      gradientColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
+    };
+    updateSettings({ background: background, backgroundSettings: newBackgroundSettings });
   };
 
   const handlePurimToggle = (type: 'regular' | 'shushan') => {
@@ -229,11 +243,12 @@ const GeneralSettingsTab = () => {
     const newBackgroundSettings = {
       ...(settings.backgroundSettings || {}),
       mode,
-      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      imageUrl: customImageUri || settings.backgroundSettings?.imageUrl || background,
       solidColor,
       gradientColors,
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
+      customImageUri,
     };
     updateSettings({ backgroundSettings: newBackgroundSettings });
   };
@@ -345,6 +360,62 @@ const GeneralSettingsTab = () => {
         return { x: 1, y: 1 };
     }
   };
+
+  const handlePickCustomImage = async () => {
+    try {
+      // Request permission to access media library
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (!permissionResult.granted) {
+        showAlert(t('error'), t('background_permission_required'));
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const imageUri = result.assets[0].uri;
+        setCustomImageUri(imageUri);
+
+        // Update background settings with custom image
+        const newBackgroundSettings = {
+          ...(settings.backgroundSettings || {}),
+          mode: 'image' as const,
+          imageUrl: imageUri,
+          customImageUri: imageUri,
+          solidColor,
+          gradientColors,
+          gradientStart: getGradientStart(gradientDirection),
+          gradientEnd: getGradientEnd(gradientDirection),
+        };
+        updateSettings({ backgroundSettings: newBackgroundSettings });
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      showAlert(t('error'), t('photo_upload_failed'));
+    }
+  };
+
+  const handleRemoveCustomImage = () => {
+    setCustomImageUri('');
+    const newBackgroundSettings = {
+      ...(settings.backgroundSettings || {}),
+      mode: 'image' as const,
+      imageUrl: background,
+      customImageUri: '',
+      solidColor,
+      gradientColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
+    };
+    updateSettings({ backgroundSettings: newBackgroundSettings });
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -553,12 +624,45 @@ const GeneralSettingsTab = () => {
 
             {/* Image Background Settings */}
             {backgroundMode === 'image' && (
-              <View className="space-y-2">
-                <Picker selectedValue={background} onValueChange={handleBackgroundChange} className="h-12">
-                  {backgroundImages.map((bimg) => (
-                    <Picker.Item key={bimg.label} label={bimg.label} value={bimg.value}></Picker.Item>
-                  ))}
-                </Picker>
+              <View className="space-y-3">
+                {/* Custom Image Upload */}
+                <View className="space-y-2">
+                  <Text className="text-xs font-medium text-gray-500">{t('background_custom_image')}</Text>
+                  {customImageUri ? (
+                    <View className="space-y-2">
+                      <View className="rounded-lg border-2 border-gray-300 overflow-hidden">
+                        <Image source={{ uri: customImageUri }} className="w-full h-40" resizeMode="cover" />
+                      </View>
+                      <TouchableOpacity
+                        className="flex-row items-center justify-center p-3 bg-red-500 rounded-lg"
+                        onPress={handleRemoveCustomImage}
+                      >
+                        <Feather name="trash-2" size={18} color="white" />
+                        <Text className="text-white font-semibold ml-2">{t('background_remove_custom')}</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      className="flex-row items-center justify-center p-4 border-2 border-dashed border-blue-400 rounded-lg bg-blue-50"
+                      onPress={() => void handlePickCustomImage()}
+                    >
+                      <Feather name="upload" size={20} color="#3B82F6" />
+                      <Text className="text-blue-600 font-semibold ml-2">{t('background_upload_custom')}</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Predefined Images */}
+                {!customImageUri && (
+                  <View className="space-y-2">
+                    <Text className="text-xs font-medium text-gray-500">{t('background_choose_from_library')}</Text>
+                    <Picker selectedValue={background} onValueChange={handleBackgroundChange} className="h-12">
+                      {backgroundImages.map((bimg) => (
+                        <Picker.Item key={bimg.label} label={bimg.label} value={bimg.value}></Picker.Item>
+                      ))}
+                    </Picker>
+                  </View>
+                )}
               </View>
             )}
 

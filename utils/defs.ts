@@ -71,6 +71,7 @@ export interface BackgroundSettings {
   gradientColors: string[];
   gradientStart?: { x: number; y: number };
   gradientEnd?: { x: number; y: number };
+  customImageUri?: string;
 }
 
 export interface Settings {

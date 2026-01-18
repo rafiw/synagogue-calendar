@@ -178,6 +178,11 @@
   "background_gradient_direction_horizontal": "אָפְקִי",
   "background_gradient_direction_diagonal": "אֲלַכְסוֹנִי",
   "background_gradient_add_color": "הוֹסֵף צֶבַע",
-  "background_gradient_remove_color": "הַסֵּר צֶבַע",
-  "choose_color": "בְּחַר צֶבַע"
+  "background_gradient_remove_color": "הַסֵּר צֶבַע",
+  "choose_color": "בְּחַר צֶבַע",
+  "background_custom_image": "תְּמוּנָה מוּתְאֶמֶת אִישִׁית",
+  "background_upload_custom": "הַעֲלֵה רֶקַע מוּתְאָם אִישִׁית",
+  "background_choose_from_library": "בְּחַר מֵסְפַרְיַּת הַתְּמוּנוֹת",
+  "background_remove_custom": "הַסֵּר תְּמוּנָה מוּתְאֶמֶת אִישִׁית",
+  "background_permission_required": "נִדְרֶשֶׁת הַרְשָׁאָה לְגִישָׁה לִתְמוּנוֹת"
 }

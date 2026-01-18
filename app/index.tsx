@@ -7,12 +7,13 @@ import Deceased, { getSubPages as getDeceasedSubPages } from '../components/Dece
 import Messages, { getSubPages as getMessagesSubPages } from '../components/Messages';
 import Zmanim, { getSubPages as getZmanimSubPages } from '../components/Zmanim';
 import Header from '../components/Header';
-import Footer from '../components/Footer';
+// import Footer from '../components/Footer';
 import { useSettings } from '../context/settingsContext';
 import { defaultPageDisplayTime, getNoScreenText } from '../utils/utils';
 import { useScreenRotation } from '../utils/useScreenRotation';
 import { Screen } from '../utils/defs';
 import Schedule from '../components/Schedule';
+import { useResponsiveSpacing, useDeviceType } from '../utils/responsive';
 
 export default function App() {
   const [isLoadingScreens, setIsLoadingScreens] = useState(true);
@@ -23,6 +24,17 @@ export default function App() {
     screens,
     defaultDisplayTime: defaultPageDisplayTime,
   });
+
+  // Responsive sizing based on device type - MUST call all hooks unconditionally
+  const deviceType = useDeviceType();
+  const baseSpacing = useResponsiveSpacing(12);
+
+  // Reduced spacing on mobile to maximize content area
+  const isMobile = deviceType === 'mobile';
+  const containerPadding = isMobile ? 8 : baseSpacing;
+  const headerMargin = isMobile ? 8 : baseSpacing;
+  const contentPadding = isMobile ? 8 : baseSpacing;
+  const borderRadius = deviceType === 'tv' ? 48 : deviceType === 'desktop' ? 32 : deviceType === 'tablet' ? 32 : 16;
 
   useEffect(() => {
     const shouldBeRTL = settings.language === 'he'; // or use your isRTL2 function
@@ -119,15 +131,37 @@ export default function App() {
   }
 
   return (
-    <ImageBackground source={{ uri: settings.background }} className="flex-1 bg-cover bg-center">
-      <View className="flex-1">
-        <View className="h-[12%]">
+    <ImageBackground source={{ uri: settings.background }} className="flex-1" resizeMode="cover">
+      {/* Subtle overlay for better content visibility */}
+      <View className="absolute inset-0 bg-black/10" />
+
+      <View className="flex-1" style={{ padding: containerPadding }}>
+        {/* Header Section */}
+        <View style={{ marginBottom: headerMargin }}>
           <Header title={settings.name} />
         </View>
-        <View className="h-[80%]">{CurrentScreenComponent && <CurrentScreenComponent />}</View>
-        <View className="h-[3%]">
-          <Footer footerText="כל הזכויות שמורות לרפי וינר" />
+
+        {/* Main Content Section - Card Style (no backdrop-blur for RN compatibility) */}
+        <View
+          className="flex-1 bg-white/40 shadow-2xl overflow-hidden border border-white/50"
+          style={{
+            borderRadius,
+            elevation: 8, // Android shadow
+            shadowColor: '#000', // iOS shadow
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.3,
+            shadowRadius: 8,
+          }}
+        >
+          <View className="flex-1" style={{ padding: contentPadding }}>
+            {CurrentScreenComponent && <CurrentScreenComponent />}
+          </View>
         </View>
+
+        {/* Optional Footer Space */}
+        {/* <View style={{ marginTop: headerMargin }}>
+          <Footer />
+        </View> */}
       </View>
     </ImageBackground>
   );

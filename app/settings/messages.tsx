@@ -20,7 +20,7 @@ const MessagesSettingsTab = () => {
     );
   }
   return (
-    <View className="flex-1  mt-4">
+    <View className="flex-1 mt-4">
       <BouncyCheckbox
         isChecked={settings.enableMessages}
         fillColor="green"
@@ -33,20 +33,6 @@ const MessagesSettingsTab = () => {
 
       {settings.enableMessages && (
         <View className="flex-1 px-4 mt-4">
-          {/* Add New Message Button */}
-          <TouchableOpacity
-            onPress={() => {
-              // Add logic to add new message
-              const newMessages = [...settings.messages, ''];
-              updateSettings({ ...settings, messages: newMessages });
-            }}
-            className="flex-row items-center justify-center bg-blue-500 p-3 rounded-lg mb-4"
-          >
-            <Feather name="plus" size={24} color="white" />
-            <Text className="text-white ml-2 font-medium">{t('add_message')}</Text>
-          </TouchableOpacity>
-
-          {/* Messages List */}
           <FlatList
             data={settings.messages}
             keyExtractor={(_, index) => index.toString()}
@@ -74,6 +60,19 @@ const MessagesSettingsTab = () => {
                 </TouchableOpacity>
               </View>
             )}
+            ListHeaderComponent={
+              <TouchableOpacity
+                onPress={() => {
+                  // Add logic to add new message
+                  const newMessages = [...settings.messages, ''];
+                  updateSettings({ ...settings, messages: newMessages });
+                }}
+                className="flex-row items-center justify-center bg-blue-500 p-3 rounded-lg mb-4"
+              >
+                <Feather name="plus" size={24} color="white" />
+                <Text className="text-white ml-2 font-medium">{t('add_message')}</Text>
+              </TouchableOpacity>
+            }
           />
         </View>
       )}

@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { defaultPageDisplayTime } from 'utils/utils';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing } from 'utils/responsive';
 
 const messagesPerPage = 3.0;
 export async function getSubPages(): Promise<number> {
@@ -21,6 +22,17 @@ const Messages: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [PageDisplayTime] = useState(defaultPageDisplayTime);
+
+  // Responsive sizes
+  const titleSize = useResponsiveFontSize('displayLarge');
+  const messageSize = useResponsiveFontSize('headingLarge');
+  const emptyTitleSize = useResponsiveFontSize('displayMedium');
+  const emptyDescSize = useResponsiveFontSize('bodyLarge');
+  const buttonTextSize = useResponsiveFontSize('headingMedium');
+  const iconSize = useResponsiveIconSize('large');
+  const iconLargeSize = useResponsiveIconSize('xxlarge');
+  const padding = useResponsiveSpacing(24);
+  const margin = useResponsiveSpacing(24);
 
   useEffect(() => {
     const updatePages = async () => {
@@ -55,18 +67,23 @@ const Messages: React.FC = () => {
   return (
     <View className="flex-1">
       {settings.messages.length > 0 ? (
-        <View className="flex-1 px-6 py-8">
+        <View className="flex-1" style={{ paddingHorizontal: padding, paddingVertical: padding }}>
           {/* Header Section */}
-          <View className="mb-8 ">
+          <View style={{ marginBottom: margin }}>
             <View className="flex-row items-center justify-center mb-2">
-              <View className="flex-row items-center bg-white/55 rounded-xl px-6 py-3 shadow-lg">
-                <Ionicons name="notifications" size={40} color="#3b82f6" />
-                <Text className="text-6xl font-bold text-gray-800 ml-3">{t('msg_title')}</Text>
+              <View
+                className="flex-row items-center bg-white/55 rounded-xl shadow-lg"
+                style={{ paddingHorizontal: padding, paddingVertical: padding / 2 }}
+              >
+                <Ionicons name="notifications" size={iconSize} color="#3b82f6" />
+                <Text className="font-bold text-gray-800" style={{ fontSize: titleSize, marginLeft: padding / 2 }}>
+                  {t('msg_title')}
+                </Text>
               </View>
             </View>
             {/* Page Indicators */}
             {totalPages > 1 && (
-              <View className="flex-row justify-center mt-4 space-x-2">
+              <View className="flex-row justify-center space-x-2" style={{ marginTop: margin / 2 }}>
                 {Array.from({ length: totalPages }).map((_, index) => (
                   <View
                     key={index}
@@ -84,9 +101,16 @@ const Messages: React.FC = () => {
             showsVerticalScrollIndicator={false}
           >
             {getCurrentPageData().map((message, index) => (
-              <View key={index} className="bg-white/55 rounded-2xl shadow-lg mb-6 p-6 border-l-4 border-blue-500">
+              <View
+                key={index}
+                className="bg-white/55 rounded-2xl shadow-lg border-l-4 border-blue-500"
+                style={{ marginBottom: margin, padding }}
+              >
                 <View className="flex-row items-start">
-                  <Text className="flex-1 text-3xl font-medium text-gray-800 leading-relaxed text-center">
+                  <Text
+                    className="flex-1 font-medium text-gray-800 leading-relaxed text-center"
+                    style={{ fontSize: messageSize }}
+                  >
                     {message}
                   </Text>
                 </View>
@@ -95,22 +119,33 @@ const Messages: React.FC = () => {
           </ScrollView>
         </View>
       ) : (
-        <View className="flex-1 items-center justify-center px-8">
+        <View className="flex-1 items-center justify-center" style={{ paddingHorizontal: padding }}>
           {/* Empty State */}
-          <View className="items-center bg-white/95 rounded-3xl shadow-xl p-10 max-w-md">
-            <View className="bg-blue-100 rounded-full p-6 mb-6">
-              <Ionicons name="chatbox-ellipses-outline" size={64} color="#3b82f6" />
+          <View className="items-center bg-white/95 rounded-3xl shadow-xl max-w-md" style={{ padding: padding * 2 }}>
+            <View className="bg-blue-100 rounded-full" style={{ padding: padding, marginBottom: padding }}>
+              <Ionicons name="chatbox-ellipses-outline" size={iconLargeSize} color="#3b82f6" />
             </View>
-            <Text className="text-4xl font-bold text-gray-800 text-center mb-3">{t('msg_no_messages')}</Text>
-            <Text className="text-xl text-gray-500 text-center mb-8 leading-relaxed">
+            <Text
+              className="font-bold text-gray-800 text-center"
+              style={{ fontSize: emptyTitleSize, marginBottom: padding / 2 }}
+            >
+              {t('msg_no_messages')}
+            </Text>
+            <Text
+              className="text-gray-500 text-center leading-relaxed"
+              style={{ fontSize: emptyDescSize, marginBottom: margin }}
+            >
               {t('msg_empty_description') || 'Add messages to display important announcements and information'}
             </Text>
             <TouchableOpacity
               onPress={() => router.push('/settings/messages')}
-              className="px-8 py-4 bg-blue-500 rounded-xl shadow-md active:opacity-80 flex-row items-center"
+              className="bg-blue-500 rounded-xl shadow-md active:opacity-80 flex-row items-center"
+              style={{ paddingHorizontal: padding, paddingVertical: padding / 2 }}
             >
-              <Ionicons name="add-circle-outline" size={24} color="white" />
-              <Text className="text-white font-semibold text-xl ml-2">{t('go_to_settings')}</Text>
+              <Ionicons name="add-circle-outline" size={iconSize / 2} color="white" />
+              <Text className="text-white font-semibold" style={{ fontSize: buttonTextSize, marginLeft: padding / 3 }}>
+                {t('go_to_settings')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

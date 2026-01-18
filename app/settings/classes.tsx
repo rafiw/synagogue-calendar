@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ActivityIndicator, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import { ScrollView } from 'react-native-gesture-handler';
 import { daysOfWeek } from 'utils/classesHelpers';
 import { Shiur } from 'utils/defs';
 import { isRTL } from 'utils/utils';
@@ -189,25 +188,24 @@ const ClassesSettingsTab = () => {
         onPress={(value) => saveChecked(value)}
       />
       {settings.enableClasses && (
-        <ScrollView>
-          <View className="flex-1 p-4 ">
-            <TouchableOpacity
-              onPress={handleAddClass}
-              className="flex-row items-center justify-center bg-blue-500 p-3 rounded-lg mb-4"
-            >
-              <Feather name="plus" size={24} color="white" />
-              <Text className="text-white ml-2 font-medium">{t('add_class')}</Text>
-            </TouchableOpacity>
-
-            <FlatList
-              data={settings.classes}
-              renderItem={({ item, index }) => renderClassItem({ rtl, item, index })}
-              keyExtractor={(_, index) => index.toString()}
-              showsVerticalScrollIndicator={false}
-              contentContainerClassName="pb-4"
-            />
-          </View>
-        </ScrollView>
+        <View className="flex-1 p-4">
+          <FlatList
+            data={settings.classes}
+            renderItem={({ item, index }) => renderClassItem({ rtl, item, index })}
+            keyExtractor={(_, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 16 }}
+            ListHeaderComponent={
+              <TouchableOpacity
+                onPress={handleAddClass}
+                className="flex-row items-center justify-center bg-blue-500 p-3 rounded-lg mb-4"
+              >
+                <Feather name="plus" size={24} color="white" />
+                <Text className="text-white ml-2 font-medium">{t('add_class')}</Text>
+              </TouchableOpacity>
+            }
+          />
+        </View>
       )}
     </View>
   );

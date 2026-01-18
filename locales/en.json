@@ -38,7 +38,7 @@
   "havdala_rt": "Havdala RT {{date}}",
   "light_candle": "Candle lighting {{date}}",
   "havdala": "Havdala {{date}}",
-  "parasha": "Parasha {{date}}",
+  "parasha": "{{date}}",
   "holiday": "Holiday {{date}}",
   "molad": "{{date}}",
   "mevarchim": "Shabat Mevarchim",

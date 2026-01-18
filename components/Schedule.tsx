@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { isRTL } from 'utils/utils';
+import { useResponsiveFontSize, useResponsiveSpacing } from 'utils/responsive';
 
 export async function getSubPages(): Promise<number> {
   return Promise.resolve(1);
@@ -12,6 +13,14 @@ const Schedule: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
   const [rtl, setRtl] = useState(false);
+
+  // Responsive sizes
+  const titleSize = useResponsiveFontSize('displayLarge');
+  const textSize = useResponsiveFontSize('headingMedium');
+  const emptyTextSize = useResponsiveFontSize('headingLarge');
+  const padding = useResponsiveSpacing(24);
+  const margin = useResponsiveSpacing(8);
+  const itemPadding = useResponsiveSpacing(16);
 
   const backgroundColor = 'bg-white/40';
   const headLineColor = 'text-gray-900';
@@ -26,18 +35,36 @@ const Schedule: React.FC = () => {
     items: { name: string; time: string }[];
     rtl: boolean;
   }) => (
-    <View className={`${backgroundColor} rounded-2xl p-6 m-2 flex-1 shadow-lg border border-gray-200`}>
-      <Text className={`text-5xl font-bold mb-6 ${headLineColor} text-center`}>{title}</Text>
+    <View
+      className={`${backgroundColor} rounded-2xl flex-1 shadow-lg border border-gray-200`}
+      style={{ padding, margin }}
+    >
+      <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
+        {title}
+      </Text>
       {items.length === 0 ? (
-        <Text className={`text-3xl py-4 text-gray-500 text-center`}>{t('schedule_no_prayers')}</Text>
+        <Text className={`text-gray-500 text-center`} style={{ fontSize: emptyTextSize, paddingVertical: itemPadding }}>
+          {t('schedule_no_prayers')}
+        </Text>
       ) : (
         <View className="space-y-2 border-gray-200">
           {items.map((item, index) => (
-            <View key={index} className="bg-white/60 rounded-xl px-6 py-4 mb-3 shadow-sm border border-gray-200">
+            <View
+              key={index}
+              className="bg-white/60 rounded-xl shadow-sm border border-gray-200"
+              style={{ paddingHorizontal: itemPadding, paddingVertical: itemPadding, marginBottom: margin }}
+            >
               <View className={`flex-row justify-between gap-4 flex-row ${rtl ? 'space-x-reverse' : ''}`}>
-                <Text className={`text-4xl ${textColor} font-semibold flex-1`}>{item.name}</Text>
-                <Text className={`text-4xl ${textColor} font-bold`}> - </Text>
-                <Text className={`text-4xl ${textColor} font-bold`}>{item.time}</Text>
+                <Text className={`${textColor} font-semibold flex-1`} style={{ fontSize: textSize }}>
+                  {item.name}
+                </Text>
+                <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
+                  {' '}
+                  -{' '}
+                </Text>
+                <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
+                  {item.time}
+                </Text>
               </View>
             </View>
           ))}
@@ -65,7 +92,7 @@ const Schedule: React.FC = () => {
   const columns = settings.scheduleSettings?.columns || [];
 
   return (
-    <View className="flex-1 p-4">
+    <View className="flex-1" style={{ padding: itemPadding }}>
       {/* Row(s) for columns */}
       <View className="flex-row justify-center items-start flex-wrap">
         {columns.map((column) => (
@@ -79,7 +106,9 @@ const Schedule: React.FC = () => {
       </View>
       {columns.length === 0 && (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-4xl text-gray-500 text-center">{t('schedule_no_prayers')}</Text>
+          <Text className="text-gray-500 text-center" style={{ fontSize: titleSize }}>
+            {t('schedule_no_prayers')}
+          </Text>
         </View>
       )}
     </View>

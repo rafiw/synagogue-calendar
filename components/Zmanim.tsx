@@ -5,6 +5,7 @@ import { useSettings } from '../context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { isRTL } from 'utils/utils';
 import { HallelType } from 'utils/zmanim_wrapper';
+import { useResponsiveFontSize, useResponsiveSpacing } from 'utils/responsive';
 
 export async function getSubPages(): Promise<number> {
   return Promise.resolve(1);
@@ -37,7 +38,13 @@ const getTachanunLabel = (
 
 const Zmanim: React.FC = () => {
   const { t, i18n } = useTranslation();
-  const { settings, updateSettings, isLoading } = useSettings();
+  const { settings } = useSettings();
+
+  // Responsive sizes
+  const titleSize = useResponsiveFontSize('displayMedium');
+  const textSize = useResponsiveFontSize('headingMedium');
+  const padding = useResponsiveSpacing(12);
+  const margin = useResponsiveSpacing(4);
 
   if (!i18n.isInitialized) {
     return (
@@ -72,10 +79,16 @@ const Zmanim: React.FC = () => {
   const fastDay = zmanim.isFastDay();
 
   const InfoGroup = ({ title, items }: { title: string; items: { text: string }[] }) => (
-    <View className={`${backgroundColor} rounded-lg p-3 m-1 flex-1 shadow-md`}>
-      <Text className={`text-4xl font-bold mb-2 ${headLineColor} text-center`}>{title}</Text>
+    <View className={`${backgroundColor} rounded-lg flex-1 shadow-md`} style={{ padding, margin }}>
+      <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
+        {title}
+      </Text>
       {items.map((item, index) => (
-        <Text key={index} className={`text-3xl py-3 ${textColor} text-center`}>
+        <Text
+          key={index}
+          className={`${textColor} text-center`}
+          style={{ fontSize: textSize, paddingVertical: padding }}
+        >
           {item.text}
         </Text>
       ))}
@@ -92,16 +105,22 @@ const Zmanim: React.FC = () => {
   }, []);
 
   const TimeGroup = ({ title, items }: { title: string; items: ({ text: string } | null)[] }) => (
-    <View className={`${backgroundColor} rounded-lg p-3 m-1 flex-1 shadow-md`}>
-      <Text className={`text-4xl font-bold mb-2 ${headLineColor} text-center`}>{title}</Text>
+    <View className={`${backgroundColor} rounded-lg flex-1 shadow-md`} style={{ padding, margin }}>
+      <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
+        {title}
+      </Text>
       <View className={`flex-row${rtl ? '-reverse' : ''} flex-wrap`}>
         {items.map((item, index) =>
           item ? (
-            <Text key={index} className={`text-3xl py-3 ${textColor} text-center w-1/2`}>
+            <Text
+              key={index}
+              className={`${textColor} text-center w-1/2`}
+              style={{ fontSize: textSize, paddingVertical: padding }}
+            >
               {item.text}
             </Text>
           ) : (
-            <View key={index} className="w-1/2 py-3" />
+            <View key={index} className="w-1/2" style={{ paddingVertical: padding }} />
           ),
         )}
       </View>
@@ -109,9 +128,9 @@ const Zmanim: React.FC = () => {
   );
 
   return (
-    <View className="flex-1 p-2">
+    <View className="flex-1" style={{ padding: padding / 2 }}>
       {/* Top Row */}
-      <View className="flex-row justify-between mb-1">
+      <View className="flex-row justify-between" style={{ marginBottom: margin }}>
         <InfoGroup
           title={t('daily_info')}
           items={[

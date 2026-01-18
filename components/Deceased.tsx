@@ -8,6 +8,7 @@ import MemorialCandle from './MemorialCandle';
 import { isRTL2 } from 'utils/utils';
 import { calculateDeceasedPages } from 'utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFontScale } from 'utils/responsive';
 
 // Export function to calculate sub-pages for timing in index.tsx
 export async function getSubPages(): Promise<number> {
@@ -245,10 +246,10 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
   }
 };
 
-// Helper function to calculate sizes based on grid
-const calculateSizes = (gridRows: number, gridCols: number) => {
+// Helper function to calculate sizes based on grid and device type
+const calculateSizes = (gridRows: number, gridCols: number, deviceScale: number) => {
   const totalCells = gridRows * gridCols;
-  const scaleFactor =
+  const gridScaleFactor =
     totalCells === 1
       ? 2.5
       : totalCells <= 2
@@ -273,23 +274,26 @@ const calculateSizes = (gridRows: number, gridCols: number) => {
                           ? 0.9
                           : 0.8;
 
+  // Combine grid scaling with device scaling
+  const combinedScale = gridScaleFactor * deviceScale;
+
   const fontSize: FontSizes = {
-    name: 18 * scaleFactor,
-    nameCard: 16 * scaleFactor,
-    namePhoto: 20 * scaleFactor,
-    date: 12 * scaleFactor,
-    dateSmall: 11 * scaleFactor,
-    hebrew: 12 * scaleFactor,
-    tribute: 11 * scaleFactor,
-    footer: 12 * scaleFactor,
-    label: 11 * scaleFactor,
+    name: 18 * combinedScale,
+    nameCard: 16 * combinedScale,
+    namePhoto: 20 * combinedScale,
+    date: 12 * combinedScale,
+    dateSmall: 11 * combinedScale,
+    hebrew: 12 * combinedScale,
+    tribute: 11 * combinedScale,
+    footer: 12 * combinedScale,
+    label: 11 * combinedScale,
   };
 
   const candleSize: CandleSizes = {
-    simple: Math.round(40 * scaleFactor),
-    card: Math.round(35 * scaleFactor),
-    photoPlaceholder: Math.round(60 * scaleFactor),
-    photoFooter: Math.round(30 * scaleFactor),
+    simple: Math.round(40 * combinedScale),
+    card: Math.round(35 * combinedScale),
+    photoPlaceholder: Math.round(60 * combinedScale),
+    photoFooter: Math.round(30 * combinedScale),
   };
 
   return { fontSize, candleSize };
@@ -301,12 +305,15 @@ const Deceased: React.FC = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // Calculate sizes once based on grid configuration
+  // Get device-specific font scale
+  const deviceScale = useFontScale();
+
+  // Calculate sizes once based on grid configuration and device type
   const tableRowsCount = settings.deceasedSettings?.tableRows || 1;
   const tableColumnsCount = settings.deceasedSettings?.tableColumns || 1;
   const { fontSize, candleSize } = useMemo(
-    () => calculateSizes(tableRowsCount, tableColumnsCount),
-    [tableRowsCount, tableColumnsCount],
+    () => calculateSizes(tableRowsCount, tableColumnsCount, deviceScale),
+    [tableRowsCount, tableColumnsCount, deviceScale],
   );
 
   // Filter deceased based on display mode (using Hebrew calendar)
@@ -336,18 +343,25 @@ const Deceased: React.FC = () => {
   }, [totalPages]);
 
   if (settings.deceased.length === 0) {
+    const emptyTextSize = 18 * deviceScale;
+    const emptyButtonSize = 16 * deviceScale;
+    const emptyPadding = 12 * deviceScale;
+
     return (
-      <View className="flex-1 justify-center items-center bg-white/90 rounded-xl m-2.5">
-        <Text className="text-lg text-gray-500 text-center">
+      <View className="flex-1 justify-center items-center bg-white/90 rounded-xl" style={{ margin: emptyPadding }}>
+        <Text className="text-gray-500 text-center" style={{ fontSize: emptyTextSize, padding: emptyPadding }}>
           {settings.deceasedSettings.displayMode === 'monthly'
             ? 'No deceased people this month'
             : t('deceased_no_people')}
         </Text>
         <TouchableOpacity
-          className="mt-5 bg-blue-500 py-3 px-6 rounded-lg"
+          className="bg-blue-500 rounded-lg"
+          style={{ marginTop: emptyPadding * 2, paddingVertical: emptyPadding, paddingHorizontal: emptyPadding * 2 }}
           onPress={() => router.push('/settings/deceased')}
         >
-          <Text className="text-white text-base font-bold">{t('deceased_add_person')}</Text>
+          <Text className="text-white font-bold" style={{ fontSize: emptyButtonSize }}>
+            {t('deceased_add_person')}
+          </Text>
         </TouchableOpacity>
       </View>
     );
@@ -383,12 +397,15 @@ const Deceased: React.FC = () => {
     );
   }
 
+  const paginationSize = 16 * deviceScale;
+  const containerPadding = 10 * deviceScale;
+
   return (
-    <View className="flex-1 p-2.5 bg-transparent">
+    <View className="flex-1 bg-transparent" style={{ padding: containerPadding }}>
       <View className="flex-1">{tableRows}</View>
       {totalPages > 1 && (
-        <View className="items-center py-2.5">
-          <Text className="text-base text-gray-700 font-bold">
+        <View className="items-center" style={{ paddingVertical: containerPadding }}>
+          <Text className="text-gray-700 font-bold" style={{ fontSize: paginationSize }}>
             {currentPage + 1} / {totalPages}
           </Text>
         </View>

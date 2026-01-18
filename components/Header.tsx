@@ -6,6 +6,7 @@ import { useRouter } from 'expo-router';
 import { isRTL2 } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
 import { ZmanimWrapper } from 'utils/zmanim_wrapper';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useDeviceType } from 'utils/responsive';
 
 const getCurrentTime = (locale: string) => {
   const now = new Date(); // cannot use zmanim.greg()
@@ -23,6 +24,18 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const [currentTime, setCurrentTime] = useState(getCurrentTime(locale));
   const router = useRouter();
   const isRTL = isRTL2(settings.language);
+  const deviceType = useDeviceType();
+
+  // Responsive sizes - use smaller fonts for header on mobile/tablet
+  // On mobile: headingLarge=24px, headingMedium=20px (instead of display sizes)
+  // On larger devices: use display sizes for better visibility
+  const isMobileOrTablet = deviceType === 'mobile' || deviceType === 'tablet';
+  const titleSize = useResponsiveFontSize(isMobileOrTablet ? 'headingLarge' : 'displayMedium');
+  const dateSize = useResponsiveFontSize(isMobileOrTablet ? 'headingMedium' : 'headingLarge');
+  const timeSize = useResponsiveFontSize(isMobileOrTablet ? 'headingMedium' : 'headingLarge');
+  const iconSize = useResponsiveIconSize('small');
+  const padding = useResponsiveSpacing(6);
+
   const zmanim = new ZmanimWrapper(
     settings.latitude,
     settings.longitude,
@@ -42,22 +55,27 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   const elements = [
     <View key={1} className="flex">
-      <Text className="text-4xl font-semibold text-gray-800 px-2">
+      <Text className="font-semibold text-gray-800" style={{ fontSize: dateSize, paddingHorizontal: padding }}>
         {dayOfWeek} - {[zmanim.getHebrewDate(), ...zmanim.getHoliday()].filter(Boolean).join(' - ')}
       </Text>
     </View>,
     <View key={2} className="flex-1 items-center">
-      <Text className="text-5xl font-bold text-gray-900">{title}</Text>
+      <Text className="font-bold text-gray-900" style={{ fontSize: titleSize }}>
+        {title}
+      </Text>
     </View>,
     <View key={3} className="flex flex-row items-center">
-      <Text className="mx-4 font-bold text-4xl text-gray-800">{currentTime}</Text>
+      <Text className="font-bold text-gray-800" style={{ fontSize: timeSize, marginHorizontal: padding * 2 }}>
+        {currentTime}
+      </Text>
     </View>,
     <View key={4} className="flex flex-row items-center">
       <TouchableOpacity
         onPress={() => router.push('/settings')}
         className="bg-gray-800 rounded-lg shadow-md hover:bg-gray-700"
+        style={{ padding: padding }}
       >
-        <Ionicons name="settings-outline" size={20} color="white" />
+        <Ionicons name="settings-outline" size={iconSize} color="white" />
       </TouchableOpacity>
     </View>,
   ];
@@ -65,8 +83,20 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const displayElements = isRTL ? [...elements].reverse() : elements;
   const style1 = isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left';
 
+  // Reduced padding for mobile to save vertical space
+  const containerPaddingX = isMobileOrTablet ? 12 : 24;
+  const containerPaddingY = isMobileOrTablet ? 8 : 20;
+  const borderRadiusSize = isMobileOrTablet ? 16 : 24;
+
   return (
-    <View className={`flex px-6 py-4 bg-white/90 shadow-lg ${style1}`}>
+    <View
+      className={`flex bg-white/40 backdrop-blur-sm shadow-2xl border border-white/50 ${style1}`}
+      style={{
+        paddingHorizontal: containerPaddingX,
+        paddingVertical: containerPaddingY,
+        borderRadius: borderRadiusSize,
+      }}
+    >
       <View className="flex flex-row items-center justify-between w-full">{displayElements}</View>
     </View>
   );

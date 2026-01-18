@@ -96,7 +96,7 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
               <Text className="text-gray-600 text-base font-semibold text-center">{t('deceased_cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity className="flex-1 py-3 rounded-lg bg-blue-500" onPress={handleConfirm}>
-              <Text className="text-white text-base font-semibold text-center">{t('deceased_save')}</Text>
+              <Text className="text-white text-base font-semibold text-center">{t('save')}</Text>
             </TouchableOpacity>
           </View>
         </View>

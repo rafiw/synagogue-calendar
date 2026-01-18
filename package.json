@@ -55,7 +55,7 @@
     "react-native-cli": "^2.0.1",
     "react-native-encrypted-storage": "^4.0.3",
     "react-native-gesture-handler": "~2.28.0",
-    "react-native-pager-view": "6.9.1",
+    "react-native-pager-view": "^8.0.0",
     "react-native-reanimated": "~4.1.1",
     "react-native-restart": "^0.0.27",
     "react-native-safe-area-context": "~5.6.0",
@@ -94,5 +94,5 @@
   "name": "synagogue-calendar",
   "version": "1.0.0",
   "private": true,
-  "license": "MIT"
+  "license": "GPL2"
 }

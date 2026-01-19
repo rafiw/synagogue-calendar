@@ -18,14 +18,27 @@ export const useDeviceType = (): DeviceType => {
     return 'tv';
   }
 
+  // For web, consider the physical resolution, not just CSS pixels
+  // TV browsers often report small logical dimensions with high pixel ratio
+  // (e.g., 960x540 with ratio 2 = actual 1920x1080)
+  let effectiveWidth = width;
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    const pixelRatio = window.devicePixelRatio || 1;
+    // If pixel ratio is significantly > 1, use physical width for detection
+    // This helps distinguish TVs (high ratio, fullscreen) from tablets
+    if (pixelRatio >= 1.5) {
+      effectiveWidth = width * pixelRatio;
+    }
+  }
+
   // Desktop/PC monitors (web browser, Electron, etc.) - viewed from 1.5-3 feet
   // These are large screens but NOT TVs
-  if (width > 1280) {
+  if (effectiveWidth > 1280) {
     return 'desktop';
   }
 
   // Tablet range
-  if (width >= 768 && width <= 1280) {
+  if (effectiveWidth >= 768 && effectiveWidth <= 1280) {
     return 'tablet';
   }
 
@@ -35,14 +48,15 @@ export const useDeviceType = (): DeviceType => {
 
 /**
  * Font size scales for different device types
- * TV needs 2.5-3x larger fonts due to viewing distance (10-foot UI)
+ * TV needs moderately larger fonts due to viewing distance (10-foot UI)
+ * but not so large that content overflows the screen
  * Desktop uses modest scaling for PC monitors at normal viewing distance (2-3 feet)
  */
 const FONT_SCALE_MULTIPLIERS: Record<DeviceType, number> = {
   mobile: 1.0, // Phone at 6-12 inches
-  tablet: 1.5, // Tablet at 12-18 inches
-  desktop: 1.2, // PC monitor at 2-3 feet (21-27 inch monitors)
-  tv: 2.8, // 55" TV at 8-10 feet viewing distance
+  tablet: 1.3, // Tablet at 12-18 inches
+  desktop: 1.0, // PC monitor at 2-3 feet - no scaling needed
+  tv: 1.2, // TV browser - minimal scaling to fit content on screen
 };
 
 /**
@@ -50,9 +64,9 @@ const FONT_SCALE_MULTIPLIERS: Record<DeviceType, number> = {
  */
 const ICON_SCALE_MULTIPLIERS: Record<DeviceType, number> = {
   mobile: 1.0, // Touch targets for fingers
-  tablet: 1.4, // Larger touch targets
-  desktop: 1.3, // Mouse cursor precision - moderate scaling
-  tv: 3.0, // Remote control - needs very large targets
+  tablet: 1.2, // Larger touch targets
+  desktop: 1.0, // Mouse cursor precision - no scaling
+  tv: 1.3, // Remote control - moderate scaling for screen fit
 };
 
 /**
@@ -60,9 +74,9 @@ const ICON_SCALE_MULTIPLIERS: Record<DeviceType, number> = {
  */
 const SPACING_SCALE_MULTIPLIERS: Record<DeviceType, number> = {
   mobile: 1.0,
-  tablet: 1.3,
-  desktop: 1.2, // Slightly more generous spacing on desktop
-  tv: 2.2, // Much more spacing for TV
+  tablet: 1.2,
+  desktop: 1.0, // No extra spacing on desktop
+  tv: 1.2, // Minimal spacing increase for TV
 };
 
 /**

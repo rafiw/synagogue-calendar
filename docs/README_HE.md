@@ -49,8 +49,8 @@
 
 ```bash
 # שכפול הריפוזיטורי
-git clone https://github.com/yourusername/synagogue-calander.git
-cd synagogue-calander
+git clone https://github.com/yourusername/synagogue-calendar.git
+cd synagogue-calendar
 
 # התקנת תלויות
 yarn install

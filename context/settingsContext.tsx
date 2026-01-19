@@ -69,8 +69,8 @@ const defaultSettings: Settings = {
       subject: 'מסילת ישרים',
     },
   ],
-  deceased: [],
   deceasedSettings: {
+    deceased: [],
     tableRows: 3,
     tableColumns: 2,
     displayMode: 'all',
@@ -286,8 +286,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         // Add githubKey from encrypted storage
         finalSettings.githubKey = githubKey;
 
-        finalSettings.deceased = finalSettings.deceased || [];
         finalSettings.deceasedSettings = {
+          deceased: [],
           tableRows: 3,
           tableColumns: 2,
           displayMode: 'all',

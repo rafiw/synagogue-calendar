@@ -17,7 +17,7 @@ export async function getSubPages(): Promise<number> {
   if (!localSettings?.deceasedSettings) return 0;
 
   const { filteredDeceased, totalPages } = calculateDeceasedPages(
-    localSettings.deceased || [],
+    localSettings.deceasedSettings.deceased || [],
     localSettings.deceasedSettings.displayMode || 'all',
     localSettings.deceasedSettings.tableRows || 1,
     localSettings.deceasedSettings.tableColumns || 1,
@@ -318,17 +318,17 @@ const Deceased: React.FC = () => {
 
   // Filter deceased based on display mode (using Hebrew calendar)
   const { filteredDeceased, totalPages } = useMemo(() => {
-    if (!settings.deceased || !settings.deceasedSettings) {
+    if (!settings.deceasedSettings?.deceased) {
       return { filteredDeceased: [], totalPages: 0 };
     }
 
     return calculateDeceasedPages(
-      settings.deceased,
+      settings.deceasedSettings.deceased,
       settings.deceasedSettings.displayMode,
       settings.deceasedSettings.tableRows,
       settings.deceasedSettings.tableColumns,
     );
-  }, [settings.deceased, settings.deceasedSettings]);
+  }, [settings.deceasedSettings]);
 
   const cellsPerPage = tableRowsCount * tableColumnsCount;
 
@@ -342,7 +342,7 @@ const Deceased: React.FC = () => {
     return () => clearInterval(interval);
   }, [totalPages]);
 
-  if (settings.deceased.length === 0) {
+  if (settings.deceasedSettings.deceased.length === 0) {
     const emptyTextSize = 18 * deviceScale;
     const emptyButtonSize = 16 * deviceScale;
     const emptyPadding = 12 * deviceScale;

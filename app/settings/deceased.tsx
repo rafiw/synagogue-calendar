@@ -540,15 +540,15 @@ const DeceasedSettingsTab = () => {
   };
 
   const addDeceasedPerson = (person: DeceasedPerson) => {
-    const updatedDeceased = [...settings.deceased, person];
-    updateSettings({ deceased: updatedDeceased });
+    const updatedDeceased = [...settings.deceasedSettings.deceased, person];
+    updateDeceasedSettings({ deceased: updatedDeceased });
     setShowForm(false);
     setEditingPerson(undefined);
   };
 
   const editDeceasedPerson = (person: DeceasedPerson) => {
-    const updatedDeceased = settings.deceased.map((p) => (p.id === person.id ? person : p));
-    updateSettings({ deceased: updatedDeceased });
+    const updatedDeceased = settings.deceasedSettings.deceased.map((p) => (p.id === person.id ? person : p));
+    updateDeceasedSettings({ deceased: updatedDeceased });
     setShowForm(false);
     setEditingPerson(undefined);
   };
@@ -566,8 +566,8 @@ const DeceasedSettingsTab = () => {
           }
         });
 
-        const updatedDeceased = settings.deceased.filter((p) => p.id !== id);
-        updateSettings({ deceased: updatedDeceased });
+        const updatedDeceased = settings.deceasedSettings.deceased.filter((p) => p.id !== id);
+        updateDeceasedSettings({ deceased: updatedDeceased });
       },
       undefined,
       {
@@ -745,11 +745,11 @@ const DeceasedSettingsTab = () => {
               />
             )}
 
-            {settings.deceased.length === 0 ? (
+            {settings.deceasedSettings.deceased.length === 0 ? (
               <Text className="text-gray-500 text-center py-4">{t('deceased_no_people')}</Text>
             ) : (
               <View>
-                {[...settings.deceased]
+                {[...settings.deceasedSettings.deceased]
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((item) => (
                     <View key={item.id} className="border border-gray-200 rounded-lg p-3 mb-2">

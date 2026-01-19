@@ -23,6 +23,7 @@ export interface DeceasedPerson {
 }
 
 export interface DeceasedSettings {
+  deceased: DeceasedPerson[];
   tableRows: number;
   tableColumns: number;
   displayMode: 'all' | 'monthly';
@@ -97,7 +98,6 @@ export interface Settings {
   enableSchedule: boolean;
   messages: string[];
   classes: Shiur[];
-  deceased: DeceasedPerson[];
   deceasedSettings: DeceasedSettings;
   scheduleSettings: ScheduleSettings;
 }

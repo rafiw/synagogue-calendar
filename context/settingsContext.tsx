@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import * as SecureStore from 'expo-secure-store';
@@ -145,9 +146,14 @@ const SettingsContext = createContext<SettingsContextType | undefined>(undefined
 const REMOTE_UPDATE_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const GITHUB_KEY_STORAGE_KEY = 'github_token';
 
-// Helper functions for secure storage (expo-secure-store handles web automatically)
+// Helper functions for secure storage
+// expo-secure-store only works on native (iOS/Android), so we fall back to AsyncStorage on web
 const getSecureGithubKey = async (): Promise<string> => {
   try {
+    if (Platform.OS === 'web') {
+      const key = await AsyncStorage.getItem(GITHUB_KEY_STORAGE_KEY);
+      return key || '';
+    }
     const key = await SecureStore.getItemAsync(GITHUB_KEY_STORAGE_KEY);
     return key || '';
   } catch (error) {
@@ -158,6 +164,14 @@ const getSecureGithubKey = async (): Promise<string> => {
 
 const setSecureGithubKey = async (key: string): Promise<void> => {
   try {
+    if (Platform.OS === 'web') {
+      if (key) {
+        await AsyncStorage.setItem(GITHUB_KEY_STORAGE_KEY, key);
+      } else {
+        await AsyncStorage.removeItem(GITHUB_KEY_STORAGE_KEY);
+      }
+      return;
+    }
     if (key) {
       await SecureStore.setItemAsync(GITHUB_KEY_STORAGE_KEY, key);
     } else {

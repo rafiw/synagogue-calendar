@@ -16,7 +16,7 @@
     "test:ui": "vitest --ui",
     "check-translations": "node scripts/check-translations.js",
     "audit-translations": "node scripts/audit-translations.js",
-    "commitlint": "commitlint",
+    "lint:commit": "commitlint",
     "build:web": "npx expo export -p web && node scripts/fix-gh-pages-paths.js",
     "deploy:web": "gh-pages -d dist --nojekyll",
     "deploy": "yarn build:web && yarn deploy:web"
@@ -37,6 +37,7 @@
     "eslint-plugin-react-native": "^5.0.0",
     "expo": "~54.0.31",
     "expo-constants": "~18.0.13",
+    "expo-font": "~14.0.10",
     "expo-image-picker": "~17.0.9",
     "expo-linear-gradient": "^15.0.8",
     "expo-linking": "~8.0.11",
@@ -91,5 +92,14 @@
   "homepage": "https://rafiw.github.io/synagogue-calendar",
   "version": "1.0.0",
   "private": true,
-  "license": "GPL-2.0-or-later"
+  "license": "GPL-2.0-or-later",
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-encrypted-storage"
+        ]
+      }
+    }
+  }
 }

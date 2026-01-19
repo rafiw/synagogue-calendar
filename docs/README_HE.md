@@ -65,6 +65,7 @@ yarn start
 
 פריסה למספר פלטפורמות:
 
+- **📺 הכי קל** - פשוט פתחו את הכתובת https://netafim.short.gy/cal בדפדפן
 - **🌐 אינטרנט** - Netlify, Vercel, GitHub Pages, או כל שרת אינטרנט
 - **📱 אנדרואיד** - APK דרך EAS Build או Android Studio
 - **🍎 iOS** - App Store דרך EAS Build או Xcode

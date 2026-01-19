@@ -68,6 +68,7 @@ yarn start
 
 Deploy to multiple platforms:
 
+- **📺 Cross platform ** - Just open https://netafim.short.gy/cal in the browser
 - **🌐 Web** - Netlify, Vercel, GitHub Pages, or any web server
 - **📱 Android** - APK via EAS Build or Android Studio
 - **🍎 iOS** - App Store via EAS Build or Xcode

@@ -4,9 +4,22 @@ This guide covers deploying the Synagogue Calendar app to various platforms.
 
 ## Table of Contents
 
+- [Android TV (Quickest!)](#-android-tv-quickest)
 - [Web Deployment](#web-deployment)
   - [Netlify](#netlify)
   - [GitHub Pages](#github-pages)
+
+---
+
+## 📺 Android TV (Quickest!)
+
+The fastest way to get the Synagogue Calendar running on an Android TV:
+
+1. Open the web browser on your Android TV
+2. Navigate to: **https://netafim.short.gy/cal**
+3. That's it! The app is ready to use
+
+This is perfect for quickly displaying the calendar on a synagogue TV screen without any installation or configuration.
 
 ---
 
@@ -258,5 +271,13 @@ yarn deploy
 - **404 Errors for font files:** Icon fonts must be copied to a simple path (not containing `node_modules`). The fix script handles this automatically.
 - **Assets Not Loading:** Ensure `assetBundlePatterns` includes all asset directories
 - **Blank Page:** Check browser console for errors related to incorrect base paths
+
+## build
+
+- When adding packages run
+  `npx expo install --fix`
+  to verify package expo compatebility.
+- To build the apk on eas servers use the command `eas build --platform android --profile preview`.
+- To add to Android studio run the command `npx expo prebuild --platform android` and then open the android folder in androd studio.
 
 [⬅️ Back to Main README](../README.md)

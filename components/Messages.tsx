@@ -2,18 +2,24 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSettings } from 'context/settingsContext';
 import { router } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { defaultPageDisplayTime } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing } from 'utils/responsive';
+import { Message } from 'utils/defs';
+import { isMessageActive, filterActiveMessages } from 'utils/classesHelpers';
 
 const messagesPerPage = 3.0;
+
 export async function getSubPages(): Promise<number> {
   const localSettingsString = await AsyncStorage.getItem('settings');
   const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
-  if (!localSettings) return 0;
-  return Math.ceil(localSettings.messages.length / messagesPerPage);
+  if (!localSettings?.messages) return 0;
+
+  // Filter to only count active messages
+  const activeMessages = localSettings.messages.filter((msg: Message) => isMessageActive(msg));
+  return Math.ceil(activeMessages.length / messagesPerPage);
 }
 
 const Messages: React.FC = () => {
@@ -34,13 +40,19 @@ const Messages: React.FC = () => {
   const padding = useResponsiveSpacing(24);
   const margin = useResponsiveSpacing(24);
 
+  // Filter to only show active messages
+  const activeMessages = useMemo(() => {
+    return filterActiveMessages(settings.messages);
+  }, [settings.messages]);
+
   useEffect(() => {
-    const updatePages = async () => {
-      const subPages = await getSubPages();
-      setTotalPages(subPages);
-    };
-    updatePages();
-  }, [settings.messages.length]);
+    const pages = Math.ceil(activeMessages.length / messagesPerPage);
+    setTotalPages(pages);
+    // Reset to first page if current page is out of bounds
+    if (currentPage >= pages && pages > 0) {
+      setCurrentPage(0);
+    }
+  }, [activeMessages.length, currentPage]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,7 +66,7 @@ const Messages: React.FC = () => {
 
   const getCurrentPageData = () => {
     const startIndex = currentPage * messagesPerPage;
-    return settings.messages.slice(startIndex, startIndex + messagesPerPage);
+    return activeMessages.slice(startIndex, startIndex + messagesPerPage);
   };
 
   if (!i18n.isInitialized)
@@ -66,7 +78,7 @@ const Messages: React.FC = () => {
 
   return (
     <View className="flex-1">
-      {settings.messages.length > 0 ? (
+      {activeMessages.length > 0 ? (
         <View className="flex-1" style={{ paddingHorizontal: padding, paddingVertical: padding }}>
           {/* Header Section */}
           <View style={{ marginBottom: margin }}>
@@ -100,9 +112,9 @@ const Messages: React.FC = () => {
             contentContainerStyle={{ justifyContent: 'center', paddingVertical: 10 }}
             showsVerticalScrollIndicator={false}
           >
-            {getCurrentPageData().map((message, index) => (
+            {getCurrentPageData().map((message) => (
               <View
-                key={index}
+                key={message.id}
                 className="bg-white/55 rounded-2xl shadow-lg border-l-4 border-blue-500"
                 style={{ marginBottom: margin, padding }}
               >
@@ -111,7 +123,7 @@ const Messages: React.FC = () => {
                     className="flex-1 font-medium text-gray-800 leading-relaxed text-center"
                     style={{ fontSize: messageSize }}
                   >
-                    {message}
+                    {message.text}
                   </Text>
                 </View>
               </View>

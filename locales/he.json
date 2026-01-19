@@ -185,5 +185,13 @@
   "background_upload_custom": "העלה רקע מותאם אישית",
   "background_choose_from_library": "בחר מספרת התמונות",
   "background_remove_custom": "הסר תמונה מותאמת אישית",
-  "background_permission_required": "נדרשת הרשאה לגישה לתמונות"
+  "background_permission_required": "נדרשת הרשאה לגישה לתמונות",
+  "start_date": "מתאריך",
+  "end_date": "עד תאריך",
+  "disabled": "מושבת",
+  "expired": "פג תוקף",
+  "active": "פעיל",
+  "scheduled": "עתידי",
+  "message_enabled": "מופעל",
+  "no_limit": "ללא הגבלה"
 }

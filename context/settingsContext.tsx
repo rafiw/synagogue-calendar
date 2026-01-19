@@ -39,9 +39,21 @@ const defaultSettings: Settings = {
   enableMessages: true,
   enableSchedule: true,
   messages: [
-    'מזל טוב למשפחת כהן לרגל הולדת הבן 👶 יהי רצון שיגדל לתורה, לחופה ולמעשים טובים.',
-    'אנו שמחים לברך את המתפללים והאורחים החדשים שהצטרפו אלינו היום. תרגישו בבית',
-    'החל מהשבוע: שיעור בגמרא עם הרב לוי כל יום שלישי בשעה 20:30 בבית הכנסת.',
+    {
+      id: 'msg_default_1',
+      text: 'מזל טוב למשפחת כהן לרגל הולדת הבן 👶 יהי רצון שיגדל לתורה, לחופה ולמעשים טובים.',
+      enabled: true,
+    },
+    {
+      id: 'msg_default_2',
+      text: 'אנו שמחים לברך את המתפללים והאורחים החדשים שהצטרפו אלינו היום. תרגישו בבית',
+      enabled: true,
+    },
+    {
+      id: 'msg_default_3',
+      text: 'החל מהשבוע: שיעור בגמרא עם הרב לוי כל יום שלישי בשעה 20:30 בבית הכנסת.',
+      enabled: true,
+    },
   ],
   classes: [
     {

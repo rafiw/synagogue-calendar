@@ -10,8 +10,12 @@ import {
   filterClassesByDay,
   isClassToday,
   getDayMonthYearFromString,
+  isMessageActive,
+  isMessageExpired,
+  isMessageScheduled,
+  filterActiveMessages,
 } from '../utils/classesHelpers';
-import { Shiur } from '../utils/defs';
+import { Shiur, Message } from '../utils/defs';
 
 describe('classesHelpers', () => {
   describe('daysOfWeek', () => {
@@ -269,6 +273,235 @@ describe('classesHelpers', () => {
       expect(result.day).toBe(29);
       expect(result.month).toBe(2);
       expect(result.year).toBe(2024);
+    });
+  });
+
+  // ==================== Message Helper Tests ====================
+
+  describe('isMessageActive', () => {
+    it('should return false if message is disabled', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: false,
+      };
+      expect(isMessageActive(message)).toBe(false);
+    });
+
+    it('should return true if enabled with no dates', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+      };
+      expect(isMessageActive(message)).toBe(true);
+    });
+
+    it('should return true if within date range', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-01-01',
+        endDate: '2024-12-31',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageActive(message, referenceDate)).toBe(true);
+    });
+
+    it('should return false if before start date', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-06-01',
+      };
+      const referenceDate = new Date('2024-05-15');
+      expect(isMessageActive(message, referenceDate)).toBe(false);
+    });
+
+    it('should return false if after end date', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        endDate: '2024-06-01',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageActive(message, referenceDate)).toBe(false);
+    });
+
+    it('should return true if only start date set and past it', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-01-01',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageActive(message, referenceDate)).toBe(true);
+    });
+
+    it('should return true if only end date set and before it', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        endDate: '2024-12-31',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageActive(message, referenceDate)).toBe(true);
+    });
+
+    it('should return true on exact start date', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-06-15',
+        endDate: '2024-06-20',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageActive(message, referenceDate)).toBe(true);
+    });
+
+    it('should return true on exact end date', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-06-10',
+        endDate: '2024-06-15',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageActive(message, referenceDate)).toBe(true);
+    });
+  });
+
+  describe('isMessageExpired', () => {
+    it('should return false if no end date', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+      };
+      expect(isMessageExpired(message)).toBe(false);
+    });
+
+    it('should return false if end date is in the future', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        endDate: '2024-12-31',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageExpired(message, referenceDate)).toBe(false);
+    });
+
+    it('should return true if end date is in the past', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        endDate: '2024-01-01',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageExpired(message, referenceDate)).toBe(true);
+    });
+
+    it('should return false on exact end date (end of day)', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        endDate: '2024-06-15',
+      };
+      const referenceDate = new Date('2024-06-15T12:00:00');
+      expect(isMessageExpired(message, referenceDate)).toBe(false);
+    });
+  });
+
+  describe('isMessageScheduled', () => {
+    it('should return false if no start date', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+      };
+      expect(isMessageScheduled(message)).toBe(false);
+    });
+
+    it('should return true if start date is in the future', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-12-31',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageScheduled(message, referenceDate)).toBe(true);
+    });
+
+    it('should return false if start date is in the past', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-01-01',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageScheduled(message, referenceDate)).toBe(false);
+    });
+
+    it('should return false on exact start date', () => {
+      const message: Message = {
+        id: '1',
+        text: 'Test',
+        enabled: true,
+        startDate: '2024-06-15',
+      };
+      const referenceDate = new Date('2024-06-15');
+      expect(isMessageScheduled(message, referenceDate)).toBe(false);
+    });
+  });
+
+  describe('filterActiveMessages', () => {
+    it('should filter to only active messages', () => {
+      const referenceDate = new Date('2024-06-15');
+      const messages: Message[] = [
+        { id: '1', text: 'Active no dates', enabled: true },
+        { id: '2', text: 'Disabled', enabled: false },
+        { id: '3', text: 'Active in range', enabled: true, startDate: '2024-01-01', endDate: '2024-12-31' },
+        { id: '4', text: 'Expired', enabled: true, endDate: '2024-01-01' },
+        { id: '5', text: 'Future', enabled: true, startDate: '2024-12-01' },
+      ];
+
+      const active = filterActiveMessages(messages, referenceDate);
+      expect(active).toHaveLength(2);
+      expect(active.map((m) => m.id)).toContain('1');
+      expect(active.map((m) => m.id)).toContain('3');
+    });
+
+    it('should return empty array if no active messages', () => {
+      const referenceDate = new Date('2024-06-15');
+      const messages: Message[] = [
+        { id: '1', text: 'Disabled', enabled: false },
+        { id: '2', text: 'Expired', enabled: true, endDate: '2024-01-01' },
+      ];
+
+      const active = filterActiveMessages(messages, referenceDate);
+      expect(active).toHaveLength(0);
+    });
+
+    it('should return all messages if all are active', () => {
+      const messages: Message[] = [
+        { id: '1', text: 'Active 1', enabled: true },
+        { id: '2', text: 'Active 2', enabled: true },
+      ];
+
+      const active = filterActiveMessages(messages);
+      expect(active).toHaveLength(2);
     });
   });
 });

@@ -54,6 +54,14 @@ export interface Screen {
   presentTime: number;
 }
 
+export interface Message {
+  id: string;
+  text: string;
+  startDate?: string; // Optional ISO date string (YYYY-MM-DD)
+  endDate?: string; // Optional ISO date string (YYYY-MM-DD)
+  enabled: boolean; // Can be re-enabled after expiring
+}
+
 export type Language = 'he' | 'en';
 
 export interface PurimSettings {
@@ -96,7 +104,7 @@ export interface Settings {
   enableDeceased: boolean;
   enableMessages: boolean;
   enableSchedule: boolean;
-  messages: string[];
+  messages: Message[];
   classes: Shiur[];
   deceasedSettings: DeceasedSettings;
   scheduleSettings: ScheduleSettings;

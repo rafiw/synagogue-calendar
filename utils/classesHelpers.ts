@@ -1,9 +1,9 @@
 /**
- * Helper functions for the Classes component
+ * Helper functions for the Classes and Messages components
  * Extracted for better testability
  */
 
-import { Shiur } from './defs';
+import { Shiur, Message } from './defs';
 
 // Day of week definitions
 export const daysOfWeek = [
@@ -125,4 +125,78 @@ export function getDayMonthYearFromString(dateString: string): { day: number; mo
     console.error('Error getting Hebrew day, month, and year from string:', error);
     return { day: 0, month: 0, year: 0 };
   }
+}
+
+// ==================== Message Helper Functions ====================
+
+/**
+ * Check if a message is currently active (enabled and within date range)
+ * If no dates set, message is always active (as long as enabled)
+ * @param message - The message to check
+ * @param referenceDate - Optional reference date for testing (defaults to current date)
+ * @returns True if the message should be displayed
+ */
+export function isMessageActive(message: Message, referenceDate?: Date): boolean {
+  if (!message.enabled) return false;
+
+  // If no dates set, always active
+  if (!message.startDate && !message.endDate) return true;
+
+  const now = referenceDate ? new Date(referenceDate) : new Date();
+  now.setHours(0, 0, 0, 0);
+
+  // Check start date if set
+  if (message.startDate) {
+    const start = new Date(message.startDate);
+    start.setHours(0, 0, 0, 0);
+    if (now < start) return false;
+  }
+
+  // Check end date if set
+  if (message.endDate) {
+    const end = new Date(message.endDate);
+    end.setHours(23, 59, 59, 999);
+    if (now > end) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Check if a message has expired (end date has passed)
+ * @param message - The message to check
+ * @param referenceDate - Optional reference date for testing (defaults to current date)
+ * @returns True if the message end date has passed
+ */
+export function isMessageExpired(message: Message, referenceDate?: Date): boolean {
+  if (!message.endDate) return false;
+  const end = new Date(message.endDate);
+  end.setHours(23, 59, 59, 999);
+  const now = referenceDate ? new Date(referenceDate) : new Date();
+  return now > end;
+}
+
+/**
+ * Check if a message is scheduled for the future (start date hasn't arrived yet)
+ * @param message - The message to check
+ * @param referenceDate - Optional reference date for testing (defaults to current date)
+ * @returns True if the message start date is in the future
+ */
+export function isMessageScheduled(message: Message, referenceDate?: Date): boolean {
+  if (!message.startDate) return false;
+  const start = new Date(message.startDate);
+  start.setHours(0, 0, 0, 0);
+  const now = referenceDate ? new Date(referenceDate) : new Date();
+  now.setHours(0, 0, 0, 0);
+  return now < start;
+}
+
+/**
+ * Filter messages to only include active ones
+ * @param messages - Array of messages to filter
+ * @param referenceDate - Optional reference date for testing (defaults to current date)
+ * @returns Array of active messages
+ */
+export function filterActiveMessages(messages: Message[], referenceDate?: Date): Message[] {
+  return messages.filter((msg) => isMessageActive(msg, referenceDate));
 }

@@ -185,5 +185,13 @@
   "background_upload_custom": "Upload Custom Background",
   "background_choose_from_library": "Choose from Library",
   "background_remove_custom": "Remove Custom Image",
-  "background_permission_required": "Permission to access photos is required"
+  "background_permission_required": "Permission to access photos is required",
+  "start_date": "From",
+  "end_date": "Until",
+  "disabled": "Disabled",
+  "expired": "Expired",
+  "active": "Active",
+  "scheduled": "Scheduled",
+  "message_enabled": "Enabled",
+  "no_limit": "No limit"
 }

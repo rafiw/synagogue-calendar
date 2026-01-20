@@ -1,8 +1,18 @@
 {
-  "extends": "./tsconfig.base",
-  "include": ["**/*.ts", "**/*.tsx", "app.config.js", "nativewind-env.d.ts"],
-  "exclude": ["**/__tests__/**", "**/__mocks__/**", "**/*.test.ts", "**/*.test.tsx"],
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Expo",
   "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "lib": [
+      "DOM",
+      "ESNext"
+    ],
+    "moduleResolution": "node",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "target": "ESNext",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitReturns": true,
@@ -13,7 +23,30 @@
     "baseUrl": "./",
     "jsx": "react-jsx",
     "paths": {
-      "@/*": ["app/*", "app/settings/*", "components/*", "utils/"]
-    }
-  }
+      "@/*": [
+        "app/*",
+        "app/settings/*",
+        "components/*",
+        "utils/"
+      ]
+    },
+    "types": [
+      "vitest/globals"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "app.config.js",
+    "nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "babel.config.cjs",
+    "metro.config.cjs",
+    "eslint.config.js",
+    "commitlint.config.js",
+    "dist"
+  ],
+  "extends": "expo/tsconfig.base"
 }

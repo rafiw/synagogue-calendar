@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { isRTL } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 export async function getSubPages(): Promise<number> {
   return Promise.resolve(1);
@@ -13,14 +13,14 @@ const Schedule: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
   const [rtl, setRtl] = useState(false);
-
+  const heightScale = useHeightScale();
   // Responsive sizes
-  const titleSize = useResponsiveFontSize('displayLarge');
-  const textSize = useResponsiveFontSize('headingMedium');
-  const emptyTextSize = useResponsiveFontSize('headingLarge');
-  const padding = useResponsiveSpacing(24);
-  const margin = useResponsiveSpacing(8);
-  const itemPadding = useResponsiveSpacing(16);
+  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(12) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(4) * heightScale);
+  const emptyTextSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const itemPadding = Math.round(useResponsiveSpacing(6) * heightScale);
 
   const backgroundColor = 'bg-white/40';
   const headLineColor = 'text-gray-900';

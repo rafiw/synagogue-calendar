@@ -6,7 +6,13 @@ import { useRouter } from 'expo-router';
 import { isRTL2 } from 'utils/utils';
 import { useTranslation } from 'react-i18next';
 import { ZmanimWrapper } from 'utils/zmanim_wrapper';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useDeviceType } from 'utils/responsive';
+import {
+  useResponsiveFontSize,
+  useResponsiveIconSize,
+  useResponsiveSpacing,
+  useDeviceType,
+  useHeightScale,
+} from 'utils/responsive';
 
 const getCurrentTime = (locale: string) => {
   const now = new Date(); // cannot use zmanim.greg()
@@ -25,10 +31,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const router = useRouter();
   const isRTL = isRTL2(settings.language);
   const deviceType = useDeviceType();
-  const { height } = useWindowDimensions();
-
-  // Scale down for small height screens (like TV at 540px logical height)
-  const heightScale = height < 600 ? 0.7 : height < 800 ? 0.85 : 1.0;
+  const heightScale = useHeightScale();
 
   // Responsive sizes - use smaller fonts for header on mobile/tablet
   // On mobile: headingLarge=24px, headingMedium=20px (instead of display sizes)

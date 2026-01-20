@@ -6,7 +6,7 @@ import { Text, View } from 'react-native';
 import { daysOfWeek } from 'utils/classesHelpers';
 import { Shiur } from 'utils/defs';
 import { defaultPageDisplayTime, isRTL2 } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const classesPerPage = 3.0;
 export async function getSubPages(): Promise<number> {
@@ -22,11 +22,13 @@ const Classes: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [PageDisplayTime] = useState(defaultPageDisplayTime);
 
+  const heightScale = useHeightScale();
+
   // Responsive sizes
-  const headerSize = useResponsiveFontSize('headingMedium');
-  const textSize = useResponsiveFontSize('bodyLarge');
-  const padding = useResponsiveSpacing(16);
-  const margin = useResponsiveSpacing(40);
+  const headerSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('bodyLarge') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(40) * heightScale);
 
   const getDayNames = (dayNumbers: number[]): string => {
     return dayNumbers

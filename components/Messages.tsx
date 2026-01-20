@@ -4,9 +4,9 @@ import { useSettings } from 'context/settingsContext';
 import { router } from 'expo-router';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { defaultPageDisplayTime } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 import { Message } from 'utils/defs';
 import { isMessageActive, filterActiveMessages } from 'utils/classesHelpers';
 
@@ -28,10 +28,7 @@ const Messages: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [PageDisplayTime] = useState(defaultPageDisplayTime);
-  const { height } = useWindowDimensions();
-
-  // Scale down for small height screens (like TV at 540px logical height)
-  const heightScale = height < 600 ? 0.7 : height < 800 ? 0.85 : 1.0;
+  const heightScale = useHeightScale();
 
   // Responsive sizes with height adjustment
   const titleSize = Math.round(useResponsiveFontSize('displayLarge') * heightScale);

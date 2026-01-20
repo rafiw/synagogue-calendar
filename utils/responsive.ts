@@ -172,6 +172,18 @@ export const useResponsiveSpacing = (baseSpacing: number): number => {
 };
 
 /**
+ * Returns a scale factor based on screen height
+ * Useful for TV and small screens to ensure content fits
+ */
+export const useHeightScale = (): number => {
+  const { height } = useWindowDimensions();
+
+  // Base scale is height / 1000 (e.g., 1000px = 1.0, 500px = 0.5)
+  // We cap it between 0.45 and 2.0 to avoid extreme sizes
+  return Math.min(Math.max(0.3, height / 670), 2.2);
+};
+
+/**
  * Get all responsive sizes in one hook for convenience
  */
 export const useResponsiveSizes = () => {
@@ -179,12 +191,14 @@ export const useResponsiveSizes = () => {
   const fontScale = useFontScale();
   const iconScale = useIconScale();
   const spacingScale = useSpacingScale();
+  const heightScale = useHeightScale();
 
   return {
     deviceType,
     fontScale,
     iconScale,
     spacingScale,
+    heightScale,
     isTV: deviceType === 'tv',
     isDesktop: deviceType === 'desktop',
     isTablet: deviceType === 'tablet',

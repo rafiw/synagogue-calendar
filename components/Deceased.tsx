@@ -8,7 +8,7 @@ import MemorialCandle from './MemorialCandle';
 import { isRTL2 } from 'utils/utils';
 import { calculateDeceasedPages } from 'utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFontScale } from 'utils/responsive';
+import { useFontScale, useHeightScale } from 'utils/responsive';
 
 // Export function to calculate sub-pages for timing in index.tsx
 export async function getSubPages(): Promise<number> {
@@ -307,13 +307,14 @@ const Deceased: React.FC = () => {
 
   // Get device-specific font scale
   const deviceScale = useFontScale();
+  const heightScale = useHeightScale();
 
   // Calculate sizes once based on grid configuration and device type
   const tableRowsCount = settings.deceasedSettings?.tableRows || 1;
   const tableColumnsCount = settings.deceasedSettings?.tableColumns || 1;
   const { fontSize, candleSize } = useMemo(
-    () => calculateSizes(tableRowsCount, tableColumnsCount, deviceScale),
-    [tableRowsCount, tableColumnsCount, deviceScale],
+    () => calculateSizes(tableRowsCount, tableColumnsCount, deviceScale * heightScale),
+    [tableRowsCount, tableColumnsCount, deviceScale, heightScale],
   );
 
   // Filter deceased based on display mode (using Hebrew calendar)
@@ -342,10 +343,12 @@ const Deceased: React.FC = () => {
     return () => clearInterval(interval);
   }, [totalPages]);
 
+  const combinedScale = deviceScale * heightScale;
+
   if (settings.deceasedSettings.deceased.length === 0) {
-    const emptyTextSize = 18 * deviceScale;
-    const emptyButtonSize = 16 * deviceScale;
-    const emptyPadding = 12 * deviceScale;
+    const emptyTextSize = 18 * combinedScale;
+    const emptyButtonSize = 16 * combinedScale;
+    const emptyPadding = 12 * combinedScale;
 
     return (
       <View className="flex-1 justify-center items-center bg-white/90 rounded-xl" style={{ margin: emptyPadding }}>
@@ -397,8 +400,8 @@ const Deceased: React.FC = () => {
     );
   }
 
-  const paginationSize = 16 * deviceScale;
-  const containerPadding = 10 * deviceScale;
+  const paginationSize = 16 * combinedScale;
+  const containerPadding = 10 * combinedScale;
 
   return (
     <View className="flex-1 bg-transparent" style={{ padding: containerPadding }}>

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { FastDayType, ZmanimWrapper } from '../utils/zmanim_wrapper';
 import { useSettings } from '../context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { isRTL } from 'utils/utils';
 import { HallelType } from 'utils/zmanim_wrapper';
-import { useResponsiveFontSize, useResponsiveSpacing } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const getTachanunLabel = (
   haveTachanunShacharit: boolean,
@@ -35,11 +35,7 @@ const getTachanunLabel = (
 const Zmanim: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { settings } = useSettings();
-  const { height } = useWindowDimensions();
-
-  // Scale down for small height screens (like TV at 540px logical height)
-  // This ensures content fits without excessive scrolling
-  const heightScale = height < 600 ? 0.7 : height < 800 ? 0.85 : 1.0;
+  const heightScale = useHeightScale();
 
   // Responsive sizes with height adjustment
   const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);

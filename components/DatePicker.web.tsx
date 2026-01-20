@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { View, Text, Pressable } from 'react-native';
 import { DayPicker } from 'react-day-picker';
@@ -15,9 +15,6 @@ interface DatePickerProps {
 
 export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: dateFormat, onChange }) => {
   const [showPicker, setShowPicker] = useState(false);
-  const [position, setPosition] = useState({ top: 0, left: 0 });
-  const buttonRef = useRef<View>(null);
-  const pickerRef = useRef<HTMLDivElement>(null);
 
   const parseDate = (dateString: string, format: 'YYYY-MM-DD' | 'DD/MM/YYYY'): Date => {
     if (!dateString) return new Date();
@@ -38,37 +35,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
 
   const selectedDate = value ? parseDate(value, dateFormat) : undefined;
 
-  // Close picker when clicking outside
-  useEffect(() => {
-    if (!showPicker) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setShowPicker(false);
-      }
-    };
-
-    // Small delay to avoid immediate close
-    const timeoutId = setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
-    }, 0);
-
-    return () => {
-      clearTimeout(timeoutId);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [showPicker]);
-
   const handleOpen = () => {
-    if (buttonRef.current) {
-      // Get the native DOM element from the ref
-      const element = buttonRef.current as unknown as HTMLElement;
-      const rect = element.getBoundingClientRect();
-      setPosition({
-        top: rect.bottom + window.scrollY + 4,
-        left: rect.left + window.scrollX,
-      });
-    }
     setShowPicker(!showPicker);
   };
 
@@ -76,7 +43,6 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
     <View className="mb-3">
       <Text className="text-gray-600 mb-1 text-sm">{label}</Text>
       <Pressable
-        ref={buttonRef}
         onPress={handleOpen}
         className="flex-row items-center justify-between rounded-lg border border-gray-300 bg-white p-3 cursor-pointer"
       >
@@ -87,32 +53,44 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
       {showPicker &&
         createPortal(
           <div
-            ref={pickerRef}
             style={{
-              position: 'absolute',
-              top: position.top,
-              left: position.left,
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
               zIndex: 99999,
-              backgroundColor: 'white',
-              borderRadius: 8,
-              padding: 16,
-              boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
             }}
+            onClick={() => setShowPicker(false)}
           >
-            <DayPicker
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => {
-                if (date) {
-                  onChange(formatDate(date, dateFormat));
-                  setShowPicker(false);
-                }
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: 8,
+                padding: 16,
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.2)',
               }}
-              captionLayout="dropdown"
-              startMonth={new Date(new Date().getFullYear() - 200, 0)}
-              endMonth={new Date()}
-              defaultMonth={selectedDate}
-            />
+              onClick={(e) => e.stopPropagation()}
+            >
+              <DayPicker
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  if (date) {
+                    onChange(formatDate(date, dateFormat));
+                    setShowPicker(false);
+                  }
+                }}
+                captionLayout="dropdown"
+                startMonth={new Date(new Date().getFullYear() - 200, 0)}
+                endMonth={new Date()}
+                defaultMonth={selectedDate}
+              />
+            </div>
           </div>,
           document.body,
         )}

@@ -11,6 +11,7 @@ import { HDate } from '@hebcal/core';
 import * as ImagePicker from 'expo-image-picker';
 import ExternalLink from '../../utils/PressableLink';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 // Local storage key for image delete URLs (not synced to GitHub for security)
 const DELETE_URLS_STORAGE_KEY = 'deceased_image_delete_urls';
@@ -158,6 +159,18 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
   const [isUploading, setIsUploading] = useState(false);
   const [personId] = useState(() => person?.id || Date.now().toString());
   const [tribute, setTribute] = useState(person?.tribute || '');
+  const heightScale = useHeightScale();
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const labelSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const smallLabelSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const buttonTextSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const iconSize = Math.round(useResponsiveIconSize('small') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const smallPadding = Math.round(useResponsiveSpacing(8) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(12) * heightScale);
 
   // Load delete URL from local storage when editing
   useEffect(() => {
@@ -293,15 +306,18 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
   };
 
   return (
-    <View className="bg-white p-4 rounded-lg shadow-sm mb-4">
-      <Text className="text-lg font-bold mb-4">{person ? t('deceased_edit') : t('deceased_add_person')}</Text>
+    <View className="bg-white rounded-lg shadow-sm" style={{ padding, marginBottom: margin }}>
+      <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
+        {person ? t('deceased_edit') : t('deceased_add_person')}
+      </Text>
 
-      <View className="mb-3">
-        <Text className="text-gray-700 mb-2">
+      <View style={{ marginBottom: margin }}>
+        <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
           {t('deceased_name')} <Text className="text-red-500">*</Text>
         </Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-3"
+          className="border border-gray-300 rounded-lg"
+          style={{ padding: smallPadding * 1.5, fontSize: textSize }}
           placeholder={t('deceased_name')}
           value={name}
           onChangeText={setName}
@@ -309,36 +325,47 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
       </View>
 
       {/* Gender toggle */}
-      <View className="mb-3">
-        <Text className="text-gray-700 mb-2">
-          {t('deceased_gender')} <Text className="text-gray-400 text-sm">({t('optional')})</Text>
+      <View style={{ marginBottom: margin }}>
+        <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+          {t('deceased_gender')}{' '}
+          <Text className="text-gray-400" style={{ fontSize: smallLabelSize }}>
+            ({t('optional')})
+          </Text>
         </Text>
-        <View className="flex-row space-x-2">
+        <View className="flex-row" style={{ gap: smallPadding }}>
           <TouchableOpacity
             onPress={() => setIsMale(true)}
-            className={`flex-1 px-3 py-2 rounded-lg border ${
+            className={`flex-1 rounded-lg border ${
               isMale === true ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'
             }`}
+            style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
           >
-            <Text className={`text-center ${isMale === true ? 'text-white' : 'text-gray-700'}`}>
+            <Text
+              className={`text-center ${isMale === true ? 'text-white' : 'text-gray-700'}`}
+              style={{ fontSize: textSize }}
+            >
               {t('deceased_gender_male')}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setIsMale(false)}
-            className={`flex-1 px-3 py-2 rounded-lg border ${
+            className={`flex-1 rounded-lg border ${
               isMale === false ? 'bg-pink-500 border-pink-500' : 'bg-white border-gray-300'
             }`}
+            style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
           >
-            <Text className={`text-center ${isMale === false ? 'text-white' : 'text-gray-700'}`}>
+            <Text
+              className={`text-center ${isMale === false ? 'text-white' : 'text-gray-700'}`}
+              style={{ fontSize: textSize }}
+            >
               {t('deceased_gender_female')}
             </Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View className="mb-3">
-        <Text className="text-gray-600 text-sm mb-1">
+      <View style={{ marginBottom: margin }}>
+        <Text className="text-gray-600" style={{ fontSize: smallLabelSize, marginBottom: smallPadding / 2 }}>
           {t('deceased_date_of_birth')} (YYYY-MM-DD) <Text className="text-gray-400">({t('optional')})</Text>
         </Text>
         <DateInputComponent
@@ -349,9 +376,9 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
         />
       </View>
 
-      <View className="mb-3">
-        <View className="flex-row items-center justify-between mb-1">
-          <Text className="text-gray-600 text-sm">
+      <View style={{ marginBottom: margin }}>
+        <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding / 2 }}>
+          <Text className="text-gray-600" style={{ fontSize: smallLabelSize }}>
             {t('deceased_date_of_birth')} ({t('hebrew')}) <Text className="text-gray-400">({t('optional')})</Text>
           </Text>
           {dateOfBirth && (
@@ -362,22 +389,25 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
                   setHebrewDateOfBirth(hebrewDate);
                 }
               }}
-              className="px-2 py-1"
+              style={{ paddingHorizontal: smallPadding, paddingVertical: smallPadding / 2 }}
             >
-              <Text className="text-blue-500 text-xs">{t('reset')}</Text>
+              <Text className="text-blue-500" style={{ fontSize: smallLabelSize }}>
+                {t('reset')}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
         <TextInput
-          className="border border-gray-300 rounded-lg p-3 bg-white"
+          className="border border-gray-300 rounded-lg bg-white"
+          style={{ padding: smallPadding * 1.5, fontSize: textSize }}
           value={hebrewDateOfBirth}
           onChangeText={(value) => setHebrewDateOfBirth(value)}
           placeholder={t('hebrew_date_placeholder')}
         />
       </View>
 
-      <View className="mb-3">
-        <Text className="text-gray-600 text-sm mb-1">
+      <View style={{ marginBottom: margin }}>
+        <Text className="text-gray-600" style={{ fontSize: smallLabelSize, marginBottom: smallPadding / 2 }}>
           {t('deceased_date_of_death')} (YYYY-MM-DD) <Text className="text-gray-400">({t('optional')})</Text>
         </Text>
         <DateInputComponent
@@ -388,9 +418,9 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
         />
       </View>
 
-      <View className="mb-3">
-        <View className="flex-row items-center justify-between mb-1">
-          <Text className="text-gray-600 text-sm">
+      <View style={{ marginBottom: margin }}>
+        <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding / 2 }}>
+          <Text className="text-gray-600" style={{ fontSize: smallLabelSize }}>
             {t('deceased_date_of_death')} ({t('hebrew')}) <Text className="text-gray-400">({t('optional')})</Text>
           </Text>
           {dateOfDeath && (
@@ -401,51 +431,64 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
                   setHebrewDateOfDeath(hebrewDate);
                 }
               }}
-              className="px-2 py-1"
+              style={{ paddingHorizontal: smallPadding, paddingVertical: smallPadding / 2 }}
             >
-              <Text className="text-blue-500 text-xs">{t('reset')}</Text>
+              <Text className="text-blue-500" style={{ fontSize: smallLabelSize }}>
+                {t('reset')}
+              </Text>
             </TouchableOpacity>
           )}
         </View>
         <TextInput
-          className="border border-gray-300 rounded-lg p-3 bg-white"
+          className="border border-gray-300 rounded-lg bg-white"
+          style={{ padding: smallPadding * 1.5, fontSize: textSize }}
           value={hebrewDateOfDeath}
           onChangeText={setHebrewDateOfDeath}
           placeholder={t('hebrew_date_placeholder')}
         />
       </View>
 
-      <View className="mb-3">
-        <Text className="text-gray-700 mb-2">
-          {t('deceased_template')} <Text className="text-gray-400 text-sm">({t('optional')})</Text>
+      <View style={{ marginBottom: margin }}>
+        <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+          {t('deceased_template')}{' '}
+          <Text className="text-gray-400" style={{ fontSize: smallLabelSize }}>
+            ({t('optional')})
+          </Text>
         </Text>
-        <View className="flex-row space-x-2">
+        <View className="flex-row" style={{ gap: smallPadding }}>
           {(['simple', 'card', 'photo'] as const).map((temp) => (
             <TouchableOpacity
               key={temp}
               onPress={() => setTemplate(temp)}
-              className={`px-3 py-2 rounded-lg border ${
+              className={`rounded-lg border ${
                 template === temp ? 'bg-blue-500 border-blue-500' : 'bg-white border-gray-300'
               }`}
+              style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
             >
-              <Text className={template === temp ? 'text-white' : 'text-gray-700'}>
+              <Text className={template === temp ? 'text-white' : 'text-gray-700'} style={{ fontSize: textSize }}>
                 {t(`deceased_template_${temp}`)}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
         {template === undefined && (
-          <Text className="text-gray-500 text-xs mt-1">{t('deceased_template_default_will_be_used')}</Text>
+          <Text className="text-gray-500" style={{ fontSize: smallLabelSize, marginTop: smallPadding / 2 }}>
+            {t('deceased_template_default_will_be_used')}
+          </Text>
         )}
       </View>
 
       {/* Optional tribute/memorial text */}
-      <View className="mb-3">
-        <Text className="text-gray-700 mb-2">
-          {t('deceased_tribute')} <Text className="text-gray-400 text-sm">({t('optional')})</Text>
+      <View style={{ marginBottom: margin }}>
+        <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+          {t('deceased_tribute')}{' '}
+          <Text className="text-gray-400" style={{ fontSize: smallLabelSize }}>
+            ({t('optional')})
+          </Text>
         </Text>
         <TextInput
-          className="border border-gray-300 rounded-lg p-3"
+          className="border border-gray-300 rounded-lg"
+          style={{ padding: smallPadding * 1.5, fontSize: textSize }}
           placeholder={t('deceased_tribute_placeholder')}
           value={tribute}
           onChangeText={setTribute}
@@ -456,17 +499,34 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
       </View>
 
       {template === 'photo' && (
-        <View className="mb-3">
-          <Text className="text-gray-700 mb-2">
-            {t('deceased_photo')} <Text className="text-gray-400 text-sm">({t('optional')})</Text>
+        <View style={{ marginBottom: margin }}>
+          <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+            {t('deceased_photo')}{' '}
+            <Text className="text-gray-400" style={{ fontSize: smallLabelSize }}>
+              ({t('optional')})
+            </Text>
           </Text>
 
           {/* Photo preview */}
           {photoUrl ? (
-            <View className="mb-3 items-center">
-              <Image source={{ uri: photoUrl }} className="w-24 h-24 rounded-lg" resizeMode="cover" />
-              <TouchableOpacity onPress={() => void handleRemovePhoto()} className="mt-2 px-3 py-1 bg-red-100 rounded">
-                <Text className="text-red-600 text-sm">{t('photo_remove')}</Text>
+            <View className="items-center" style={{ marginBottom: margin }}>
+              <Image
+                source={{ uri: photoUrl }}
+                style={{ width: 96 * heightScale, height: 96 * heightScale, borderRadius: 8 }}
+                resizeMode="cover"
+              />
+              <TouchableOpacity
+                onPress={() => void handleRemovePhoto()}
+                className="bg-red-100 rounded"
+                style={{
+                  marginTop: smallPadding,
+                  paddingHorizontal: smallPadding * 1.5,
+                  paddingVertical: smallPadding / 2,
+                }}
+              >
+                <Text className="text-red-600" style={{ fontSize: smallLabelSize }}>
+                  {t('photo_remove')}
+                </Text>
               </TouchableOpacity>
             </View>
           ) : null}
@@ -475,33 +535,41 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
           <TouchableOpacity
             onPress={() => void pickImage()}
             disabled={isUploading}
-            className={`flex-row items-center justify-center p-3 rounded-lg border border-dashed ${
+            className={`flex-row items-center justify-center rounded-lg border border-dashed ${
               isUploading ? 'bg-gray-100 border-gray-300' : 'bg-blue-50 border-blue-300'
             }`}
+            style={{ padding: smallPadding * 1.5 }}
           >
             {isUploading ? (
               <View className="flex-row items-center">
                 <ActivityIndicator size="small" color="#3b82f6" />
-                <Text className="text-blue-600 ml-2">{t('photo_uploading')}</Text>
+                <Text className="text-blue-600" style={{ fontSize: textSize, marginLeft: smallPadding }}>
+                  {t('photo_uploading')}
+                </Text>
               </View>
             ) : (
               <View className="flex-row items-center">
-                <Feather name="upload" size={20} color="#3b82f6" />
-                <Text className="text-blue-600 ml-2">{t('photo_upload')}</Text>
+                <Feather name="upload" size={iconSize} color="#3b82f6" />
+                <Text className="text-blue-600" style={{ fontSize: textSize, marginLeft: smallPadding }}>
+                  {t('photo_upload')}
+                </Text>
               </View>
             )}
           </TouchableOpacity>
 
           {/* Divider with "or" */}
-          <View className="flex-row items-center my-3">
+          <View className="flex-row items-center" style={{ marginVertical: margin }}>
             <View className="flex-1 h-px bg-gray-300" />
-            <Text className="mx-3 text-gray-500">{t('or')}</Text>
+            <Text className="text-gray-500" style={{ fontSize: textSize, marginHorizontal: margin }}>
+              {t('or')}
+            </Text>
             <View className="flex-1 h-px bg-gray-300" />
           </View>
 
           {/* URL input */}
           <TextInput
-            className="border border-gray-300 rounded-lg p-3"
+            className="border border-gray-300 rounded-lg"
+            style={{ padding: smallPadding * 1.5, fontSize: textSize }}
             placeholder={t('deceased_photo_url')}
             value={photoUrl}
             onChangeText={setPhotoUrl}
@@ -509,12 +577,24 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
         </View>
       )}
 
-      <View className="flex-row space-x-2">
-        <TouchableOpacity onPress={handleSave} className="flex-1 bg-blue-500 p-3 rounded-lg">
-          <Text className="text-white text-center font-medium">{t('deceased_save')}</Text>
+      <View className="flex-row" style={{ gap: smallPadding }}>
+        <TouchableOpacity
+          onPress={handleSave}
+          className="flex-1 bg-blue-500 rounded-lg"
+          style={{ padding: smallPadding * 1.5 }}
+        >
+          <Text className="text-white text-center font-medium" style={{ fontSize: buttonTextSize }}>
+            {t('deceased_save')}
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleCancel} className="flex-1 bg-gray-300 p-3 rounded-lg">
-          <Text className="text-gray-700 text-center font-medium">{t('deceased_cancel')}</Text>
+        <TouchableOpacity
+          onPress={handleCancel}
+          className="flex-1 bg-gray-300 rounded-lg"
+          style={{ padding: smallPadding * 1.5 }}
+        >
+          <Text className="text-gray-700 text-center font-medium" style={{ fontSize: buttonTextSize }}>
+            {t('deceased_cancel')}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -526,6 +606,18 @@ const DeceasedSettingsTab = () => {
   const { t, i18n } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [editingPerson, setEditingPerson] = useState<DeceasedPerson | undefined>();
+  const heightScale = useHeightScale() / 1.5;
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(useResponsiveFontSize('headingSmall') * heightScale);
+  const labelSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
+  const smallTextSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
+  const buttonTextSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
+  const checkboxSize = Math.round(25 * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const smallPadding = Math.round(useResponsiveSpacing(8) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(16) * heightScale);
 
   const saveChecked = (value: boolean) => {
     updateSettings({ enableDeceased: value });
@@ -592,92 +684,133 @@ const DeceasedSettingsTab = () => {
   }
 
   return (
-    <ScrollView className="flex-1 mt-4">
+    <ScrollView className="flex-1" style={{ marginTop: margin }}>
       <BouncyCheckbox
+        size={checkboxSize}
         isChecked={settings.enableDeceased}
         fillColor="green"
         iconStyle={{ borderColor: 'green' }}
         innerIconStyle={{ borderWidth: 2 }}
         text={t('enable_deceased')}
-        textComponent={<Text>{t('enable_deceased')}</Text>}
+        textComponent={<Text style={{ fontSize: textSize }}>{t('enable_deceased')}</Text>}
         onPress={(value) => saveChecked(value)}
       />
 
       {settings.enableDeceased && (
-        <View className="flex-1 px-4 mt-4 space-y-4">
+        <View className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin, gap: margin }}>
           {/* Table Configuration */}
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-lg font-bold mb-4">{t('deceased_table_configuration')}</Text>
-            <View className="mb-3 flex-row-reverse items-center justify-between">
-              <Text className="text-gray-700 mb-2">{t('deceased_table_rows')}</Text>
-              <View className="flex-row items-center space-x-2">
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
+              {t('deceased_table_configuration')}
+            </Text>
+            <View
+              className="flex-row-reverse items-center justify-between"
+              style={{ marginBottom: smallPadding * 1.5 }}
+            >
+              <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                {t('deceased_table_rows')}
+              </Text>
+              <View className="flex-row items-center" style={{ gap: smallPadding }}>
                 <TouchableOpacity
                   onPress={() =>
                     updateDeceasedSettings({ tableRows: Math.max(1, settings.deceasedSettings.tableRows - 1) })
                   }
-                  className="bg-gray-200 rounded-lg p-2 w-10 h-10 items-center justify-center"
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
                   disabled={settings.deceasedSettings.tableRows <= 1}
                 >
-                  <Text className="text-gray-700 font-bold text-xl">-</Text>
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                    -
+                  </Text>
                 </TouchableOpacity>
-                <View className="bg-blue-100 rounded-lg px-4 py-2 min-w-[50px] items-center">
-                  <Text className="text-blue-900 font-bold text-lg">{settings.deceasedSettings.tableRows}</Text>
+                <View
+                  className="bg-blue-100 rounded-lg items-center"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+                >
+                  <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
+                    {settings.deceasedSettings.tableRows}
+                  </Text>
                 </View>
                 <TouchableOpacity
                   onPress={() =>
                     updateDeceasedSettings({ tableRows: Math.min(5, settings.deceasedSettings.tableRows + 1) })
                   }
-                  className="bg-gray-200 rounded-lg p-2 w-10 h-10 items-center justify-center"
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
                   disabled={settings.deceasedSettings.tableRows >= 10}
                 >
-                  <Text className="text-gray-700 font-bold text-xl">+</Text>
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                    +
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
             {/* table columns */}
-            <View className="mb-3 flex-row-reverse items-center justify-between">
-              <Text className="text-gray-700 mb-2">{t('deceased_table_columns')}</Text>
-              <View className="flex-row items-center space-x-2">
+            <View
+              className="flex-row-reverse items-center justify-between"
+              style={{ marginBottom: smallPadding * 1.5 }}
+            >
+              <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                {t('deceased_table_columns')}
+              </Text>
+              <View className="flex-row items-center" style={{ gap: smallPadding }}>
                 <TouchableOpacity
                   onPress={() =>
                     updateDeceasedSettings({ tableColumns: Math.max(1, settings.deceasedSettings.tableColumns - 1) })
                   }
-                  className="bg-gray-200 rounded-lg p-2 w-10 h-10 items-center justify-center"
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
                   disabled={settings.deceasedSettings.tableColumns <= 1}
                 >
-                  <Text className="text-gray-700 font-bold text-xl">-</Text>
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                    -
+                  </Text>
                 </TouchableOpacity>
-                <View className="bg-blue-100 rounded-lg px-4 py-2 min-w-[50px] items-center">
-                  <Text className="text-blue-900 font-bold text-lg">{settings.deceasedSettings.tableColumns}</Text>
+                <View
+                  className="bg-blue-100 rounded-lg items-center"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+                >
+                  <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
+                    {settings.deceasedSettings.tableColumns}
+                  </Text>
                 </View>
                 <TouchableOpacity
                   onPress={() =>
                     updateDeceasedSettings({ tableColumns: Math.min(5, settings.deceasedSettings.tableColumns + 1) })
                   }
-                  className="bg-gray-200 rounded-lg p-2 w-10 h-10 items-center justify-center"
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
                   disabled={settings.deceasedSettings.tableColumns >= 5}
                 >
-                  <Text className="text-gray-700 font-bold text-xl">+</Text>
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                    +
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
           </View>
 
           {/* Display Mode */}
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-lg font-bold mb-4">{t('deceased_display_mode')}</Text>
-            <View className="flex-row space-x-2">
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
+              {t('deceased_display_mode')}
+            </Text>
+            <View className="flex-row" style={{ gap: smallPadding }}>
               {(['all', 'monthly'] as const).map((mode) => (
                 <TouchableOpacity
                   key={mode}
                   onPress={() => updateDeceasedSettings({ displayMode: mode })}
-                  className={`px-3 py-2 rounded-lg border ${
+                  className={`rounded-lg border ${
                     settings.deceasedSettings.displayMode === mode
                       ? 'bg-blue-500 border-blue-500'
                       : 'bg-white border-gray-300'
                   }`}
+                  style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
                 >
-                  <Text className={settings.deceasedSettings.displayMode === mode ? 'text-white' : 'text-gray-700'}>
+                  <Text
+                    className={settings.deceasedSettings.displayMode === mode ? 'text-white' : 'text-gray-700'}
+                    style={{ fontSize: textSize }}
+                  >
                     {t(`deceased_display_${mode}`)}
                   </Text>
                 </TouchableOpacity>
@@ -686,20 +819,26 @@ const DeceasedSettingsTab = () => {
           </View>
 
           {/* Default Template */}
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-lg font-bold mb-4">{t('deceased_default_template')}</Text>
-            <View className="flex-row space-x-2">
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
+              {t('deceased_default_template')}
+            </Text>
+            <View className="flex-row" style={{ gap: smallPadding }}>
               {(['simple', 'card', 'photo'] as const).map((temp) => (
                 <TouchableOpacity
                   key={temp}
                   onPress={() => updateDeceasedSettings({ defaultTemplate: temp })}
-                  className={`px-3 py-2 rounded-lg border ${
+                  className={`rounded-lg border ${
                     settings.deceasedSettings.defaultTemplate === temp
                       ? 'bg-blue-500 border-blue-500'
                       : 'bg-white border-gray-300'
                   }`}
+                  style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
                 >
-                  <Text className={settings.deceasedSettings.defaultTemplate === temp ? 'text-white' : 'text-gray-700'}>
+                  <Text
+                    className={settings.deceasedSettings.defaultTemplate === temp ? 'text-white' : 'text-gray-700'}
+                    style={{ fontSize: textSize }}
+                  >
                     {t(`deceased_template_${temp}`)}
                   </Text>
                 </TouchableOpacity>
@@ -708,14 +847,19 @@ const DeceasedSettingsTab = () => {
           </View>
 
           {/* Image Upload API Key */}
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <View className="flex-row items-center justify-between mb-2">
-              <Text className="text-lg font-bold">{t('imgbb_api_key')}</Text>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding }}>
+              <Text className="font-bold" style={{ fontSize: titleSize }}>
+                {t('imgbb_api_key')}
+              </Text>
               <ExternalLink url="https://api.imgbb.com/" label={t('imgbb_get_key')} />
             </View>
-            <Text className="text-gray-500 text-sm mb-3">{t('imgbb_api_key_description')}</Text>
+            <Text className="text-gray-500" style={{ fontSize: smallTextSize, marginBottom: smallPadding * 1.5 }}>
+              {t('imgbb_api_key_description')}
+            </Text>
             <TextInput
-              className="border border-gray-300 rounded-lg p-3"
+              className="border border-gray-300 rounded-lg"
+              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
               placeholder={t('imgbb_api_key_placeholder')}
               value={settings.deceasedSettings.imgbbApiKey || ''}
               onChangeText={(value) => updateDeceasedSettings({ imgbbApiKey: value })}
@@ -725,11 +869,19 @@ const DeceasedSettingsTab = () => {
           </View>
 
           {/* Deceased People List */}
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <View className="flex-row justify-between items-center mb-4">
-              <Text className="text-lg font-bold">{t('deceased_people')}</Text>
-              <TouchableOpacity onPress={() => setShowForm(true)} className="bg-green-500 px-4 py-2 rounded-lg">
-                <Text className="text-white font-medium">{t('deceased_add_person')}</Text>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <View className="flex-row justify-between items-center" style={{ marginBottom: margin }}>
+              <Text className="font-bold" style={{ fontSize: titleSize }}>
+                {t('deceased_people')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setShowForm(true)}
+                className="bg-green-500 rounded-lg"
+                style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+              >
+                <Text className="text-white font-medium" style={{ fontSize: buttonTextSize }}>
+                  {t('deceased_add_person')}
+                </Text>
               </TouchableOpacity>
             </View>
 
@@ -746,47 +898,71 @@ const DeceasedSettingsTab = () => {
             )}
 
             {settings.deceasedSettings.deceased.length === 0 ? (
-              <Text className="text-gray-500 text-center py-4">{t('deceased_no_people')}</Text>
+              <Text className="text-gray-500 text-center" style={{ fontSize: textSize, paddingVertical: padding }}>
+                {t('deceased_no_people')}
+              </Text>
             ) : (
               <View>
                 {[...settings.deceasedSettings.deceased]
                   .sort((a, b) => a.name.localeCompare(b.name))
                   .map((item) => (
-                    <View key={item.id} className="border border-gray-200 rounded-lg p-3 mb-2">
-                      <Text className="font-medium text-lg">{item.name}</Text>
+                    <View
+                      key={item.id}
+                      className="border border-gray-200 rounded-lg"
+                      style={{ padding: smallPadding * 1.5, marginBottom: smallPadding }}
+                    >
+                      <Text className="font-medium" style={{ fontSize: titleSize }}>
+                        {item.name}
+                      </Text>
                       {item.isMale !== undefined && (
-                        <Text className="text-gray-600">
+                        <Text className="text-gray-600" style={{ fontSize: smallTextSize }}>
                           {t('deceased_gender')}:{' '}
                           {item.isMale ? t('deceased_gender_male') : t('deceased_gender_female')}
                         </Text>
                       )}
                       {(item.dateOfBirth || item.hebrewDateOfBirth) && (
-                        <Text className="text-gray-600">
+                        <Text className="text-gray-600" style={{ fontSize: smallTextSize }}>
                           {t('deceased_date_of_birth')}: {item.dateOfBirth || '-'}{' '}
                           {item.hebrewDateOfBirth && `- ${item.hebrewDateOfBirth}`}
                         </Text>
                       )}
                       {(item.dateOfDeath || item.hebrewDateOfDeath) && (
-                        <Text className="text-gray-600">
+                        <Text className="text-gray-600" style={{ fontSize: smallTextSize }}>
                           {t('deceased_date_of_death')}: {item.dateOfDeath || '-'}{' '}
                           {item.hebrewDateOfDeath && `- ${item.hebrewDateOfDeath}`}
                         </Text>
                       )}
                       {item.template && (
-                        <Text className="text-gray-600">
+                        <Text className="text-gray-600" style={{ fontSize: smallTextSize }}>
                           {t('deceased_template')}: {t(`deceased_template_${item.template}`)}
                         </Text>
                       )}
-                      {item.tribute && <Text className="text-gray-600 italic mt-1">{item.tribute}</Text>}
-                      <View className="flex-row space-x-2 mt-2">
-                        <TouchableOpacity onPress={() => startEditing(item)} className="bg-blue-500 px-3 py-1 rounded">
-                          <Text className="text-white text-sm">{t('deceased_edit')}</Text>
+                      {item.tribute && (
+                        <Text
+                          className="text-gray-600 italic"
+                          style={{ fontSize: smallTextSize, marginTop: smallPadding / 2 }}
+                        >
+                          {item.tribute}
+                        </Text>
+                      )}
+                      <View className="flex-row" style={{ gap: smallPadding, marginTop: smallPadding }}>
+                        <TouchableOpacity
+                          onPress={() => startEditing(item)}
+                          className="bg-blue-500 rounded"
+                          style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding / 2 }}
+                        >
+                          <Text className="text-white" style={{ fontSize: smallTextSize }}>
+                            {t('deceased_edit')}
+                          </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => void deleteDeceasedPerson(item.id)}
-                          className="bg-red-500 px-3 py-1 rounded"
+                          className="bg-red-500 rounded"
+                          style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding / 2 }}
                         >
-                          <Text className="text-white text-sm">{t('deceased_delete')}</Text>
+                          <Text className="text-white" style={{ fontSize: smallTextSize }}>
+                            {t('deceased_delete')}
+                          </Text>
                         </TouchableOpacity>
                       </View>
                     </View>

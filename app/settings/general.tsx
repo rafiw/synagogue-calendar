@@ -19,6 +19,7 @@ import ExternalLink from '../../utils/PressableLink';
 import ColorPickerModal from '../../components/ColorPickerModal';
 import { showAlert } from '../../utils/alert';
 import { isRTL } from 'utils/utils';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const HelpSection = () => {
   const { t } = useTranslation();
@@ -26,89 +27,107 @@ const HelpSection = () => {
   const link1 = 'https://github.com';
   const link2 = 'https://gist.github.com';
   const link3 = 'https://github.com/settings/personal-access-tokens/new';
+  const heightScale = useHeightScale();
+
+  // Responsive sizes
+  const textSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const iconSize = Math.round(useResponsiveIconSize('medium') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const smallPadding = Math.round(useResponsiveSpacing(8) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(16) * heightScale);
+  const imageHeight = Math.round(160 * heightScale);
+
   return (
-    <View className="mb-4">
+    <View style={{ marginBottom: margin }}>
       <TouchableOpacity
         onPress={() => setIsExpanded(!isExpanded)}
-        className="flex-row items-center justify-between p-3 bg-blue-50 rounded-lg"
+        className="flex-row items-center justify-between bg-blue-50 rounded-lg"
+        style={{ padding: smallPadding * 1.5 }}
       >
-        <Text className="text-blue-600 font-medium">{t('setup_help')}</Text>
-        <Feather name={isExpanded ? 'chevron-up' : 'chevron-down'} size={24} color="#2563eb" />
+        <Text className="text-blue-600 font-medium" style={{ fontSize: textSize }}>{t('setup_help')}</Text>
+        <Feather name={isExpanded ? 'chevron-up' : 'chevron-down'} size={iconSize} color="#2563eb" />
       </TouchableOpacity>
 
       {/* eslint-disable @typescript-eslint/no-require-imports */}
       {isExpanded && (
-        <View className="mt-2 space-y-4">
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">
+        <View style={{ marginTop: smallPadding, gap: margin }}>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
               {t('help_step_1')} <ExternalLink url={link1} /> {t('help_step_1_1')}
             </Text>
           </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
               {t('help_step_2')} <ExternalLink url={link2} />
               {t('help_step_2_1')}
             </Text>
           </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_3')}</Text>
-            <Text className="text-gray-700 mb-2 font-bold">{t('help_step_3_1')}</Text>
-            <Text className="text-gray-700 mb-2">{t('help_step_3_2')}</Text>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_3')}</Text>
+            <Text className="text-gray-700 font-bold" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_3_1')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_3_2')}</Text>
             <Image
               source={require('../../assets/help/help3.png')}
-              className="w-full h-40 rounded-lg"
+              className="w-full rounded-lg"
+              style={{ height: imageHeight }}
               resizeMode="contain"
             />
           </View>
 
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_4')}</Text>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_4')}</Text>
             <Image
               source={require('../../assets/help/help4.png')}
-              className="w-full h-40 rounded-lg"
+              className="w-full rounded-lg"
+              style={{ height: imageHeight }}
               resizeMode="contain"
             />
           </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_5')}</Text>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_5')}</Text>
             <Image
               source={require('../../assets/help/help5.png')}
-              className="w-full h-40 rounded-lg"
+              className="w-full rounded-lg"
+              style={{ height: imageHeight }}
               resizeMode="contain"
             />
           </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
               {t('help_step_6')} <ExternalLink url={link3} />
             </Text>
-            <Text className="text-gray-700 mb-2">{t('help_step_6_1')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_6_1')}</Text>
             <Image
               source={require('../../assets/help/help6.png')}
-              className="w-full h-40 rounded-lg"
+              className="w-full rounded-lg"
+              style={{ height: imageHeight }}
               resizeMode="contain"
             />
           </View>
-          <View className="w-full bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_7')}</Text>
+          <View className="w-full bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_7')}</Text>
             <Image
               source={require('../../assets/help/help7.png')}
-              className="w-full h-48 rounded-lg"
+              className="w-full rounded-lg"
+              style={{ height: imageHeight * 1.2 }}
               resizeMode="contain"
             />
           </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_8')}</Text>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_8')}</Text>
             <Image
               source={require('../../assets/help/help8.png')}
-              className="w-full h-40 rounded-lg"
+              className="w-full rounded-lg"
+              style={{ height: imageHeight }}
               resizeMode="contain"
             />
           </View>
-          <View className="bg-white p-4 rounded-lg shadow-sm">
-            <Text className="text-gray-700 mb-2">{t('help_step_9')}</Text>
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_9')}</Text>
             <Image
               source={require('../../assets/help/help9.png')}
-              className="w-full h-40 rounded-lg"
+              className="w-full rounded-lg"
+              style={{ height: imageHeight }}
               resizeMode="contain"
             />
           </View>
@@ -134,6 +153,18 @@ const GeneralSettingsTab = () => {
   const [background, setBackground] = useState(settings.backgroundSettings?.imageUrl || '');
   const [purimSettings, setPurimSettings] = useState(settings.purimSettings || { regular: true, shushan: false });
   const [rtl, setRtl] = useState(false);
+  const heightScale = useHeightScale() * 0.5;
+
+  // Responsive sizes with height adjustment
+  const labelSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const buttonTextSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const iconSize = Math.round(useResponsiveIconSize('small') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const smallPadding = Math.round(useResponsiveSpacing(8) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(16) * heightScale);
+  const pickerHeight = Math.round(48 * heightScale);
+  const imageHeight = Math.round(160 * heightScale);
 
   useEffect(() => {
     const checkRTL = async () => {
@@ -437,27 +468,28 @@ const GeneralSettingsTab = () => {
 
   return (
     <ScrollView className="flex-1 bg-white">
-      <View className="p-4">
-        <View className="space-y-4">
-          <View className={`flex-row items-center gap-4 ${rtl ? 'flex-row-reverse' : ''}`}>
+      <View style={{ padding }}>
+        <View style={{ gap: margin }}>
+          <View className={`flex-row items-center ${rtl ? 'flex-row-reverse' : ''}`} style={{ gap: padding }}>
             {/* Name */}
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('synagogue_name')}</Text>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('synagogue_name')}</Text>
               <TextInput
-                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                 value={synagogueName}
                 onChangeText={handleSynagogueName}
                 placeholder="Enter Synagogue Name"
               />
             </View>
             {/* Language */}
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('language')}</Text>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('language')}</Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker
                   selectedValue={settings.language}
                   onValueChange={(value) => void handleChangeLanguage(value)}
-                  className="h-12"
+                  style={{ height: pickerHeight }}
                 >
                   <Picker.Item label="English" value="en" />
                   <Picker.Item label="עברית" value="he" />
@@ -465,52 +497,55 @@ const GeneralSettingsTab = () => {
               </View>
             </View>
             {/* nusach */}
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('nusach')}</Text>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('nusach')}</Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker selectedValue={settings.nusach} onValueChange={handleChangeNusach} className="h-12">
+                <Picker selectedValue={settings.nusach} onValueChange={handleChangeNusach} style={{ height: pickerHeight }}>
                   <Picker.Item label={t('nusach_ashkenaz')} value="ashkenaz" />
                   <Picker.Item label={t('nusach_sephardic')} value="sephardic" />
                 </Picker>
               </View>
             </View>
           </View>
-          <HelpSection />
+          {/* <HelpSection /> */}
           {/* gist sha512 */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('gist_sha')}</Text>
+          <View style={{ gap: smallPadding }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('gist_sha')}</Text>
             <TextInput
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+              className="w-full border border-gray-300 rounded-lg bg-gray-50"
+              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
               value={gistId}
               onChangeText={handleGistId}
             />
           </View>
           {/* gistFileName */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('gist_file_key')}</Text>
+          <View style={{ gap: smallPadding }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('gist_file_key')}</Text>
             <TextInput
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+              className="w-full border border-gray-300 rounded-lg bg-gray-50"
+              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
               value={gistFileName}
               onChangeText={handleGistFileName}
               placeholder="synagogue-settings.json"
             />
           </View>
           {/* access */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('gist_key')}</Text>
+          <View style={{ gap: smallPadding }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('gist_key')}</Text>
             <TextInput
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+              className="w-full border border-gray-300 rounded-lg bg-gray-50"
+              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
               value={githubKeyUrl}
               onChangeText={handleGithubKey}
               secureTextEntry={true}
             />
           </View>
           {/* Location */}
-          <View className={`flex-row items-center gap-4 ${rtl ? 'flex-row-reverse' : ''}`}>
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('location')}</Text>
+          <View className={`flex-row items-center ${rtl ? 'flex-row-reverse' : ''}`} style={{ gap: padding }}>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('location')}</Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker selectedValue={selectedLocation} onValueChange={handleCityChange} className="h-12">
+                <Picker selectedValue={selectedLocation} onValueChange={handleCityChange} style={{ height: pickerHeight }}>
                   {settings.language === 'en'
                     ? cities.map((location) => (
                         <Picker.Item key={location.name} label={location.name} value={location.name} />
@@ -526,10 +561,10 @@ const GeneralSettingsTab = () => {
               </View>
             </View>
             {/* olson */}
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('olson')}</Text>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('olson')}</Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker selectedValue={olson} onValueChange={handleOlsonChange} className="h-12">
+                <Picker selectedValue={olson} onValueChange={handleOlsonChange} style={{ height: pickerHeight }}>
                   {olsons.map((olson) => (
                     <Picker.Item key={olson} label={olson} value={olson} />
                   ))}
@@ -539,31 +574,34 @@ const GeneralSettingsTab = () => {
           </View>
 
           {/* Coordinates */}
-          <View className="flex-row space-x-4">
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('latitude')}</Text>
+          <View className="flex-row" style={{ gap: padding }}>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('latitude')}</Text>
               <TextInput
-                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                 value={latitude}
                 onChangeText={handleLatitudeChange}
                 keyboardType="numeric"
                 placeholder="Enter latitude"
               />
             </View>
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('longitude')}</Text>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('longitude')}</Text>
               <TextInput
-                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                 value={longitude}
                 onChangeText={handleLongitudeChange}
                 keyboardType="numeric"
                 placeholder="Enter longitude"
               />
             </View>
-            <View className="flex-1 space-y-2">
-              <Text className="text-sm font-medium text-gray-600">{t('elevation')}</Text>
+            <View className="flex-1" style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('elevation')}</Text>
               <TextInput
-                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                 value={elevation}
                 onChangeText={handleElevationChange}
                 keyboardType="numeric"
@@ -573,67 +611,77 @@ const GeneralSettingsTab = () => {
           </View>
 
           {/* Purim */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('purim_type')}</Text>
-            <View className="flex-row gap-4">
+          <View style={{ gap: smallPadding }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('purim_type')}</Text>
+            <View className="flex-row" style={{ gap: padding }}>
               <TouchableOpacity
-                className="flex-1 flex-row items-center p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="flex-1 flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
+                style={{ padding: smallPadding * 1.5 }}
                 onPress={() => handlePurimToggle('regular')}
               >
                 <View
-                  className={`w-5 h-5 rounded border-2 mr-3 items-center justify-center ${purimSettings.regular ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}`}
+                  className={`rounded border-2 items-center justify-center ${purimSettings.regular ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}`}
+                  style={{ width: 20 * heightScale, height: 20 * heightScale, marginRight: smallPadding * 1.5 }}
                 >
-                  {purimSettings.regular && <Feather name="check" size={14} color="white" />}
+                  {purimSettings.regular && <Feather name="check" size={iconSize * 0.7} color="white" />}
                 </View>
-                <Text className="text-gray-700">{t('purim_regular')}</Text>
+                <Text className="text-gray-700" style={{ fontSize: textSize }}>{t('purim_regular')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="flex-1 flex-row items-center p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="flex-1 flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
+                style={{ padding: smallPadding * 1.5 }}
                 onPress={() => handlePurimToggle('shushan')}
               >
                 <View
-                  className={`w-5 h-5 rounded border-2 mr-3 items-center justify-center ${purimSettings.shushan ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}`}
+                  className={`rounded border-2 items-center justify-center ${purimSettings.shushan ? 'bg-blue-500 border-blue-500' : 'border-gray-400'}`}
+                  style={{ width: 20 * heightScale, height: 20 * heightScale, marginRight: smallPadding * 1.5 }}
                 >
-                  {purimSettings.shushan && <Feather name="check" size={14} color="white" />}
+                  {purimSettings.shushan && <Feather name="check" size={iconSize * 0.7} color="white" />}
                 </View>
-                <Text className="text-gray-700">{t('purim_shushan')}</Text>
+                <Text className="text-gray-700" style={{ fontSize: textSize }}>{t('purim_shushan')}</Text>
               </TouchableOpacity>
             </View>
           </View>
           {/* background */}
-          <View className="space-y-4">
-            <Text className="text-sm font-medium text-gray-600">{t('background')}</Text>
+          <View style={{ gap: margin }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('background')}</Text>
 
             {/* Background Mode Selection */}
-            <View className="space-y-2">
-              <Text className="text-xs font-medium text-gray-500">{t('background_mode')}</Text>
-              <View className="flex-row space-x-2">
+            <View style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_mode')}</Text>
+              <View className="flex-row" style={{ gap: smallPadding }}>
                 <TouchableOpacity
-                  className={`flex-1 p-3 border rounded-lg ${backgroundMode === 'image' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  className={`flex-1 border rounded-lg ${backgroundMode === 'image' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  style={{ padding: smallPadding * 1.5 }}
                   onPress={() => handleBackgroundModeChange('image')}
                 >
                   <Text
                     className={`text-center ${backgroundMode === 'image' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                    style={{ fontSize: textSize }}
                   >
                     {t('background_mode_image')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className={`flex-1 p-3 border rounded-lg ${backgroundMode === 'solid' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  className={`flex-1 border rounded-lg ${backgroundMode === 'solid' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  style={{ padding: smallPadding * 1.5 }}
                   onPress={() => handleBackgroundModeChange('solid')}
                 >
                   <Text
                     className={`text-center ${backgroundMode === 'solid' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                    style={{ fontSize: textSize }}
                   >
                     {t('background_mode_solid')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className={`flex-1 p-3 border rounded-lg ${backgroundMode === 'gradient' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  className={`flex-1 border rounded-lg ${backgroundMode === 'gradient' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                  style={{ padding: smallPadding * 1.5 }}
                   onPress={() => handleBackgroundModeChange('gradient')}
                 >
                   <Text
                     className={`text-center ${backgroundMode === 'gradient' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                    style={{ fontSize: textSize }}
                   >
                     {t('background_mode_gradient')}
                   </Text>
@@ -643,39 +691,41 @@ const GeneralSettingsTab = () => {
 
             {/* Image Background Settings */}
             {backgroundMode === 'image' && (
-              <View className="space-y-3">
+              <View style={{ gap: smallPadding * 1.5 }}>
                 {/* Custom Image Upload */}
-                <View className="space-y-2">
-                  <Text className="text-xs font-medium text-gray-500">{t('background_custom_image')}</Text>
+                <View style={{ gap: smallPadding }}>
+                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_custom_image')}</Text>
                   {customImageUri ? (
-                    <View className="space-y-2">
+                    <View style={{ gap: smallPadding }}>
                       <View className="rounded-lg border-2 border-gray-300 overflow-hidden">
-                        <Image source={{ uri: customImageUri }} className="w-full h-40" resizeMode="cover" />
+                        <Image source={{ uri: customImageUri }} className="w-full" style={{ height: imageHeight }} resizeMode="cover" />
                       </View>
                       <TouchableOpacity
-                        className="flex-row items-center justify-center p-3 bg-red-500 rounded-lg"
+                        className="flex-row items-center justify-center bg-red-500 rounded-lg"
+                        style={{ padding: smallPadding * 1.5 }}
                         onPress={handleRemoveCustomImage}
                       >
-                        <Feather name="trash-2" size={18} color="white" />
-                        <Text className="text-white font-semibold ml-2">{t('background_remove_custom')}</Text>
+                        <Feather name="trash-2" size={iconSize} color="white" />
+                        <Text className="text-white font-semibold" style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}>{t('background_remove_custom')}</Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
                     <TouchableOpacity
-                      className="flex-row items-center justify-center p-4 border-2 border-dashed border-blue-400 rounded-lg bg-blue-50"
+                      className="flex-row items-center justify-center border-2 border-dashed border-blue-400 rounded-lg bg-blue-50"
+                      style={{ padding }}
                       onPress={() => void handlePickCustomImage()}
                     >
-                      <Feather name="upload" size={20} color="#3B82F6" />
-                      <Text className="text-blue-600 font-semibold ml-2">{t('background_upload_custom')}</Text>
+                      <Feather name="upload" size={iconSize} color="#3B82F6" />
+                      <Text className="text-blue-600 font-semibold" style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}>{t('background_upload_custom')}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
 
                 {/* Predefined Images */}
                 {!customImageUri && (
-                  <View className="space-y-2">
-                    <Text className="text-xs font-medium text-gray-500">{t('background_choose_from_library')}</Text>
-                    <Picker selectedValue={background} onValueChange={handleBackgroundChange} className="h-12">
+                  <View style={{ gap: smallPadding }}>
+                    <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_choose_from_library')}</Text>
+                    <Picker selectedValue={background} onValueChange={handleBackgroundChange} style={{ height: pickerHeight }}>
                       {backgroundImages.map((bimg) => (
                         <Picker.Item key={bimg.label} label={bimg.label} value={bimg.value}></Picker.Item>
                       ))}
@@ -687,30 +737,31 @@ const GeneralSettingsTab = () => {
 
             {/* Solid Color Background Settings */}
             {backgroundMode === 'solid' && (
-              <View className="space-y-2">
-                <Text className="text-xs font-medium text-gray-500">{t('background_solid_color')}</Text>
+              <View style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_solid_color')}</Text>
                 <TouchableOpacity
-                  className="flex-row items-center space-x-2 p-4 border border-gray-300 rounded-lg bg-gray-50"
+                  className="flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding, gap: smallPadding }}
                   onPress={() => openColorPicker(null, solidColor)}
                 >
                   <View
-                    className="w-16 h-16 rounded border-2 border-gray-400"
-                    style={{ backgroundColor: solidColor }}
+                    className="rounded border-2 border-gray-400"
+                    style={{ backgroundColor: solidColor, width: 64 * heightScale, height: 64 * heightScale }}
                   />
                   <View className="flex-1">
-                    <Text className="text-gray-700 font-semibold">{solidColor.toUpperCase()}</Text>
-                    <Text className="text-gray-500 text-sm">{t('optional')}</Text>
+                    <Text className="text-gray-700 font-semibold" style={{ fontSize: textSize }}>{solidColor.toUpperCase()}</Text>
+                    <Text className="text-gray-500" style={{ fontSize: labelSize }}>{t('optional')}</Text>
                   </View>
-                  <Feather name="edit-2" size={20} color="#666" />
+                  <Feather name="edit-2" size={iconSize} color="#666" />
                 </TouchableOpacity>
                 {/* Preset Colors */}
-                <View className="flex-row flex-wrap gap-2">
+                <View className="flex-row flex-wrap" style={{ gap: smallPadding }}>
                   {['#E3F2FD', '#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5', '#2196F3', '#1E88E5', '#1976D2'].map(
                     (color) => (
                       <TouchableOpacity
                         key={color}
-                        className="w-10 h-10 rounded border border-gray-300"
-                        style={{ backgroundColor: color }}
+                        className="rounded border border-gray-300"
+                        style={{ backgroundColor: color, width: 40 * heightScale, height: 40 * heightScale }}
                         onPress={() => handleSolidColorChange(color)}
                       />
                     ),
@@ -721,66 +772,73 @@ const GeneralSettingsTab = () => {
 
             {/* Gradient Background Settings */}
             {backgroundMode === 'gradient' && (
-              <View className="space-y-3">
-                <Text className="text-xs font-medium text-gray-500">{t('background_gradient_colors')}</Text>
-                <View className="flex-row gap-4">
+              <View style={{ gap: smallPadding * 1.5 }}>
+                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_gradient_colors')}</Text>
+                <View className="flex-row" style={{ gap: padding }}>
                   {gradientColors.map((color, index) => (
                     <View
                       key={index}
                       className="flex-1 flex-row items-stretch rounded-lg overflow-hidden border border-gray-300"
                     >
                       <TouchableOpacity
-                        className="flex-1 items-center justify-center py-4"
-                        style={{ backgroundColor: color }}
+                        className="flex-1 items-center justify-center"
+                        style={{ backgroundColor: color, paddingVertical: padding }}
                         onPress={() => openColorPicker(index, color)}
                       >
-                        <Feather name="edit-2" size={20} color="rgba(255,255,255,0.8)" />
+                        <Feather name="edit-2" size={iconSize} color="rgba(255,255,255,0.8)" />
                       </TouchableOpacity>
                       {gradientColors.length > 2 && (
                         <TouchableOpacity
-                          className="px-3 bg-red-500 items-center justify-center"
+                          className="bg-red-500 items-center justify-center"
+                          style={{ paddingHorizontal: smallPadding * 1.5 }}
                           onPress={() => handleRemoveGradientColor(index)}
                         >
-                          <Feather name="x" size={16} color="white" />
+                          <Feather name="x" size={iconSize * 0.8} color="white" />
                         </TouchableOpacity>
                       )}
                     </View>
                   ))}
                 </View>
-                <TouchableOpacity className="p-3 bg-blue-500 rounded-lg" onPress={handleAddGradientColor}>
-                  <Text className="text-center text-white font-semibold">{t('background_gradient_add_color')}</Text>
+                <TouchableOpacity className="bg-blue-500 rounded-lg" style={{ padding: smallPadding * 1.5 }} onPress={handleAddGradientColor}>
+                  <Text className="text-center text-white font-semibold" style={{ fontSize: buttonTextSize }}>{t('background_gradient_add_color')}</Text>
                 </TouchableOpacity>
 
                 {/* Gradient Direction */}
-                <View className="space-y-2">
-                  <Text className="text-xs font-medium text-gray-500">{t('background_gradient_direction')}</Text>
-                  <View className="flex-row space-x-2">
+                <View style={{ gap: smallPadding }}>
+                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_gradient_direction')}</Text>
+                  <View className="flex-row" style={{ gap: smallPadding }}>
                     <TouchableOpacity
-                      className={`flex-1 p-3 border rounded-lg ${gradientDirection === 'vertical' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      className={`flex-1 border rounded-lg ${gradientDirection === 'vertical' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      style={{ padding: smallPadding * 1.5 }}
                       onPress={() => handleGradientDirectionChange('vertical')}
                     >
                       <Text
                         className={`text-center ${gradientDirection === 'vertical' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                        style={{ fontSize: textSize }}
                       >
                         {t('background_gradient_direction_vertical')}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      className={`flex-1 p-3 border rounded-lg ${gradientDirection === 'horizontal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      className={`flex-1 border rounded-lg ${gradientDirection === 'horizontal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      style={{ padding: smallPadding * 1.5 }}
                       onPress={() => handleGradientDirectionChange('horizontal')}
                     >
                       <Text
                         className={`text-center ${gradientDirection === 'horizontal' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                        style={{ fontSize: textSize }}
                       >
                         {t('background_gradient_direction_horizontal')}
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      className={`flex-1 p-3 border rounded-lg ${gradientDirection === 'diagonal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      className={`flex-1 border rounded-lg ${gradientDirection === 'diagonal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                      style={{ padding: smallPadding * 1.5 }}
                       onPress={() => handleGradientDirectionChange('diagonal')}
                     >
                       <Text
                         className={`text-center ${gradientDirection === 'diagonal' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                        style={{ fontSize: textSize }}
                       >
                         {t('background_gradient_direction_diagonal')}
                       </Text>

@@ -7,6 +7,7 @@ import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { daysOfWeek } from 'utils/classesHelpers';
 import { Shiur } from 'utils/defs';
 import { isRTL } from 'utils/utils';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 // Checkbox styles - extracted to avoid inline style warnings
 const checkboxStyles = {
@@ -24,6 +25,17 @@ const ClassesSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
   const [rtl, setRtl] = useState(false);
+  const heightScale = useHeightScale() * 0.6;
+
+  // Responsive sizes with height adjustment
+  const labelSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const buttonTextSize = Math.round(useResponsiveFontSize('bodyLarge') * heightScale);
+  const checkboxSize = Math.round(25 * heightScale);
+  const iconSize = Math.round(useResponsiveIconSize('medium') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const smallPadding = Math.round(useResponsiveSpacing(8) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(16) * heightScale);
 
   useEffect(() => {
     const checkRTL = async () => {
@@ -95,75 +107,103 @@ const ClassesSettingsTab = () => {
   };
 
   const renderClassItem = ({ rtl, item, index }: { rtl: boolean; item: Shiur; index: number }) => (
-    <View className="bg-white rounded-lg p-4 mb-4 shadow-sm  border border-gray-500">
+    <View className="bg-white rounded-lg shadow-sm border border-gray-500" style={{ padding, marginBottom: margin }}>
       <View className={`flex-row ${rtl ? 'justify-end' : 'justify-start'}`}>
-        <TouchableOpacity onPress={() => handleDeleteClass(index)} className="p-2">
-          <Feather name="trash-2" size={24} color="red" />
+        <TouchableOpacity onPress={() => handleDeleteClass(index)} style={{ padding: smallPadding }}>
+          <Feather name="trash-2" size={iconSize} color="red" />
         </TouchableOpacity>
       </View>
-      <View className="space-y-4 ">
+      <View style={{ gap: padding }}>
         {/* Days of the week selection */}
         <View>
-          <Text className="text-gray-600 mb-2 text-center font-medium">{t('day')}</Text>
-          <View className={`flex-row flex-wrap gap-2 ${rtl ? 'justify-end' : 'justify-start'}`}>
+          <Text
+            className="text-gray-600 text-center font-medium"
+            style={{ fontSize: labelSize, marginBottom: smallPadding }}
+          >
+            {t('day')}
+          </Text>
+          <View className={`flex-row flex-wrap ${rtl ? 'justify-end' : 'justify-start'}`} style={{ gap: smallPadding }}>
             {(rtl ? [...daysOfWeek].reverse() : daysOfWeek).map((day) => (
-              <View key={day.number} className="flex-row items-center mb-2">
+              <View key={day.number} className="flex-row items-center" style={{ marginBottom: smallPadding }}>
                 <BouncyCheckbox
-                  size={25}
+                  size={checkboxSize}
                   isChecked={item.day.includes(day.number)}
                   fillColor="#3b82f6"
                   iconStyle={checkboxStyles.blue.iconStyle}
                   innerIconStyle={checkboxStyles.blue.innerIconStyle}
                   onPress={() => handleToggleDay(index, day.number)}
-                  textComponent={<Text className={`${rtl ? 'mr-2' : 'ml-2'} text-gray-700`}>{t(day.key)}</Text>}
+                  textComponent={
+                    <Text
+                      className="text-gray-700"
+                      style={{
+                        fontSize: textSize,
+                        marginLeft: rtl ? 0 : smallPadding,
+                        marginRight: rtl ? smallPadding : 0,
+                      }}
+                    >
+                      {t(day.key)}
+                    </Text>
+                  }
                 />
               </View>
             ))}
           </View>
         </View>
 
-        <View className={`flex-row gap-4${rtl ? 'space-x-reverse' : ''} space-x-4`}>
+        <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
           <View className="flex-1">
-            <Text className="text-gray-600 mb-1 text-center">{t('start_time')}</Text>
+            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
+              {t('start_time')}
+            </Text>
             <TextInput
               value={item.start}
               onChangeText={(value) => handleUpdateClass(index, 'start', value)}
-              className="border border-gray-300 rounded-md p-2 text-center"
+              className="border border-gray-300 rounded-md text-center"
+              style={{ padding: smallPadding, fontSize: textSize }}
               placeholder="HH:MM"
               textAlign={rtl ? 'right' : 'left'}
             />
           </View>
 
           <View className="flex-1">
-            <Text className="text-gray-600 mb-1 text-center">{t('end_time')}</Text>
+            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
+              {t('end_time')}
+            </Text>
             <TextInput
               value={item.end}
               onChangeText={(value) => handleUpdateClass(index, 'end', value)}
-              className="border border-gray-300 rounded-md p-2 text-center"
+              className="border border-gray-300 rounded-md text-center"
+              style={{ padding: smallPadding, fontSize: textSize }}
               placeholder="HH:MM"
               textAlign={rtl ? 'right' : 'left'}
             />
           </View>
         </View>
 
-        <View className={`flex-row gap-4 flex-row ${rtl ? 'space-x-reverse' : ''} space-x-4`}>
+        <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
           <View className="flex-1">
-            <Text className="text-gray-600 mb-1 text-center">{t('tutor')}</Text>
+            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
+              {t('tutor')}
+            </Text>
             <TextInput
               value={item.tutor}
               onChangeText={(value) => handleUpdateClass(index, 'tutor', value)}
-              className="border border-gray-300 rounded-md p-2 text-center"
+              className="border border-gray-300 rounded-md text-center"
+              style={{ padding: smallPadding, fontSize: textSize }}
               placeholder={t('tutor')}
               textAlign={rtl ? 'right' : 'left'}
             />
           </View>
 
           <View className="flex-1">
-            <Text className="text-gray-600 mb-1 text-center">{t('subject')}</Text>
+            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
+              {t('subject')}
+            </Text>
             <TextInput
               value={item.subject}
               onChangeText={(value) => handleUpdateClass(index, 'subject', value)}
-              className="border border-gray-300 rounded-md p-2 text-center"
+              className="border border-gray-300 rounded-md text-center"
+              style={{ padding: smallPadding, fontSize: textSize }}
               placeholder={t('subject')}
               textAlign={rtl ? 'right' : 'left'}
             />
@@ -182,31 +222,35 @@ const ClassesSettingsTab = () => {
   }
 
   return (
-    <View className="flex-1 mt-4">
+    <View className="flex-1" style={{ marginTop: margin }}>
       <BouncyCheckbox
+        size={checkboxSize}
         isChecked={settings.enableClasses}
         fillColor="green"
         iconStyle={checkboxStyles.green.iconStyle}
         innerIconStyle={checkboxStyles.green.innerIconStyle}
         text={t('enable_classes')}
-        textComponent={<Text>{t('enable_classes')}</Text>}
+        textComponent={<Text style={{ fontSize: textSize }}>{t('enable_classes')}</Text>}
         onPress={(value) => saveChecked(value)}
       />
       {settings.enableClasses && (
-        <View className="flex-1 p-4">
+        <View className="flex-1" style={{ padding }}>
           <FlatList
             data={settings.classes}
             renderItem={({ item, index }) => renderClassItem({ rtl, item, index })}
             keyExtractor={(item, index) => item.id || index.toString()}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 16 }}
+            contentContainerStyle={{ paddingBottom: padding }}
             ListHeaderComponent={
               <TouchableOpacity
                 onPress={handleAddClass}
-                className="flex-row items-center justify-center bg-blue-500 p-3 rounded-lg mb-4"
+                className="flex-row items-center justify-center bg-blue-500 rounded-lg"
+                style={{ padding: smallPadding * 1.5, marginBottom: margin }}
               >
-                <Feather name="plus" size={24} color="white" />
-                <Text className="text-white ml-2 font-medium">{t('add_class')}</Text>
+                <Feather name="plus" size={iconSize} color="white" />
+                <Text className="text-white font-medium" style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}>
+                  {t('add_class')}
+                </Text>
               </TouchableOpacity>
             }
           />

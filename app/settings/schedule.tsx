@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { ScheduleColumn, Prayer } from 'utils/defs';
 import { showConfirm, showAlert } from 'utils/alert';
 import { isRTL } from 'utils/utils';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const ScheduleSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
@@ -20,6 +21,19 @@ const ScheduleSettingsTab = () => {
   const [prayerTime, setPrayerTime] = useState('');
   const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
   const [rtl, setRtl] = useState(false);
+  const heightScale = useHeightScale() * 0.6;
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const labelSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const buttonTextSize = Math.round(useResponsiveFontSize('bodyLarge') * heightScale);
+  const checkboxSize = Math.round(25 * heightScale);
+  const iconSize = Math.round(useResponsiveIconSize('medium') * heightScale);
+  const smallIconSize = Math.round(useResponsiveIconSize('small') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const smallPadding = Math.round(useResponsiveSpacing(8) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(16) * heightScale);
 
   useEffect(() => {
     const checkRTL = async () => {
@@ -239,72 +253,98 @@ const ScheduleSettingsTab = () => {
   const columns = settings.scheduleSettings?.columns || [];
 
   return (
-    <View className="flex-1 mt-4">
+    <View className="flex-1" style={{ marginTop: margin }}>
       <BouncyCheckbox
+        size={checkboxSize}
         isChecked={settings.enableSchedule}
         fillColor="green"
         iconStyle={{ borderColor: 'green' }}
         innerIconStyle={{ borderWidth: 2 }}
         text={t('enable_schedule')}
-        textComponent={<Text>{t('enable_schedule')}</Text>}
+        textComponent={<Text style={{ fontSize: textSize }}>{t('enable_schedule')}</Text>}
         onPress={(value) => void saveChecked(value)}
       />
 
       {settings.enableSchedule && (
-        <ScrollView className="flex-1 px-4 mt-4">
+        <ScrollView className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin }}>
           {/* Add Column Button */}
           <TouchableOpacity
-            className="bg-blue-500 p-3 rounded-lg mb-4 flex-row items-center justify-center"
+            className="bg-blue-500 rounded-lg flex-row items-center justify-center"
+            style={{ padding: smallPadding * 1.5, marginBottom: margin }}
             onPress={openAddColumnModal}
           >
-            <Ionicons name="add" size={24} color="white" />
-            <Text className="text-white font-bold ml-2">{t('schedule_add_column')}</Text>
+            <Ionicons name="add" size={iconSize} color="white" />
+            <Text className="text-white font-bold" style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}>
+              {t('schedule_add_column')}
+            </Text>
           </TouchableOpacity>
 
           {/* Columns List */}
           {columns.map((column) => (
-            <View key={column.id} className="bg-gray-100 rounded-lg p-4 mb-4  border border-gray-400">
+            <View
+              key={column.id}
+              className="bg-gray-100 rounded-lg border border-gray-400"
+              style={{ padding, marginBottom: margin }}
+            >
               {/* Column Header */}
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-xl font-bold flex-1">{column.title}</Text>
-                <View className="flex-row gap-">
+              <View className="flex-row justify-between items-center" style={{ marginBottom: smallPadding * 1.5 }}>
+                <Text className="font-bold flex-1" style={{ fontSize: titleSize }}>
+                  {column.title}
+                </Text>
+                <View className="flex-row" style={{ gap: smallPadding }}>
                   <TouchableOpacity onPress={() => openEditColumnModal(column)}>
-                    <Feather name="edit" size={20} color="#3b82f6" />
+                    <Feather name="edit" size={smallIconSize} color="#3b82f6" />
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => deleteColumn(column.id)}>
-                    <Feather name="trash-2" size={20} color="#ef4444" />
+                    <Feather name="trash-2" size={smallIconSize} color="#ef4444" />
                   </TouchableOpacity>
                 </View>
               </View>
 
               {/* Add Prayer Button */}
               <TouchableOpacity
-                className="bg-green-500 p-2 rounded-lg mb-3 flex-row items-center justify-center"
+                className="bg-green-500 rounded-lg flex-row items-center justify-center"
+                style={{ padding: smallPadding, marginBottom: smallPadding * 1.5 }}
                 onPress={() => openAddPrayerModal(column.id)}
               >
-                <Ionicons name="add" size={20} color="white" />
-                <Text className="text-white font-semibold ml-1">{t('schedule_add_prayer')}</Text>
+                <Ionicons name="add" size={smallIconSize} color="white" />
+                <Text
+                  className="text-white font-semibold"
+                  style={{ fontSize: labelSize, marginLeft: smallPadding / 2 }}
+                >
+                  {t('schedule_add_prayer')}
+                </Text>
               </TouchableOpacity>
 
               {/* Prayers List */}
               {column.prayers.length === 0 ? (
-                <Text className="text-gray-500 text-center py-2">{t('schedule_no_prayers')}</Text>
+                <Text
+                  className="text-gray-500 text-center"
+                  style={{ fontSize: labelSize, paddingVertical: smallPadding }}
+                >
+                  {t('schedule_no_prayers')}
+                </Text>
               ) : (
                 column.prayers.map((prayer) => (
                   <View
                     key={prayer.id}
-                    className={`${rtl ? 'space-x-reverse' : ''} bg-white rounded-lg p-3 mb-2 flex-row items-center border border-gray-400 `}
+                    className={`${rtl ? 'space-x-reverse' : ''} bg-white rounded-lg flex-row items-center border border-gray-400`}
+                    style={{ padding: smallPadding * 1.5, marginBottom: smallPadding }}
                   >
-                    <View className="flex-row flex-1 items-center justify-between pr-4">
-                      <Text className="font-semibold text-base">{prayer.name}</Text>
-                      <Text className="text-gray-700 font-bold text-base">{prayer.time}</Text>
+                    <View className="flex-row flex-1 items-center justify-between" style={{ paddingRight: padding }}>
+                      <Text className="font-semibold" style={{ fontSize: textSize }}>
+                        {prayer.name}
+                      </Text>
+                      <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                        {prayer.time}
+                      </Text>
                     </View>
-                    <View className="flex-row gap-3 items-center">
+                    <View className="flex-row items-center" style={{ gap: smallPadding * 1.5 }}>
                       <TouchableOpacity onPress={() => openEditPrayerModal(column.id, prayer)}>
-                        <Feather name="edit" size={20} color="#3b82f6" />
+                        <Feather name="edit" size={smallIconSize} color="#3b82f6" />
                       </TouchableOpacity>
                       <TouchableOpacity onPress={() => deletePrayer(column.id, prayer.id)}>
-                        <Feather name="trash-2" size={20} color="#ef4444" />
+                        <Feather name="trash-2" size={smallIconSize} color="#ef4444" />
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -313,7 +353,11 @@ const ScheduleSettingsTab = () => {
             </View>
           ))}
 
-          {columns.length === 0 && <Text className="text-gray-500 text-center py-4">{t('schedule_no_prayers')}</Text>}
+          {columns.length === 0 && (
+            <Text className="text-gray-500 text-center" style={{ fontSize: labelSize, paddingVertical: padding }}>
+              {t('schedule_no_prayers')}
+            </Text>
+          )}
         </ScrollView>
       )}
 
@@ -324,29 +368,39 @@ const ScheduleSettingsTab = () => {
         animationType="slide"
         onRequestClose={() => setIsColumnModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50 ">
-          <View className="bg-white rounded-lg p-6 w-4/5 max-w-md">
-            <Text className="text-xl font-bold mb-4">
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-lg w-4/5 max-w-md" style={{ padding: padding * 1.5 }}>
+            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
               {editingColumn ? t('schedule_edit_column') : t('schedule_add_column')}
             </Text>
 
-            <Text className="mb-2">{t('schedule_column_title')}</Text>
+            <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_column_title')}</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg p-2 mb-4"
+              className="border border-gray-300 rounded-lg"
+              style={{ padding: smallPadding, fontSize: textSize, marginBottom: margin }}
               value={columnTitle}
               onChangeText={setColumnTitle}
               placeholder={t('schedule_column_title')}
             />
 
-            <View className="flex-row gap-2">
+            <View className="flex-row" style={{ gap: smallPadding }}>
               <TouchableOpacity
-                className="flex-1 bg-gray-300 p-3 rounded-lg"
+                className="flex-1 bg-gray-300 rounded-lg"
+                style={{ padding: smallPadding * 1.5 }}
                 onPress={() => setIsColumnModalVisible(false)}
               >
-                <Text className="text-center font-semibold">{t('deceased_cancel')}</Text>
+                <Text className="text-center font-semibold" style={{ fontSize: buttonTextSize }}>
+                  {t('deceased_cancel')}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-blue-500 p-3 rounded-lg" onPress={saveColumn}>
-                <Text className="text-center font-semibold text-white">{t('save')}</Text>
+              <TouchableOpacity
+                className="flex-1 bg-blue-500 rounded-lg"
+                style={{ padding: smallPadding * 1.5 }}
+                onPress={saveColumn}
+              >
+                <Text className="text-center font-semibold text-white" style={{ fontSize: buttonTextSize }}>
+                  {t('save')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -361,36 +415,47 @@ const ScheduleSettingsTab = () => {
         onRequestClose={() => setIsPrayerModalVisible(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white rounded-lg p-6 w-4/5 max-w-md">
-            <Text className="text-xl font-bold mb-4">
+          <View className="bg-white rounded-lg w-4/5 max-w-md" style={{ padding: padding * 1.5 }}>
+            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
               {editingPrayer ? t('schedule_edit_prayer') : t('schedule_add_prayer')}
             </Text>
 
-            <Text className="mb-2">{t('schedule_prayer_name')}</Text>
+            <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_prayer_name')}</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg p-2 mb-4"
+              className="border border-gray-300 rounded-lg"
+              style={{ padding: smallPadding, fontSize: textSize, marginBottom: margin }}
               value={prayerName}
               onChangeText={setPrayerName}
               placeholder={t('schedule_prayer_name')}
             />
 
-            <Text className="mb-2">{t('schedule_prayer_time')}</Text>
+            <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_prayer_time')}</Text>
             <TextInput
-              className="border border-gray-300 rounded-lg p-2 mb-4"
+              className="border border-gray-300 rounded-lg"
+              style={{ padding: smallPadding, fontSize: textSize, marginBottom: margin }}
               value={prayerTime}
               onChangeText={setPrayerTime}
               placeholder="08:00"
             />
 
-            <View className="flex-row gap-2">
+            <View className="flex-row" style={{ gap: smallPadding }}>
               <TouchableOpacity
-                className="flex-1 bg-gray-300 p-3 rounded-lg"
+                className="flex-1 bg-gray-300 rounded-lg"
+                style={{ padding: smallPadding * 1.5 }}
                 onPress={() => setIsPrayerModalVisible(false)}
               >
-                <Text className="text-center font-semibold">{t('deceased_cancel')}</Text>
+                <Text className="text-center font-semibold" style={{ fontSize: buttonTextSize }}>
+                  {t('deceased_cancel')}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity className="flex-1 bg-green-500 p-3 rounded-lg" onPress={savePrayer}>
-                <Text className="text-center font-semibold text-white">{t('save')}</Text>
+              <TouchableOpacity
+                className="flex-1 bg-green-500 rounded-lg"
+                style={{ padding: smallPadding * 1.5 }}
+                onPress={savePrayer}
+              >
+                <Text className="text-center font-semibold text-white" style={{ fontSize: buttonTextSize }}>
+                  {t('save')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>

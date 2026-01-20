@@ -10,6 +10,7 @@ import MessagesSettingsTab from './messages';
 import ClassesSettingsTab from './classes';
 import DeceasedSettingsTab from './deceased';
 import ScheduleSettingsTab from './schedule';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -30,6 +31,15 @@ export default function SettingsLayout() {
   const [activeTab, setActiveTab] = useState<TabKey>('general');
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const { width, height } = useWindowDimensions();
+  const heightScale = useHeightScale() / 1.5;
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(useResponsiveFontSize('displaySmall') * heightScale);
+  const tabTextSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
+  const buttonTextSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
+  const smallPadding = Math.round(useResponsiveSpacing(12) * heightScale);
+  const sidebarWidth = Math.round(192 * heightScale);
 
   // Use sidebar layout for TV/wide screens (height < 700 and width > height)
   const isTVLayout = height < 700 && width > height;
@@ -81,10 +91,12 @@ export default function SettingsLayout() {
     return (
       <View className="flex-1 flex-row">
         {/* Left Sidebar */}
-        <View className="w-48 bg-gray-100 border-r border-gray-300">
+        <View className="bg-gray-100 border-r border-gray-300" style={{ width: sidebarWidth }}>
           {/* Title in sidebar */}
-          <View className="p-3 border-b border-gray-300">
-            <Text className="text-xl font-bold text-center">{t('settings_title')}</Text>
+          <View className="border-b border-gray-300" style={{ padding: smallPadding }}>
+            <Text className="font-bold text-center" style={{ fontSize: tabTextSize * 1.2 }}>
+              {t('settings_title')}
+            </Text>
           </View>
 
           {/* Tab buttons */}
@@ -93,9 +105,13 @@ export default function SettingsLayout() {
               <TouchableOpacity
                 key={tab.key}
                 onPress={() => setActiveTab(tab.key)}
-                className={`p-3 border-b border-gray-200 ${activeTab === tab.key ? 'bg-blue-500' : 'bg-transparent'}`}
+                className={`border-b border-gray-200 ${activeTab === tab.key ? 'bg-blue-500' : 'bg-transparent'}`}
+                style={{ padding: smallPadding }}
               >
-                <Text className={`text-base ${activeTab === tab.key ? 'text-white font-semibold' : 'text-gray-700'}`}>
+                <Text
+                  className={activeTab === tab.key ? 'text-white font-semibold' : 'text-gray-700'}
+                  style={{ fontSize: tabTextSize }}
+                >
                   {tab.title}
                 </Text>
               </TouchableOpacity>
@@ -103,9 +119,15 @@ export default function SettingsLayout() {
           </ScrollView>
 
           {/* Save button in sidebar */}
-          <View className="p-3 border-t border-gray-300">
-            <TouchableOpacity className="bg-blue-500 p-3 rounded-lg items-center" onPress={handleSave}>
-              <Text className="text-white font-medium">{t('save')}</Text>
+          <View className="border-t border-gray-300" style={{ padding: smallPadding }}>
+            <TouchableOpacity
+              className="bg-blue-500 rounded-lg items-center"
+              style={{ padding: smallPadding }}
+              onPress={handleSave}
+            >
+              <Text className="text-white font-medium" style={{ fontSize: tabTextSize }}>
+                {t('save')}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -118,7 +140,9 @@ export default function SettingsLayout() {
         {/* Save confirmation banner */}
         {settingsSaved && (
           <Animated.View style={[styles.banner, styles.bannerTV, { opacity: fadeAnim }]}>
-            <Text className="text-white text-base">{t('settings_saved')}</Text>
+            <Text className="text-white" style={{ fontSize: tabTextSize }}>
+              {t('settings_saved')}
+            </Text>
           </Animated.View>
         )}
       </View>
@@ -129,8 +153,10 @@ export default function SettingsLayout() {
   return (
     <View className="flex-1">
       {/* Title */}
-      <View className="items-center py-4">
-        <Text className="text-3xl font-bold">{t('settings_title')}</Text>
+      <View className="items-center" style={{ paddingVertical: padding }}>
+        <Text className="font-bold" style={{ fontSize: titleSize }}>
+          {t('settings_title')}
+        </Text>
       </View>
       <View className="flex-1 items-center">
         <View className="w-full max-w-2xl flex-1">
@@ -142,15 +168,19 @@ export default function SettingsLayout() {
             <Tab.Screen name="deceased" component={DeceasedSettingsTab} options={{ title: t('deceased_title') }} />
           </Tab.Navigator>
         </View>
-        <View className="w-full max-w-md p-4">
-          <TouchableOpacity className="bg-blue-500 p-4 rounded-lg items-center" onPress={handleSave}>
-            <Text className="text-white font-medium text-lg">{t('save')}</Text>
+        <View className="w-full max-w-md" style={{ padding }}>
+          <TouchableOpacity className="bg-blue-500 rounded-lg items-center" style={{ padding }} onPress={handleSave}>
+            <Text className="text-white font-medium" style={{ fontSize: buttonTextSize }}>
+              {t('save')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
       {settingsSaved && (
         <Animated.View style={[styles.banner, { opacity: fadeAnim }]}>
-          <Text className="text-white text-base">{t('settings_saved')}</Text>
+          <Text className="text-white" style={{ fontSize: tabTextSize }}>
+            {t('settings_saved')}
+          </Text>
         </Animated.View>
       )}
     </View>

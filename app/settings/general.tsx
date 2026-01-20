@@ -240,7 +240,7 @@ const GeneralSettingsTab = () => {
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
     };
-    updateSettings({ background: background, backgroundSettings: newBackgroundSettings });
+    updateSettings({ backgroundSettings: newBackgroundSettings });
   };
 
   const handlePurimToggle = (type: 'regular' | 'shushan') => {

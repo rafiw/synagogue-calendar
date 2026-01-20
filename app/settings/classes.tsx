@@ -65,7 +65,7 @@ const ClassesSettingsTab = () => {
       ...defaultShiur,
       id: `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
-    const updatedClasses = [...settings.classes, newClass];
+    const updatedClasses = [newClass, ...settings.classes];
     updateSettings({ classes: updatedClasses });
   };
 

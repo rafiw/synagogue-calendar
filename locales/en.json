@@ -194,12 +194,5 @@
   "active": "Active",
   "scheduled": "Scheduled",
   "message_enabled": "Enabled",
-  "no_limit": "No limit",
-  "display_time_settings": "Display Time Settings",
-  "display_time_description": "Set how long each component is displayed (in seconds)",
-  "display_time_zmanim": "Zmanim Display Time (seconds)",
-  "display_time_classes": "Classes Display Time (seconds)",
-  "display_time_deceased": "Memorial Display Time (seconds)",
-  "display_time_messages": "Messages Display Time (seconds)",
-  "display_time_schedule": "Schedule Display Time (seconds)"
+  "no_limit": "No limit"
 }

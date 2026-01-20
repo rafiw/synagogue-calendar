@@ -557,7 +557,7 @@ const GeneralSettingsTab = () => {
             />
           </View>
           {/* gistFileName */}
-          <View style={{ gap: smallPadding }}>
+          {/* <View style={{ gap: smallPadding }}>
             <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
               {t('gist_file_key')}
             </Text>
@@ -568,7 +568,7 @@ const GeneralSettingsTab = () => {
               onChangeText={handleGistFileName}
               placeholder="synagogue-settings.json"
             />
-          </View>
+          </View> */}
           {/* access */}
           <View style={{ gap: smallPadding }}>
             <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>

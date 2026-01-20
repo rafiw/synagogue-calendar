@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { FastDayType, ZmanimWrapper } from '../utils/zmanim_wrapper';
 import { useSettings } from '../context/settingsContext';
 import { useTranslation } from 'react-i18next';
@@ -35,7 +35,9 @@ const getTachanunLabel = (
 const Zmanim: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { settings } = useSettings();
+  const { width } = useWindowDimensions();
   const heightScale = useHeightScale();
+  const isSmallWidth = width < 500;
 
   // Responsive sizes with height adjustment
   const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
@@ -77,7 +79,10 @@ const Zmanim: React.FC = () => {
   const fastDay = zmanim.isFastDay();
 
   const InfoGroup = ({ title, items }: { title: string; items: { text: string }[] }) => (
-    <View className={`${backgroundColor} rounded-lg flex-1 shadow-md`} style={{ padding, margin }}>
+    <View
+      className={`${backgroundColor} rounded-lg ${isSmallWidth ? 'w-full' : 'flex-1'} shadow-md`}
+      style={{ padding, margin }}
+    >
       <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
         {title}
       </Text>
@@ -103,7 +108,10 @@ const Zmanim: React.FC = () => {
   }, []);
 
   const TimeGroup = ({ title, items }: { title: string; items: ({ text: string } | null)[] }) => (
-    <View className={`${backgroundColor} rounded-lg flex-1 shadow-md`} style={{ padding, margin }}>
+    <View
+      className={`${backgroundColor} rounded-lg ${isSmallWidth ? 'w-full' : 'flex-1'} shadow-md`}
+      style={{ padding, margin }}
+    >
       <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
         {title}
       </Text>
@@ -128,7 +136,7 @@ const Zmanim: React.FC = () => {
   return (
     <ScrollView className="flex-1" contentContainerStyle={{ padding: padding / 2 }}>
       {/* Top Row */}
-      <View className="flex-row justify-between" style={{ marginBottom: margin }}>
+      <View className={isSmallWidth ? 'flex-col' : 'flex-row justify-between'} style={{ marginBottom: margin }}>
         <InfoGroup
           title={t('daily_info')}
           items={[

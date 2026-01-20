@@ -1,7 +1,7 @@
 import { useSettings } from 'context/settingsContext';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View, useWindowDimensions } from 'react-native';
 import { isRTL } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
@@ -12,8 +12,11 @@ export async function getSubPages(): Promise<number> {
 const Schedule: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
+  const { width } = useWindowDimensions();
   const [rtl, setRtl] = useState(false);
   const heightScale = useHeightScale();
+  const isSmallHeight = width < 500;
+
   // Responsive sizes
   const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
   const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
@@ -36,7 +39,7 @@ const Schedule: React.FC = () => {
     rtl: boolean;
   }) => (
     <View
-      className={`${backgroundColor} rounded-2xl flex-1 shadow-lg border border-gray-200`}
+      className={`${backgroundColor} rounded-2xl ${isSmallHeight ? 'w-full' : 'flex-1'} shadow-lg border border-gray-200`}
       style={{ padding, margin }}
     >
       <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
@@ -94,7 +97,7 @@ const Schedule: React.FC = () => {
   return (
     <View className="flex-1" style={{ padding: itemPadding }}>
       {/* Row(s) for columns */}
-      <View className="flex-row justify-center items-start flex-wrap">
+      <View className={`${isSmallHeight ? 'flex-col' : 'flex-row flex-wrap'} justify-center items-start`}>
         {columns.map((column) => (
           <InfoGroup
             key={column.id}

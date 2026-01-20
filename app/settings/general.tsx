@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
+  useWindowDimensions,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -44,7 +45,9 @@ const HelpSection = () => {
         className="flex-row items-center justify-between bg-blue-50 rounded-lg"
         style={{ padding: smallPadding * 1.5 }}
       >
-        <Text className="text-blue-600 font-medium" style={{ fontSize: textSize }}>{t('setup_help')}</Text>
+        <Text className="text-blue-600 font-medium" style={{ fontSize: textSize }}>
+          {t('setup_help')}
+        </Text>
         <Feather name={isExpanded ? 'chevron-up' : 'chevron-down'} size={iconSize} color="#2563eb" />
       </TouchableOpacity>
 
@@ -63,9 +66,15 @@ const HelpSection = () => {
             </Text>
           </View>
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_3')}</Text>
-            <Text className="text-gray-700 font-bold" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_3_1')}</Text>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_3_2')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_3')}
+            </Text>
+            <Text className="text-gray-700 font-bold" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_3_1')}
+            </Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_3_2')}
+            </Text>
             <Image
               source={require('../../assets/help/help3.png')}
               className="w-full rounded-lg"
@@ -75,7 +84,9 @@ const HelpSection = () => {
           </View>
 
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_4')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_4')}
+            </Text>
             <Image
               source={require('../../assets/help/help4.png')}
               className="w-full rounded-lg"
@@ -84,7 +95,9 @@ const HelpSection = () => {
             />
           </View>
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_5')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_5')}
+            </Text>
             <Image
               source={require('../../assets/help/help5.png')}
               className="w-full rounded-lg"
@@ -96,7 +109,9 @@ const HelpSection = () => {
             <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
               {t('help_step_6')} <ExternalLink url={link3} />
             </Text>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_6_1')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_6_1')}
+            </Text>
             <Image
               source={require('../../assets/help/help6.png')}
               className="w-full rounded-lg"
@@ -105,7 +120,9 @@ const HelpSection = () => {
             />
           </View>
           <View className="w-full bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_7')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_7')}
+            </Text>
             <Image
               source={require('../../assets/help/help7.png')}
               className="w-full rounded-lg"
@@ -114,7 +131,9 @@ const HelpSection = () => {
             />
           </View>
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_8')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_8')}
+            </Text>
             <Image
               source={require('../../assets/help/help8.png')}
               className="w-full rounded-lg"
@@ -123,7 +142,9 @@ const HelpSection = () => {
             />
           </View>
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>{t('help_step_9')}</Text>
+            <Text className="text-gray-700" style={{ fontSize: textSize, marginBottom: smallPadding }}>
+              {t('help_step_9')}
+            </Text>
             <Image
               source={require('../../assets/help/help9.png')}
               className="w-full rounded-lg"
@@ -141,6 +162,7 @@ const HelpSection = () => {
 const GeneralSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
+  const { height } = useWindowDimensions();
   const [latitude, setLatitude] = useState(settings.latitude.toString());
   const [longitude, setLongitude] = useState(settings.longitude.toString());
   const [elevation, setElevation] = useState(settings.elevation?.toString() || '0');
@@ -154,6 +176,7 @@ const GeneralSettingsTab = () => {
   const [purimSettings, setPurimSettings] = useState(settings.purimSettings || { regular: true, shushan: false });
   const [rtl, setRtl] = useState(false);
   const heightScale = useHeightScale() * 0.5;
+  const isSmallHeight = height < 600;
 
   // Responsive sizes with height adjustment
   const labelSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
@@ -470,10 +493,15 @@ const GeneralSettingsTab = () => {
     <ScrollView className="flex-1 bg-white">
       <View style={{ padding }}>
         <View style={{ gap: margin }}>
-          <View className={`flex-row items-center ${rtl ? 'flex-row-reverse' : ''}`} style={{ gap: padding }}>
+          <View
+            className={`${isSmallHeight ? 'flex-row' : ''} items-center ${rtl ? 'flex-row-reverse' : ''}`}
+            style={{ gap: padding }}
+          >
             {/* Name */}
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('synagogue_name')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('synagogue_name')}
+              </Text>
               <TextInput
                 className="w-full border border-gray-300 rounded-lg bg-gray-50"
                 style={{ padding: smallPadding * 1.5, fontSize: textSize }}
@@ -484,7 +512,9 @@ const GeneralSettingsTab = () => {
             </View>
             {/* Language */}
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('language')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('language')}
+              </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker
                   selectedValue={settings.language}
@@ -498,9 +528,15 @@ const GeneralSettingsTab = () => {
             </View>
             {/* nusach */}
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('nusach')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('nusach')}
+              </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker selectedValue={settings.nusach} onValueChange={handleChangeNusach} style={{ height: pickerHeight }}>
+                <Picker
+                  selectedValue={settings.nusach}
+                  onValueChange={handleChangeNusach}
+                  style={{ height: pickerHeight }}
+                >
                   <Picker.Item label={t('nusach_ashkenaz')} value="ashkenaz" />
                   <Picker.Item label={t('nusach_sephardic')} value="sephardic" />
                 </Picker>
@@ -510,7 +546,9 @@ const GeneralSettingsTab = () => {
           {/* <HelpSection /> */}
           {/* gist sha512 */}
           <View style={{ gap: smallPadding }}>
-            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('gist_sha')}</Text>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+              {t('gist_sha')}
+            </Text>
             <TextInput
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
@@ -520,7 +558,9 @@ const GeneralSettingsTab = () => {
           </View>
           {/* gistFileName */}
           <View style={{ gap: smallPadding }}>
-            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('gist_file_key')}</Text>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+              {t('gist_file_key')}
+            </Text>
             <TextInput
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
@@ -531,7 +571,9 @@ const GeneralSettingsTab = () => {
           </View>
           {/* access */}
           <View style={{ gap: smallPadding }}>
-            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('gist_key')}</Text>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+              {t('gist_key')}
+            </Text>
             <TextInput
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
@@ -541,11 +583,20 @@ const GeneralSettingsTab = () => {
             />
           </View>
           {/* Location */}
-          <View className={`flex-row items-center ${rtl ? 'flex-row-reverse' : ''}`} style={{ gap: padding }}>
+          <View
+            className={`${isSmallHeight ? 'flex-row' : ''} items-center ${rtl ? 'flex-row-reverse' : ''}`}
+            style={{ gap: padding }}
+          >
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('location')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('location')}
+              </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker selectedValue={selectedLocation} onValueChange={handleCityChange} style={{ height: pickerHeight }}>
+                <Picker
+                  selectedValue={selectedLocation}
+                  onValueChange={handleCityChange}
+                  style={{ height: pickerHeight }}
+                >
                   {settings.language === 'en'
                     ? cities.map((location) => (
                         <Picker.Item key={location.name} label={location.name} value={location.name} />
@@ -562,7 +613,9 @@ const GeneralSettingsTab = () => {
             </View>
             {/* olson */}
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('olson')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('olson')}
+              </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker selectedValue={olson} onValueChange={handleOlsonChange} style={{ height: pickerHeight }}>
                   {olsons.map((olson) => (
@@ -574,9 +627,11 @@ const GeneralSettingsTab = () => {
           </View>
 
           {/* Coordinates */}
-          <View className="flex-row" style={{ gap: padding }}>
+          <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('latitude')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('latitude')}
+              </Text>
               <TextInput
                 className="w-full border border-gray-300 rounded-lg bg-gray-50"
                 style={{ padding: smallPadding * 1.5, fontSize: textSize }}
@@ -587,7 +642,9 @@ const GeneralSettingsTab = () => {
               />
             </View>
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('longitude')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('longitude')}
+              </Text>
               <TextInput
                 className="w-full border border-gray-300 rounded-lg bg-gray-50"
                 style={{ padding: smallPadding * 1.5, fontSize: textSize }}
@@ -598,7 +655,9 @@ const GeneralSettingsTab = () => {
               />
             </View>
             <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('elevation')}</Text>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('elevation')}
+              </Text>
               <TextInput
                 className="w-full border border-gray-300 rounded-lg bg-gray-50"
                 style={{ padding: smallPadding * 1.5, fontSize: textSize }}
@@ -612,7 +671,9 @@ const GeneralSettingsTab = () => {
 
           {/* Purim */}
           <View style={{ gap: smallPadding }}>
-            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('purim_type')}</Text>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+              {t('purim_type')}
+            </Text>
             <View className="flex-row" style={{ gap: padding }}>
               <TouchableOpacity
                 className="flex-1 flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
@@ -625,7 +686,9 @@ const GeneralSettingsTab = () => {
                 >
                   {purimSettings.regular && <Feather name="check" size={iconSize * 0.7} color="white" />}
                 </View>
-                <Text className="text-gray-700" style={{ fontSize: textSize }}>{t('purim_regular')}</Text>
+                <Text className="text-gray-700" style={{ fontSize: textSize }}>
+                  {t('purim_regular')}
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 className="flex-1 flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
@@ -638,17 +701,23 @@ const GeneralSettingsTab = () => {
                 >
                   {purimSettings.shushan && <Feather name="check" size={iconSize * 0.7} color="white" />}
                 </View>
-                <Text className="text-gray-700" style={{ fontSize: textSize }}>{t('purim_shushan')}</Text>
+                <Text className="text-gray-700" style={{ fontSize: textSize }}>
+                  {t('purim_shushan')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
           {/* background */}
           <View style={{ gap: margin }}>
-            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('background')}</Text>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+              {t('background')}
+            </Text>
 
             {/* Background Mode Selection */}
             <View style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_mode')}</Text>
+              <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                {t('background_mode')}
+              </Text>
               <View className="flex-row" style={{ gap: smallPadding }}>
                 <TouchableOpacity
                   className={`flex-1 border rounded-lg ${backgroundMode === 'image' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
@@ -694,11 +763,18 @@ const GeneralSettingsTab = () => {
               <View style={{ gap: smallPadding * 1.5 }}>
                 {/* Custom Image Upload */}
                 <View style={{ gap: smallPadding }}>
-                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_custom_image')}</Text>
+                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                    {t('background_custom_image')}
+                  </Text>
                   {customImageUri ? (
                     <View style={{ gap: smallPadding }}>
                       <View className="rounded-lg border-2 border-gray-300 overflow-hidden">
-                        <Image source={{ uri: customImageUri }} className="w-full" style={{ height: imageHeight }} resizeMode="cover" />
+                        <Image
+                          source={{ uri: customImageUri }}
+                          className="w-full"
+                          style={{ height: imageHeight }}
+                          resizeMode="cover"
+                        />
                       </View>
                       <TouchableOpacity
                         className="flex-row items-center justify-center bg-red-500 rounded-lg"
@@ -706,7 +782,12 @@ const GeneralSettingsTab = () => {
                         onPress={handleRemoveCustomImage}
                       >
                         <Feather name="trash-2" size={iconSize} color="white" />
-                        <Text className="text-white font-semibold" style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}>{t('background_remove_custom')}</Text>
+                        <Text
+                          className="text-white font-semibold"
+                          style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}
+                        >
+                          {t('background_remove_custom')}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   ) : (
@@ -716,7 +797,12 @@ const GeneralSettingsTab = () => {
                       onPress={() => void handlePickCustomImage()}
                     >
                       <Feather name="upload" size={iconSize} color="#3B82F6" />
-                      <Text className="text-blue-600 font-semibold" style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}>{t('background_upload_custom')}</Text>
+                      <Text
+                        className="text-blue-600 font-semibold"
+                        style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}
+                      >
+                        {t('background_upload_custom')}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -724,8 +810,14 @@ const GeneralSettingsTab = () => {
                 {/* Predefined Images */}
                 {!customImageUri && (
                   <View style={{ gap: smallPadding }}>
-                    <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_choose_from_library')}</Text>
-                    <Picker selectedValue={background} onValueChange={handleBackgroundChange} style={{ height: pickerHeight }}>
+                    <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                      {t('background_choose_from_library')}
+                    </Text>
+                    <Picker
+                      selectedValue={background}
+                      onValueChange={handleBackgroundChange}
+                      style={{ height: pickerHeight }}
+                    >
                       {backgroundImages.map((bimg) => (
                         <Picker.Item key={bimg.label} label={bimg.label} value={bimg.value}></Picker.Item>
                       ))}
@@ -738,7 +830,9 @@ const GeneralSettingsTab = () => {
             {/* Solid Color Background Settings */}
             {backgroundMode === 'solid' && (
               <View style={{ gap: smallPadding }}>
-                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_solid_color')}</Text>
+                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                  {t('background_solid_color')}
+                </Text>
                 <TouchableOpacity
                   className="flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
                   style={{ padding, gap: smallPadding }}
@@ -749,8 +843,12 @@ const GeneralSettingsTab = () => {
                     style={{ backgroundColor: solidColor, width: 64 * heightScale, height: 64 * heightScale }}
                   />
                   <View className="flex-1">
-                    <Text className="text-gray-700 font-semibold" style={{ fontSize: textSize }}>{solidColor.toUpperCase()}</Text>
-                    <Text className="text-gray-500" style={{ fontSize: labelSize }}>{t('optional')}</Text>
+                    <Text className="text-gray-700 font-semibold" style={{ fontSize: textSize }}>
+                      {solidColor.toUpperCase()}
+                    </Text>
+                    <Text className="text-gray-500" style={{ fontSize: labelSize }}>
+                      {t('optional')}
+                    </Text>
                   </View>
                   <Feather name="edit-2" size={iconSize} color="#666" />
                 </TouchableOpacity>
@@ -773,7 +871,9 @@ const GeneralSettingsTab = () => {
             {/* Gradient Background Settings */}
             {backgroundMode === 'gradient' && (
               <View style={{ gap: smallPadding * 1.5 }}>
-                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_gradient_colors')}</Text>
+                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                  {t('background_gradient_colors')}
+                </Text>
                 <View className="flex-row" style={{ gap: padding }}>
                   {gradientColors.map((color, index) => (
                     <View
@@ -799,13 +899,21 @@ const GeneralSettingsTab = () => {
                     </View>
                   ))}
                 </View>
-                <TouchableOpacity className="bg-blue-500 rounded-lg" style={{ padding: smallPadding * 1.5 }} onPress={handleAddGradientColor}>
-                  <Text className="text-center text-white font-semibold" style={{ fontSize: buttonTextSize }}>{t('background_gradient_add_color')}</Text>
+                <TouchableOpacity
+                  className="bg-blue-500 rounded-lg"
+                  style={{ padding: smallPadding * 1.5 }}
+                  onPress={handleAddGradientColor}
+                >
+                  <Text className="text-center text-white font-semibold" style={{ fontSize: buttonTextSize }}>
+                    {t('background_gradient_add_color')}
+                  </Text>
                 </TouchableOpacity>
 
                 {/* Gradient Direction */}
                 <View style={{ gap: smallPadding }}>
-                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>{t('background_gradient_direction')}</Text>
+                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                    {t('background_gradient_direction')}
+                  </Text>
                   <View className="flex-row" style={{ gap: smallPadding }}>
                     <TouchableOpacity
                       className={`flex-1 border rounded-lg ${gradientDirection === 'vertical' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}

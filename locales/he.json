@@ -194,5 +194,12 @@
   "active": "פעיל",
   "scheduled": "עתידי",
   "message_enabled": "מופעל",
-  "no_limit": "ללא הגבלה"
+  "no_limit": "ללא הגבלה",
+  "display_time_settings": "הגדרות זמן תצוגה",
+  "display_time_description": "הגדר כמה זמן כל רכיב יוצג (בשניות)",
+  "display_time_zmanim": "זמן תצוגת זמנים (שניות)",
+  "display_time_classes": "זמן תצוגת שיעורים (שניות)",
+  "display_time_deceased": "זמן תצוגת נפטרים (שניות)",
+  "display_time_messages": "זמן תצוגת הודעות (שניות)",
+  "display_time_schedule": "זמן תצוגת לוח זמנים (שניות)"
 }

@@ -33,6 +33,13 @@ const defaultSettings: Settings = {
     regular: true,
     shushan: false,
   },
+  displayTimeSettings: {
+    zmanim: 10,
+    classes: 10,
+    deceased: 10,
+    messages: 10,
+    schedule: 10,
+  },
   enableZmanim: true,
   enableClasses: true,
   enableDeceased: true,
@@ -329,6 +336,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
           gradientStart: { x: 1, y: 1 },
           gradientEnd: { x: 0, y: 0 },
+        };
+        // Ensure display time settings are properly initialized
+        finalSettings.displayTimeSettings = finalSettings.displayTimeSettings || {
+          zmanim: 10,
+          classes: 10,
+          deceased: 10,
+          messages: 10,
+          schedule: 10,
         };
       }
 

@@ -17,7 +17,7 @@ export const useDeviceType = (): DeviceType => {
   if (Platform.isTV) {
     return 'tv';
   }
-
+  
   // For web, consider the physical resolution, not just CSS pixels
   // TV browsers often report small logical dimensions with high pixel ratio
   // (e.g., 960x540 with ratio 2 = actual 1920x1080)
@@ -176,8 +176,9 @@ export const useResponsiveSpacing = (baseSpacing: number): number => {
  * Useful for TV and small screens to ensure content fits
  */
 export const useHeightScale = (): number => {
-  const { height } = useWindowDimensions();
-
+  const { height,width } = useWindowDimensions();
+// console.log('height', height);
+// console.log('width', width);
   // Base scale is height / 1000 (e.g., 1000px = 1.0, 500px = 0.5)
   // We cap it between 0.45 and 2.0 to avoid extreme sizes
   return Math.min(Math.max(0.3, height / 670), 2.2);

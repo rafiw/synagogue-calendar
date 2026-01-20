@@ -83,6 +83,14 @@ export interface BackgroundSettings {
   customImageUri?: string;
 }
 
+export interface DisplayTimeSettings {
+  zmanim: number;
+  classes: number;
+  deceased: number;
+  messages: number;
+  schedule: number;
+}
+
 export interface Settings {
   name: string;
   gistId: string;
@@ -99,6 +107,7 @@ export interface Settings {
   il: boolean;
   backgroundSettings?: BackgroundSettings;
   purimSettings: PurimSettings;
+  displayTimeSettings: DisplayTimeSettings;
   enableZmanim: boolean;
   enableClasses: boolean;
   enableDeceased: boolean;

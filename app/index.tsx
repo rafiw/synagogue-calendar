@@ -66,36 +66,44 @@ export default function App() {
       getDeceasedSubPages(),
     ]);
 
+    const displayTimes = settings.displayTimeSettings || {
+      zmanim: defaultPageDisplayTime,
+      classes: defaultPageDisplayTime,
+      deceased: defaultPageDisplayTime,
+      messages: defaultPageDisplayTime,
+      schedule: defaultPageDisplayTime,
+    };
+
     return [
       {
         id: 1,
         name: 'zmanim',
         content: () => (settings.enableZmanim ? <Zmanim /> : null),
-        presentTime: defaultPageDisplayTime,
+        presentTime: displayTimes.zmanim,
       },
       {
         id: 2,
         name: 'classes',
         content: () => (settings.enableClasses ? <Classes /> : null),
-        presentTime: classSubPages * defaultPageDisplayTime,
+        presentTime: classSubPages * displayTimes.classes,
       },
       {
         id: 3,
         name: 'deceased',
         content: () => (settings.enableDeceased ? <Deceased /> : null),
-        presentTime: deceasedSubPages * defaultPageDisplayTime,
+        presentTime: deceasedSubPages * displayTimes.deceased,
       },
       {
         id: 4,
         name: 'messages',
         content: () => (settings.enableMessages ? <Messages /> : null),
-        presentTime: messagesSubPages * defaultPageDisplayTime,
+        presentTime: messagesSubPages * displayTimes.messages,
       },
       {
         id: 5,
         name: 'schedule',
         content: () => (settings.enableSchedule ? <Schedule /> : null),
-        presentTime: defaultPageDisplayTime,
+        presentTime: displayTimes.schedule,
       },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
   }, [settings]);

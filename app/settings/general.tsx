@@ -202,6 +202,13 @@ const GeneralSettingsTab = () => {
   const [backgroundMode, setBackgroundMode] = useState(settings.backgroundSettings?.mode || 'image');
   const [solidColor, setSolidColor] = useState(settings.backgroundSettings?.solidColor || '#E3F2FD');
   const [gradientColors, setGradientColors] = useState(
+  // Display time settings
+  const [displayTimeZmanim, setDisplayTimeZmanim] = useState(settings.displayTimeSettings?.zmanim?.toString() || '10');
+  const [displayTimeClasses, setDisplayTimeClasses] = useState(settings.displayTimeSettings?.classes?.toString() || '10');
+  const [displayTimeDeceased, setDisplayTimeDeceased] = useState(settings.displayTimeSettings?.deceased?.toString() || '10');
+  const [displayTimeMessages, setDisplayTimeMessages] = useState(settings.displayTimeSettings?.messages?.toString() || '10');
+  const [displayTimeSchedule, setDisplayTimeSchedule] = useState(settings.displayTimeSettings?.schedule?.toString() || '10');
+
     settings.backgroundSettings?.gradientColors || ['#E3F2FD', '#BBDEFB', '#90CAF9'],
   );
   const [gradientDirection, setGradientDirection] = useState<'vertical' | 'horizontal' | 'diagonal'>(
@@ -461,6 +468,42 @@ const GeneralSettingsTab = () => {
         updateSettings({ backgroundSettings: newBackgroundSettings });
       }
     } catch (error) {
+  const handleDisplayTimeChange = (component: 'zmanim' | 'classes' | 'deceased' | 'messages' | 'schedule', value: string) => {
+    const numValue = Number(value);
+    if (!isNaN(numValue) && numValue > 0) {
+      const newDisplayTimeSettings = {
+        ...(settings.displayTimeSettings || {
+          zmanim: 10,
+          classes: 10,
+          deceased: 10,
+          messages: 10,
+          schedule: 10,
+        }),
+        [component]: numValue,
+      };
+      updateSettings({ displayTimeSettings: newDisplayTimeSettings });
+
+      // Update local state
+      switch (component) {
+        case 'zmanim':
+          setDisplayTimeZmanim(value);
+          break;
+        case 'classes':
+          setDisplayTimeClasses(value);
+          break;
+        case 'deceased':
+          setDisplayTimeDeceased(value);
+          break;
+        case 'messages':
+          setDisplayTimeMessages(value);
+          break;
+        case 'schedule':
+          setDisplayTimeSchedule(value);
+          break;
+      }
+    }
+  };
+
       console.error('Error picking image:', error);
       showAlert(t('error'), t('photo_upload_failed'));
     }
@@ -645,6 +688,73 @@ const GeneralSettingsTab = () => {
               <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
                 {t('longitude')}
               </Text>
+
+          {/* Display Time Settings */}
+          <View style={{ gap: smallPadding }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>{t('display_time_settings')}</Text>
+            <Text className="text-gray-500" style={{ fontSize: labelSize * 0.85, marginBottom: smallPadding }}>{t('display_time_description')}</Text>
+            <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
+              <View className="flex-1" style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-600" style={{ fontSize: labelSize * 0.9 }}>{t('display_time_zmanim')}</Text>
+                <TextInput
+                  className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                  value={displayTimeZmanim}
+                  onChangeText={(value) => handleDisplayTimeChange('zmanim', value)}
+                  keyboardType="numeric"
+                  placeholder="10"
+                />
+              </View>
+              <View className="flex-1" style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-600" style={{ fontSize: labelSize * 0.9 }}>{t('display_time_classes')}</Text>
+                <TextInput
+                  className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                  value={displayTimeClasses}
+                  onChangeText={(value) => handleDisplayTimeChange('classes', value)}
+                  keyboardType="numeric"
+                  placeholder="10"
+                />
+              </View>
+              <View className="flex-1" style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-600" style={{ fontSize: labelSize * 0.9 }}>{t('display_time_deceased')}</Text>
+                <TextInput
+                  className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                  value={displayTimeDeceased}
+                  onChangeText={(value) => handleDisplayTimeChange('deceased', value)}
+                  keyboardType="numeric"
+                  placeholder="10"
+                />
+              </View>
+            </View>
+            <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
+              <View className="flex-1" style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-600" style={{ fontSize: labelSize * 0.9 }}>{t('display_time_messages')}</Text>
+                <TextInput
+                  className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                  value={displayTimeMessages}
+                  onChangeText={(value) => handleDisplayTimeChange('messages', value)}
+                  keyboardType="numeric"
+                  placeholder="10"
+                />
+              </View>
+              <View className="flex-1" style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-600" style={{ fontSize: labelSize * 0.9 }}>{t('display_time_schedule')}</Text>
+                <TextInput
+                  className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                  value={displayTimeSchedule}
+                  onChangeText={(value) => handleDisplayTimeChange('schedule', value)}
+                  keyboardType="numeric"
+                  placeholder="10"
+                />
+              </View>
+              <View className="flex-1" />
+            </View>
+          </View>
+
               <TextInput
                 className="w-full border border-gray-300 rounded-lg bg-gray-50"
                 style={{ padding: smallPadding * 1.5, fontSize: textSize }}

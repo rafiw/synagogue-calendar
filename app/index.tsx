@@ -7,7 +7,7 @@
  * (at your option) any later version.
  */
 
-import { View, Text, ActivityIndicator, I18nManager } from 'react-native';
+import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
 import { router } from 'expo-router';
 
@@ -37,14 +37,20 @@ export default function App() {
 
   // Responsive sizing based on device type - MUST call all hooks unconditionally
   const deviceType = useDeviceType();
+  const { height } = useWindowDimensions();
   const baseSpacing = useResponsiveSpacing(12);
 
-  // Reduced spacing on mobile to maximize content area
+  // Scale down for small height screens (like TV at 540px logical height)
+  const heightScale = height < 600 ? 0.7 : height < 800 ? 0.85 : 1.0;
+
+  // Reduced spacing on mobile to maximize content area, with height scaling
   const isMobile = deviceType === 'mobile';
-  const containerPadding = isMobile ? 8 : baseSpacing;
-  const headerMargin = isMobile ? 8 : baseSpacing;
-  const contentPadding = isMobile ? 8 : baseSpacing;
-  const borderRadius = deviceType === 'tv' ? 48 : deviceType === 'desktop' ? 32 : deviceType === 'tablet' ? 32 : 16;
+  const containerPadding = Math.round((isMobile ? 8 : baseSpacing) * heightScale);
+  const headerMargin = Math.round((isMobile ? 8 : baseSpacing) * heightScale);
+  const contentPadding = Math.round((isMobile ? 8 : baseSpacing) * heightScale);
+  const borderRadius = Math.round(
+    (deviceType === 'tv' ? 48 : deviceType === 'desktop' ? 32 : deviceType === 'tablet' ? 32 : 16) * heightScale,
+  );
 
   useEffect(() => {
     const shouldBeRTL = settings.language === 'he'; // or use your isRTL2 function

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { FastDayType, ZmanimWrapper } from '../utils/zmanim_wrapper';
 import { useSettings } from '../context/settingsContext';
 import { useTranslation } from 'react-i18next';
@@ -35,12 +35,17 @@ const getTachanunLabel = (
 const Zmanim: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { settings } = useSettings();
+  const { height } = useWindowDimensions();
 
-  // Responsive sizes
-  const titleSize = useResponsiveFontSize('displayMedium');
-  const textSize = useResponsiveFontSize('headingMedium');
-  const padding = useResponsiveSpacing(12);
-  const margin = useResponsiveSpacing(4);
+  // Scale down for small height screens (like TV at 540px logical height)
+  // This ensures content fits without excessive scrolling
+  const heightScale = height < 600 ? 0.7 : height < 800 ? 0.85 : 1.0;
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(12) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(4) * heightScale);
 
   if (!i18n.isInitialized) {
     return (
@@ -125,7 +130,7 @@ const Zmanim: React.FC = () => {
   );
 
   return (
-    <View className="flex-1" style={{ padding: padding / 2 }}>
+    <ScrollView className="flex-1" contentContainerStyle={{ padding: padding / 2 }}>
       {/* Top Row */}
       <View className="flex-row justify-between" style={{ marginBottom: margin }}>
         <InfoGroup
@@ -190,7 +195,7 @@ const Zmanim: React.FC = () => {
           ]}
         />
       </View>
-    </View>
+    </ScrollView>
   );
 };
 

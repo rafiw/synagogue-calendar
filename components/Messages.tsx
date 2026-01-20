@@ -4,7 +4,7 @@ import { useSettings } from 'context/settingsContext';
 import { router } from 'expo-router';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 import { defaultPageDisplayTime } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing } from 'utils/responsive';
 import { Message } from 'utils/defs';
@@ -28,17 +28,21 @@ const Messages: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [PageDisplayTime] = useState(defaultPageDisplayTime);
+  const { height } = useWindowDimensions();
 
-  // Responsive sizes
-  const titleSize = useResponsiveFontSize('displayLarge');
-  const messageSize = useResponsiveFontSize('headingLarge');
-  const emptyTitleSize = useResponsiveFontSize('displayMedium');
-  const emptyDescSize = useResponsiveFontSize('bodyLarge');
-  const buttonTextSize = useResponsiveFontSize('headingMedium');
-  const iconSize = useResponsiveIconSize('large');
-  const iconLargeSize = useResponsiveIconSize('xxlarge');
-  const padding = useResponsiveSpacing(24);
-  const margin = useResponsiveSpacing(24);
+  // Scale down for small height screens (like TV at 540px logical height)
+  const heightScale = height < 600 ? 0.7 : height < 800 ? 0.85 : 1.0;
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(useResponsiveFontSize('displayLarge') * heightScale);
+  const messageSize = Math.round(useResponsiveFontSize('headingLarge') * heightScale);
+  const emptyTitleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
+  const emptyDescSize = Math.round(useResponsiveFontSize('bodyLarge') * heightScale);
+  const buttonTextSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const iconSize = Math.round(useResponsiveIconSize('large') * heightScale);
+  const iconLargeSize = Math.round(useResponsiveIconSize('xxlarge') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(24) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(24) * heightScale);
 
   // Filter to only show active messages
   const activeMessages = useMemo(() => {

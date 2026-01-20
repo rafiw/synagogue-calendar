@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { useSettings } from '../context/settingsContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -25,16 +25,22 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const router = useRouter();
   const isRTL = isRTL2(settings.language);
   const deviceType = useDeviceType();
+  const { height } = useWindowDimensions();
+
+  // Scale down for small height screens (like TV at 540px logical height)
+  const heightScale = height < 600 ? 0.7 : height < 800 ? 0.85 : 1.0;
 
   // Responsive sizes - use smaller fonts for header on mobile/tablet
   // On mobile: headingLarge=24px, headingMedium=20px (instead of display sizes)
   // On larger devices: use display sizes for better visibility
   const isMobileOrTablet = deviceType === 'mobile' || deviceType === 'tablet';
-  const titleSize = useResponsiveFontSize(isMobileOrTablet ? 'headingLarge' : 'displayMedium');
-  const dateSize = useResponsiveFontSize(isMobileOrTablet ? 'headingMedium' : 'headingLarge');
-  const timeSize = useResponsiveFontSize(isMobileOrTablet ? 'headingMedium' : 'headingLarge');
-  const iconSize = useResponsiveIconSize('small');
-  const padding = useResponsiveSpacing(6);
+  const titleSize = Math.round(
+    useResponsiveFontSize(isMobileOrTablet ? 'headingLarge' : 'displayMedium') * heightScale,
+  );
+  const dateSize = Math.round(useResponsiveFontSize(isMobileOrTablet ? 'headingMedium' : 'headingLarge') * heightScale);
+  const timeSize = Math.round(useResponsiveFontSize(isMobileOrTablet ? 'headingMedium' : 'headingLarge') * heightScale);
+  const iconSize = Math.round((useResponsiveIconSize('small') * heightScale) / 2.0);
+  const padding = Math.round(useResponsiveSpacing(6) * heightScale);
 
   const zmanim = new ZmanimWrapper(
     settings.nusach,
@@ -84,10 +90,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const displayElements = isRTL ? [...elements].reverse() : elements;
   const style1 = isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left';
 
-  // Reduced padding for mobile to save vertical space
-  const containerPaddingX = isMobileOrTablet ? 12 : 24;
-  const containerPaddingY = isMobileOrTablet ? 8 : 20;
-  const borderRadiusSize = isMobileOrTablet ? 16 : 24;
+  // Reduced padding for mobile to save vertical space, with height scaling
+  const containerPaddingX = Math.round((isMobileOrTablet ? 12 : 24) * heightScale);
+  const containerPaddingY = Math.round((isMobileOrTablet ? 8 : 20) * heightScale);
+  const borderRadiusSize = Math.round((isMobileOrTablet ? 16 : 24) * heightScale);
 
   return (
     <View

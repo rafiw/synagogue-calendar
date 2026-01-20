@@ -23,6 +23,7 @@
   "go_to_settings": "Go to settings",
   "msg_no_messages": "No messages found, go to settings to add some.",
   "settings_title": "Settings",
+  "general_title": "General",
   "classes_title": "Classes",
   "messages_title": "Messages",
   "shachar": "Alot HaShachar: {{date}}",

@@ -1,7 +1,16 @@
 import { Feather } from '@expo/vector-icons';
 import { useSettings } from 'context/settingsContext';
 import { useTranslation } from 'react-i18next';
-import { View, Text, ActivityIndicator, TouchableOpacity, TextInput, Image, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  ActivityIndicator,
+  TouchableOpacity,
+  TextInput,
+  Image,
+  ScrollView,
+  useWindowDimensions,
+} from 'react-native';
 import { showAlert, showConfirm } from '../../utils/alert';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useState, useEffect } from 'react';
@@ -606,6 +615,8 @@ const DeceasedSettingsTab = () => {
   const { t, i18n } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [editingPerson, setEditingPerson] = useState<DeceasedPerson | undefined>();
+  const { height } = useWindowDimensions();
+  const isSmallHeight = height < 600;
   const heightScale = useHeightScale() / 1.5;
 
   // Responsive sizes with height adjustment
@@ -703,139 +714,152 @@ const DeceasedSettingsTab = () => {
             <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
               {t('deceased_table_configuration')}
             </Text>
-            <View className="flex-row items-center justify-between">
-              {/* Table Columns */}
-              <View className="flex-1 items-center">
-                <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
-                  {t('deceased_table_columns')}
-                </Text>
-                <View className="flex-row items-center" style={{ gap: smallPadding }}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      updateDeceasedSettings({ tableColumns: Math.max(1, settings.deceasedSettings.tableColumns - 1) })
-                    }
-                    className="bg-gray-200 rounded-lg items-center justify-center"
-                    style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                    disabled={settings.deceasedSettings.tableColumns <= 1}
-                  >
-                    <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
-                      -
-                    </Text>
-                  </TouchableOpacity>
-                  <View
-                    className="bg-blue-100 rounded-lg items-center"
-                    style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
-                  >
-                    <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
-                      {settings.deceasedSettings.tableColumns}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      updateDeceasedSettings({ tableColumns: Math.min(5, settings.deceasedSettings.tableColumns + 1) })
-                    }
-                    className="bg-gray-200 rounded-lg items-center justify-center"
-                    style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                    disabled={settings.deceasedSettings.tableColumns >= 5}
-                  >
-                    <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
-                      +
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              {/* Table Rows */}
-              <View className="flex-1 items-center">
-                <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
-                  {t('deceased_table_rows')}
-                </Text>
-                <View className="flex-row items-center" style={{ gap: smallPadding }}>
-                  <TouchableOpacity
-                    onPress={() =>
-                      updateDeceasedSettings({ tableRows: Math.max(1, settings.deceasedSettings.tableRows - 1) })
-                    }
-                    className="bg-gray-200 rounded-lg items-center justify-center"
-                    style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                    disabled={settings.deceasedSettings.tableRows <= 1}
-                  >
-                    <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
-                      -
-                    </Text>
-                  </TouchableOpacity>
-                  <View
-                    className="bg-blue-100 rounded-lg items-center"
-                    style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
-                  >
-                    <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
-                      {settings.deceasedSettings.tableRows}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    onPress={() =>
-                      updateDeceasedSettings({ tableRows: Math.min(5, settings.deceasedSettings.tableRows + 1) })
-                    }
-                    className="bg-gray-200 rounded-lg items-center justify-center"
-                    style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                    disabled={settings.deceasedSettings.tableRows >= 10}
-                  >
-                    <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
-                      +
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-              {/* Display Mode */}
-              <View className="flex-1 items-center">
-                <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
-                  {t('deceased_display_mode')}
-                </Text>
-                <View className="flex-row" style={{ gap: smallPadding }}>
-                  {(['all', 'monthly'] as const).map((mode) => (
+            <View style={{ gap: padding }}>
+              {/* First Row: Table Columns and Table Rows */}
+              <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
+                {/* Table Columns */}
+                <View className={`${isSmallHeight ? 'flex-1' : 'w-full'} items-center`}>
+                  <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                    {t('deceased_table_columns')}
+                  </Text>
+                  <View className="flex-row items-center" style={{ gap: smallPadding }}>
                     <TouchableOpacity
-                      key={mode}
-                      onPress={() => updateDeceasedSettings({ displayMode: mode })}
-                      className={`rounded-lg border ${
-                        settings.deceasedSettings.displayMode === mode
-                          ? 'bg-blue-500 border-blue-500'
-                          : 'bg-white border-gray-300'
-                      }`}
-                      style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
+                      onPress={() =>
+                        updateDeceasedSettings({
+                          tableColumns: Math.max(1, settings.deceasedSettings.tableColumns - 1),
+                        })
+                      }
+                      className="bg-gray-200 rounded-lg items-center justify-center"
+                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                      disabled={settings.deceasedSettings.tableColumns <= 1}
                     >
-                      <Text
-                        className={settings.deceasedSettings.displayMode === mode ? 'text-white' : 'text-gray-700'}
-                        style={{ fontSize: textSize }}
-                      >
-                        {t(`deceased_display_${mode}`)}
+                      <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                        -
                       </Text>
                     </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-              {/* Default Template */}
-              <View className="flex-1 items-center">
-                <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
-                  {t('deceased_default_template')}
-                </Text>
-                <View className="flex-row" style={{ gap: smallPadding }}>
-                  {(['simple', 'card', 'photo'] as const).map((temp) => (
-                    <TouchableOpacity
-                      key={temp}
-                      onPress={() => updateDeceasedSettings({ defaultTemplate: temp })}
-                      className={`rounded-lg border ${
-                        settings.deceasedSettings.defaultTemplate === temp
-                          ? 'bg-blue-500 border-blue-500'
-                          : 'bg-white border-gray-300'
-                      }`}
-                      style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
+                    <View
+                      className="bg-blue-100 rounded-lg items-center"
+                      style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
                     >
-                      <Text
-                        className={settings.deceasedSettings.defaultTemplate === temp ? 'text-white' : 'text-gray-700'}
-                        style={{ fontSize: textSize }}
-                      >
-                        {t(`deceased_template_${temp}`)}
+                      <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
+                        {settings.deceasedSettings.tableColumns}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() =>
+                        updateDeceasedSettings({
+                          tableColumns: Math.min(5, settings.deceasedSettings.tableColumns + 1),
+                        })
+                      }
+                      className="bg-gray-200 rounded-lg items-center justify-center"
+                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                      disabled={settings.deceasedSettings.tableColumns >= 5}
+                    >
+                      <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                        +
                       </Text>
                     </TouchableOpacity>
-                  ))}
+                  </View>
+                </View>
+                {/* Table Rows */}
+                <View className={`${isSmallHeight ? 'flex-1' : 'w-full'} items-center`}>
+                  <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                    {t('deceased_table_rows')}
+                  </Text>
+                  <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        updateDeceasedSettings({ tableRows: Math.max(1, settings.deceasedSettings.tableRows - 1) })
+                      }
+                      className="bg-gray-200 rounded-lg items-center justify-center"
+                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                      disabled={settings.deceasedSettings.tableRows <= 1}
+                    >
+                      <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                        -
+                      </Text>
+                    </TouchableOpacity>
+                    <View
+                      className="bg-blue-100 rounded-lg items-center"
+                      style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+                    >
+                      <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
+                        {settings.deceasedSettings.tableRows}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() =>
+                        updateDeceasedSettings({ tableRows: Math.min(5, settings.deceasedSettings.tableRows + 1) })
+                      }
+                      className="bg-gray-200 rounded-lg items-center justify-center"
+                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                      disabled={settings.deceasedSettings.tableRows >= 10}
+                    >
+                      <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
+                        +
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+
+              {/* Second Row: Display Mode and Default Template */}
+              <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
+                {/* Display Mode */}
+                <View className={`${isSmallHeight ? 'flex-1' : 'w-full'} items-center`}>
+                  <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                    {t('deceased_display_mode')}
+                  </Text>
+                  <View className="flex-row" style={{ gap: smallPadding }}>
+                    {(['all', 'monthly'] as const).map((mode) => (
+                      <TouchableOpacity
+                        key={mode}
+                        onPress={() => updateDeceasedSettings({ displayMode: mode })}
+                        className={`rounded-lg border ${
+                          settings.deceasedSettings.displayMode === mode
+                            ? 'bg-blue-500 border-blue-500'
+                            : 'bg-white border-gray-300'
+                        }`}
+                        style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
+                      >
+                        <Text
+                          className={settings.deceasedSettings.displayMode === mode ? 'text-white' : 'text-gray-700'}
+                          style={{ fontSize: textSize }}
+                        >
+                          {t(`deceased_display_${mode}`)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+                {/* Default Template */}
+                <View className={`${isSmallHeight ? 'flex-1' : 'w-full'} items-center`}>
+                  <Text className="text-gray-700" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                    {t('deceased_default_template')}
+                  </Text>
+                  <View className="flex-row" style={{ gap: smallPadding }}>
+                    {(['simple', 'card', 'photo'] as const).map((temp) => (
+                      <TouchableOpacity
+                        key={temp}
+                        onPress={() => updateDeceasedSettings({ defaultTemplate: temp })}
+                        className={`rounded-lg border ${
+                          settings.deceasedSettings.defaultTemplate === temp
+                            ? 'bg-blue-500 border-blue-500'
+                            : 'bg-white border-gray-300'
+                        }`}
+                        style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
+                      >
+                        <Text
+                          className={
+                            settings.deceasedSettings.defaultTemplate === temp ? 'text-white' : 'text-gray-700'
+                          }
+                          style={{ fontSize: textSize }}
+                        >
+                          {t(`deceased_template_${temp}`)}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
                 </View>
               </View>
             </View>

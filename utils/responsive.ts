@@ -205,3 +205,13 @@ export const useResponsiveSizes = () => {
     isMobile: deviceType === 'mobile',
   };
 };
+
+export const getDisplayDebugInfo = () => {
+  const { height, width, scale, fontScale } = useWindowDimensions();
+  return {
+    height,
+    width,
+    scale,
+    fontScale,
+  };
+};

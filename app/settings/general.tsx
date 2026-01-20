@@ -168,7 +168,7 @@ const GeneralSettingsTab = () => {
   const [elevation, setElevation] = useState(settings.elevation?.toString() || '0');
   const [gistId, setGistId] = useState(settings.gistId);
   const [githubKeyUrl, setGithubKeyUrl] = useState(settings.githubKey);
-  const [gistFileName, setGistFileName] = useState(settings.gistFileName);
+  // const [gistFileName, setGistFileName] = useState(settings.gistFileName);
   const [synagogueName, setSynagogueName] = useState(settings.name);
   const [selectedLocation, setSelectedLocation] = useState(cities[0]!.name);
   const [olson, setOlson] = useState(settings.olson);
@@ -232,10 +232,10 @@ const GeneralSettingsTab = () => {
     updateSettings({ gistId: gistId });
   };
 
-  const handleGistFileName = (gistFileName: string) => {
-    setGistFileName(gistFileName);
-    updateSettings({ gistFileName: gistFileName });
-  };
+  // const handleGistFileName = (gistFileName: string) => {
+  //   setGistFileName(gistFileName);
+  //   updateSettings({ gistFileName: gistFileName });
+  // };
 
   const handleGithubKey = (githubKey: string) => {
     setGithubKeyUrl(githubKey);
@@ -493,25 +493,24 @@ const GeneralSettingsTab = () => {
     <ScrollView className="flex-1 bg-white">
       <View style={{ padding }}>
         <View style={{ gap: margin }}>
-          <View
-            className={`${isSmallHeight ? 'flex-row' : ''} items-center ${rtl ? 'flex-row-reverse' : ''}`}
-            style={{ gap: padding }}
-          >
-            {/* Name */}
-            <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
-                {t('synagogue_name')}
-              </Text>
-              <TextInput
-                className="w-full border border-gray-300 rounded-lg bg-gray-50"
-                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                value={synagogueName}
-                onChangeText={handleSynagogueName}
-                placeholder="Enter Synagogue Name"
-              />
-            </View>
+          {/* Name - Full Width */}
+          <View style={{ gap: smallPadding }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+              {t('synagogue_name')}
+            </Text>
+            <TextInput
+              className="w-full border border-gray-300 rounded-lg bg-gray-50"
+              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+              value={synagogueName}
+              onChangeText={handleSynagogueName}
+              placeholder="Enter Synagogue Name"
+            />
+          </View>
+
+          {/* Language and Nusach - Side by Side on Narrow Screens */}
+          <View className={`${isSmallHeight ? (rtl ? 'flex-row-reverse' : 'flex-row') : ''}`} style={{ gap: padding }}>
             {/* Language */}
-            <View className="flex-1" style={{ gap: smallPadding }}>
+            <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
               <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
                 {t('language')}
               </Text>
@@ -527,7 +526,7 @@ const GeneralSettingsTab = () => {
               </View>
             </View>
             {/* nusach */}
-            <View className="flex-1" style={{ gap: smallPadding }}>
+            <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
               <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
                 {t('nusach')}
               </Text>
@@ -584,10 +583,10 @@ const GeneralSettingsTab = () => {
           </View>
           {/* Location */}
           <View
-            className={`${isSmallHeight ? 'flex-row' : ''} items-center ${rtl ? 'flex-row-reverse' : ''}`}
+            className={`${isSmallHeight ? (rtl ? 'flex-row-reverse' : 'flex-row') : ''} items-center`}
             style={{ gap: padding }}
           >
-            <View className="flex-1" style={{ gap: smallPadding }}>
+            <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
               <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
                 {t('location')}
               </Text>
@@ -612,7 +611,7 @@ const GeneralSettingsTab = () => {
               </View>
             </View>
             {/* olson */}
-            <View className="flex-1" style={{ gap: smallPadding }}>
+            <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
               <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
                 {t('olson')}
               </Text>
@@ -627,34 +626,38 @@ const GeneralSettingsTab = () => {
           </View>
 
           {/* Coordinates */}
-          <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
-            <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
-                {t('latitude')}
-              </Text>
-              <TextInput
-                className="w-full border border-gray-300 rounded-lg bg-gray-50"
-                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                value={latitude}
-                onChangeText={handleLatitudeChange}
-                keyboardType="numeric"
-                placeholder="Enter latitude"
-              />
+          <View style={{ gap: padding }}>
+            {/* First Row: Latitude and Longitude */}
+            <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
+              <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                  {t('latitude')}
+                </Text>
+                <TextInput
+                  className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                  value={latitude}
+                  onChangeText={handleLatitudeChange}
+                  keyboardType="numeric"
+                  placeholder="Enter latitude"
+                />
+              </View>
+              <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                  {t('longitude')}
+                </Text>
+                <TextInput
+                  className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                  style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                  value={longitude}
+                  onChangeText={handleLongitudeChange}
+                  keyboardType="numeric"
+                  placeholder="Enter longitude"
+                />
+              </View>
             </View>
-            <View className="flex-1" style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
-                {t('longitude')}
-              </Text>
-              <TextInput
-                className="w-full border border-gray-300 rounded-lg bg-gray-50"
-                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                value={longitude}
-                onChangeText={handleLongitudeChange}
-                keyboardType="numeric"
-                placeholder="Enter longitude"
-              />
-            </View>
-            <View className="flex-1" style={{ gap: smallPadding }}>
+            {/* Second Row: Elevation */}
+            <View style={{ gap: smallPadding }}>
               <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
                 {t('elevation')}
               </Text>

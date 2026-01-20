@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { Feather } from '@expo/vector-icons';
 import ExternalLink from '../../utils/PressableLink';
 import ColorPickerModal from '../../components/ColorPickerModal';
 import { showAlert } from '../../utils/alert';
+import { isRTL } from 'utils/utils';
 
 const HelpSection = () => {
   const { t } = useTranslation();
@@ -132,6 +133,16 @@ const GeneralSettingsTab = () => {
   const [olson, setOlson] = useState(settings.olson);
   const [background, setBackground] = useState(settings.backgroundSettings?.imageUrl || '');
   const [purimSettings, setPurimSettings] = useState(settings.purimSettings || { regular: true, shushan: false });
+  const [rtl, setRtl] = useState(false);
+
+  useEffect(() => {
+    const checkRTL = async () => {
+      const isRightToLeft = await isRTL();
+      setRtl(isRightToLeft);
+    };
+
+    checkRTL();
+  }, []);
 
   // New background settings state
   const [backgroundMode, setBackgroundMode] = useState(settings.backgroundSettings?.mode || 'image');
@@ -428,17 +439,43 @@ const GeneralSettingsTab = () => {
     <ScrollView className="flex-1 bg-white">
       <View className="p-4">
         <View className="space-y-4">
-          {/* Name */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('synagogue_name')}</Text>
-            <TextInput
-              className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
-              value={synagogueName}
-              onChangeText={handleSynagogueName}
-              placeholder="Enter Synagogue Name"
-            />
-            <HelpSection />
+          <View className={`flex-row items-center gap-4 ${rtl ? 'flex-row-reverse' : ''}`}>
+            {/* Name */}
+            <View className="flex-1 space-y-2">
+              <Text className="text-sm font-medium text-gray-600">{t('synagogue_name')}</Text>
+              <TextInput
+                className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50"
+                value={synagogueName}
+                onChangeText={handleSynagogueName}
+                placeholder="Enter Synagogue Name"
+              />
+            </View>
+            {/* Language */}
+            <View className="flex-1 space-y-2">
+              <Text className="text-sm font-medium text-gray-600">{t('language')}</Text>
+              <View className="border border-gray-300 rounded-lg bg-gray-50">
+                <Picker
+                  selectedValue={settings.language}
+                  onValueChange={(value) => void handleChangeLanguage(value)}
+                  className="h-12"
+                >
+                  <Picker.Item label="English" value="en" />
+                  <Picker.Item label="עברית" value="he" />
+                </Picker>
+              </View>
+            </View>
+            {/* nusach */}
+            <View className="flex-1 space-y-2">
+              <Text className="text-sm font-medium text-gray-600">{t('nusach')}</Text>
+              <View className="border border-gray-300 rounded-lg bg-gray-50">
+                <Picker selectedValue={settings.nusach} onValueChange={handleChangeNusach} className="h-12">
+                  <Picker.Item label={t('nusach_ashkenaz')} value="ashkenaz" />
+                  <Picker.Item label={t('nusach_sephardic')} value="sephardic" />
+                </Picker>
+              </View>
+            </View>
           </View>
+          <HelpSection />
           {/* gist sha512 */}
           <View className="space-y-2">
             <Text className="text-sm font-medium text-gray-600">{t('gist_sha')}</Text>
@@ -468,47 +505,36 @@ const GeneralSettingsTab = () => {
               secureTextEntry={true}
             />
           </View>
-          {/* Language */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('language')}</Text>
-            <View className="border border-gray-300 rounded-lg bg-gray-50">
-              <Picker
-                selectedValue={settings.language}
-                onValueChange={(value) => void handleChangeLanguage(value)}
-                className="h-12"
-              >
-                <Picker.Item label="English" value="en" />
-                <Picker.Item label="עברית" value="he" />
-              </Picker>
-            </View>
-          </View>
-          {/* nusach */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('nusach')}</Text>
-            <View className="border border-gray-300 rounded-lg bg-gray-50">
-              <Picker selectedValue={settings.nusach} onValueChange={handleChangeNusach} className="h-12">
-                <Picker.Item label={t('nusach_ashkenaz')} value="ashkenaz" />
-                <Picker.Item label={t('nusach_sephardic')} value="sephardic" />
-              </Picker>
-            </View>
-          </View>
           {/* Location */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('location')}</Text>
-            <View className="border border-gray-300 rounded-lg bg-gray-50">
-              <Picker selectedValue={selectedLocation} onValueChange={handleCityChange} className="h-12">
-                {settings.language === 'en'
-                  ? cities.map((location) => (
-                      <Picker.Item key={location.name} label={location.name} value={location.name} />
-                    ))
-                  : cities.map((location) => (
-                      <Picker.Item
-                        key={location.hebrew_name}
-                        label={location.hebrew_name}
-                        value={location.hebrew_name}
-                      />
-                    ))}
-              </Picker>
+          <View className={`flex-row items-center gap-4 ${rtl ? 'flex-row-reverse' : ''}`}>
+            <View className="flex-1 space-y-2">
+              <Text className="text-sm font-medium text-gray-600">{t('location')}</Text>
+              <View className="border border-gray-300 rounded-lg bg-gray-50">
+                <Picker selectedValue={selectedLocation} onValueChange={handleCityChange} className="h-12">
+                  {settings.language === 'en'
+                    ? cities.map((location) => (
+                        <Picker.Item key={location.name} label={location.name} value={location.name} />
+                      ))
+                    : cities.map((location) => (
+                        <Picker.Item
+                          key={location.hebrew_name}
+                          label={location.hebrew_name}
+                          value={location.hebrew_name}
+                        />
+                      ))}
+                </Picker>
+              </View>
+            </View>
+            {/* olson */}
+            <View className="flex-1 space-y-2">
+              <Text className="text-sm font-medium text-gray-600">{t('olson')}</Text>
+              <View className="border border-gray-300 rounded-lg bg-gray-50">
+                <Picker selectedValue={olson} onValueChange={handleOlsonChange} className="h-12">
+                  {olsons.map((olson) => (
+                    <Picker.Item key={olson} label={olson} value={olson} />
+                  ))}
+                </Picker>
+              </View>
             </View>
           </View>
 
@@ -545,21 +571,13 @@ const GeneralSettingsTab = () => {
               />
             </View>
           </View>
-          {/* olson */}
-          <View className="space-y-2">
-            <Text className="text-sm font-medium text-gray-600">{t('olson')}</Text>
-            <Picker selectedValue={olson} onValueChange={handleOlsonChange} className="h-12">
-              {olsons.map((olson) => (
-                <Picker.Item key={olson} label={olson} value={olson} />
-              ))}
-            </Picker>
-          </View>
+
           {/* Purim */}
           <View className="space-y-2">
             <Text className="text-sm font-medium text-gray-600">{t('purim_type')}</Text>
-            <View className="space-y-2">
+            <View className="flex-row gap-4">
               <TouchableOpacity
-                className="flex-row items-center p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="flex-1 flex-row items-center p-3 border border-gray-300 rounded-lg bg-gray-50"
                 onPress={() => handlePurimToggle('regular')}
               >
                 <View
@@ -570,7 +588,7 @@ const GeneralSettingsTab = () => {
                 <Text className="text-gray-700">{t('purim_regular')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="flex-row items-center p-3 border border-gray-300 rounded-lg bg-gray-50"
+                className="flex-1 flex-row items-center p-3 border border-gray-300 rounded-lg bg-gray-50"
                 onPress={() => handlePurimToggle('shushan')}
               >
                 <View
@@ -705,28 +723,30 @@ const GeneralSettingsTab = () => {
             {backgroundMode === 'gradient' && (
               <View className="space-y-3">
                 <Text className="text-xs font-medium text-gray-500">{t('background_gradient_colors')}</Text>
-                {gradientColors.map((color, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    className="flex-row items-center space-x-2 p-3 border border-gray-300 rounded-lg bg-gray-50"
-                    onPress={() => openColorPicker(index, color)}
-                  >
-                    <View className="w-12 h-12 rounded border-2 border-gray-400" style={{ backgroundColor: color }} />
-                    <View className="flex-1">
-                      <Text className="text-gray-700 font-semibold">{color.toUpperCase()}</Text>
-                      <Text className="text-gray-500 text-xs">Color {index + 1}</Text>
-                    </View>
-                    <Feather name="edit-2" size={18} color="#666" />
-                    {gradientColors.length > 2 && (
+                <View className="flex-row gap-4">
+                  {gradientColors.map((color, index) => (
+                    <View
+                      key={index}
+                      className="flex-1 flex-row items-stretch rounded-lg overflow-hidden border border-gray-300"
+                    >
                       <TouchableOpacity
-                        className="p-2 bg-red-500 rounded ml-2"
-                        onPress={() => handleRemoveGradientColor(index)}
+                        className="flex-1 items-center justify-center py-4"
+                        style={{ backgroundColor: color }}
+                        onPress={() => openColorPicker(index, color)}
                       >
-                        <Feather name="x" size={18} color="white" />
+                        <Feather name="edit-2" size={20} color="rgba(255,255,255,0.8)" />
                       </TouchableOpacity>
-                    )}
-                  </TouchableOpacity>
-                ))}
+                      {gradientColors.length > 2 && (
+                        <TouchableOpacity
+                          className="px-3 bg-red-500 items-center justify-center"
+                          onPress={() => handleRemoveGradientColor(index)}
+                        >
+                          <Feather name="x" size={16} color="white" />
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  ))}
+                </View>
                 <TouchableOpacity className="p-3 bg-blue-500 rounded-lg" onPress={handleAddGradientColor}>
                   <Text className="text-center text-white font-semibold">{t('background_gradient_add_color')}</Text>
                 </TouchableOpacity>

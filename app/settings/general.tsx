@@ -710,6 +710,79 @@ const GeneralSettingsTab = () => {
               </TouchableOpacity>
             </View>
           </View>
+          {/* Screen Display Times */}
+          <View style={{ gap: smallPadding }}>
+            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+              {t('screen_display_times')}
+            </Text>
+            <View style={{ gap: padding }}>
+              {(['zmanim', 'classes', 'deceased', 'messages', 'schedule'] as const).map((screenName) => (
+                <View key={screenName} className="flex-row items-center justify-between" style={{ gap: padding }}>
+                  <Text className="flex-1 text-gray-700" style={{ fontSize: textSize }}>
+                    {t(`${screenName}_title` as any)}
+                  </Text>
+                  <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const currentTime = settings.screenDisplayTimes?.[screenName] || 10;
+                        const newTime = Math.max(5, currentTime - 5);
+                        updateSettings({
+                          screenDisplayTimes: {
+                            ...(settings.screenDisplayTimes || {
+                              zmanim: 10,
+                              classes: 10,
+                              deceased: 10,
+                              messages: 10,
+                              schedule: 10,
+                            }),
+                            [screenName]: newTime,
+                          },
+                        });
+                      }}
+                      className="bg-gray-200 rounded-lg items-center justify-center"
+                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                    >
+                      <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                        -
+                      </Text>
+                    </TouchableOpacity>
+                    <View
+                      className="bg-blue-100 rounded-lg items-center justify-center"
+                      style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 60 * heightScale }}
+                    >
+                      <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
+                        {settings.screenDisplayTimes?.[screenName] || 10}s
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        const currentTime = settings.screenDisplayTimes?.[screenName] || 10;
+                        const newTime = Math.min(60, currentTime + 5);
+                        updateSettings({
+                          screenDisplayTimes: {
+                            ...(settings.screenDisplayTimes || {
+                              zmanim: 10,
+                              classes: 10,
+                              deceased: 10,
+                              messages: 10,
+                              schedule: 10,
+                            }),
+                            [screenName]: newTime,
+                          },
+                        });
+                      }}
+                      className="bg-gray-200 rounded-lg items-center justify-center"
+                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                    >
+                      <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                        +
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
           {/* background */}
           <View style={{ gap: margin }}>
             <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>

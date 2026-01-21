@@ -66,36 +66,41 @@ export default function App() {
       getDeceasedSubPages(),
     ]);
 
+    const displayTimes = settings.screenDisplayTimes;
+    const getDisplayTime = (screenName: keyof typeof displayTimes, defaultTime: number): number => {
+      return displayTimes?.[screenName] ? displayTimes[screenName] * 1000 : defaultTime;
+    };
+
     return [
       {
         id: 1,
         name: 'zmanim',
         content: () => (settings.enableZmanim ? <Zmanim /> : null),
-        presentTime: defaultPageDisplayTime,
+        presentTime: getDisplayTime('zmanim', defaultPageDisplayTime),
       },
       {
         id: 2,
         name: 'classes',
         content: () => (settings.enableClasses ? <Classes /> : null),
-        presentTime: classSubPages * defaultPageDisplayTime,
+        presentTime: getDisplayTime('classes', classSubPages * defaultPageDisplayTime),
       },
       {
         id: 3,
         name: 'deceased',
         content: () => (settings.enableDeceased ? <Deceased /> : null),
-        presentTime: deceasedSubPages * defaultPageDisplayTime,
+        presentTime: getDisplayTime('deceased', deceasedSubPages * defaultPageDisplayTime),
       },
       {
         id: 4,
         name: 'messages',
         content: () => (settings.enableMessages ? <Messages /> : null),
-        presentTime: messagesSubPages * defaultPageDisplayTime,
+        presentTime: getDisplayTime('messages', messagesSubPages * defaultPageDisplayTime),
       },
       {
         id: 5,
         name: 'schedule',
         content: () => (settings.enableSchedule ? <Schedule /> : null),
-        presentTime: defaultPageDisplayTime,
+        presentTime: getDisplayTime('schedule', defaultPageDisplayTime),
       },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
   }, [settings]);

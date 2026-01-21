@@ -93,12 +93,21 @@ const Schedule: React.FC = () => {
     );
 
   const columns = settings.scheduleSettings?.columns || [];
+  const columnsWithPrayers = columns.filter((column) => column.prayers.length > 0);
 
   return (
     <View className="flex-1" style={{ padding: itemPadding }}>
+      {/* Headline */}
+      {columnsWithPrayers.length > 0 && (
+        <View style={{ marginBottom: padding }}>
+          <Text className={`${headLineColor} font-bold text-center`} style={{ fontSize: titleSize }}>
+            {t('schedule_title')}
+          </Text>
+        </View>
+      )}
       {/* Row(s) for columns */}
       <View className={`${isSmallHeight ? 'flex-col' : 'flex-row flex-wrap'} justify-center items-start`}>
-        {columns.map((column) => (
+        {columnsWithPrayers.map((column) => (
           <InfoGroup
             key={column.id}
             title={column.title}
@@ -107,7 +116,7 @@ const Schedule: React.FC = () => {
           />
         ))}
       </View>
-      {columns.length === 0 && (
+      {columnsWithPrayers.length === 0 && (
         <View className="flex-1 justify-center items-center">
           <Text className="text-gray-500 text-center" style={{ fontSize: titleSize }}>
             {t('schedule_no_prayers')}

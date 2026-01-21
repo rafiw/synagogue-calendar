@@ -194,5 +194,13 @@
   "active": "Active",
   "scheduled": "Scheduled",
   "message_enabled": "Enabled",
-  "no_limit": "No limit"
+  "no_limit": "No limit",
+  "invalid_time_format": "Invalid time format (use HH:MM)",
+  "end_time_before_start": "End time must be after start time",
+  "import_csv": "Import CSV",
+  "screen_display_times": "Screen Display Times",
+  "zmanim_title": "Zmanim",
+  "class_title": "Class Title",
+  "class_title_placeholder": "E.g., Lesson 1, Gemara Shiur",
+  "deceased_config_help": "Configure how deceased people are displayed:\n\n- Rows & Columns: Set the grid layout (e.g., 2x3 = 6 people per page)\n- Display Mode: 'All' shows everyone, 'Monthly' shows only those who passed away in the current month\n- Default Template: Choose the visual style for entries"
 }

@@ -69,6 +69,37 @@ const ClassesSettingsTab = () => {
     updateSettings({ classes: updatedClasses });
   };
 
+  const validateTime = (timeStr: string): boolean => {
+    const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
+    return timeRegex.test(timeStr);
+  };
+
+  const compareTimeStrings = (time1: string, time2: string): number => {
+    if (!time1 || !time2) return 0;
+    const [h1, m1] = time1.split(':').map(Number);
+    const [h2, m2] = time2.split(':').map(Number);
+    const mins1 = (h1 || 0) * 60 + (m1 || 0);
+    const mins2 = (h2 || 0) * 60 + (m2 || 0);
+    return mins1 - mins2;
+  };
+
+  const getTimeWarning = (startTime: string, endTime: string): string | null => {
+    if (!startTime || !endTime) return null;
+
+    if (startTime && !validateTime(startTime)) {
+      return t('invalid_time_format');
+    }
+    if (endTime && !validateTime(endTime)) {
+      return t('invalid_time_format');
+    }
+
+    if (compareTimeStrings(startTime, endTime) >= 0) {
+      return t('end_time_before_start');
+    }
+
+    return null;
+  };
+
   const handleUpdateClass = (index: number, field: keyof Shiur, value: string | number[]) => {
     const updatedClasses = [...settings.classes];
     const currentClass = updatedClasses[index] ?? defaultShiur;
@@ -106,9 +137,44 @@ const ClassesSettingsTab = () => {
     updateSettings({ classes: updatedClasses });
   };
 
+  const handleMoveClass = (index: number, direction: 'up' | 'down') => {
+    const updatedClasses = [...settings.classes];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+
+    if (newIndex < 0 || newIndex >= updatedClasses.length) return;
+
+    const temp = updatedClasses[index];
+    const swap = updatedClasses[newIndex];
+    if (temp && swap) {
+      updatedClasses[index] = swap;
+      updatedClasses[newIndex] = temp;
+      updateSettings({ classes: updatedClasses });
+    }
+  };
+
   const renderClassItem = ({ rtl, item, index }: { rtl: boolean; item: Shiur; index: number }) => (
     <View className="bg-white rounded-lg shadow-sm border border-gray-500" style={{ padding, marginBottom: margin }}>
-      <View className={`flex-row ${rtl ? 'justify-end' : 'justify-start'}`}>
+      <View className={`flex-row justify-between items-center`}>
+        <View className="flex-row" style={{ gap: smallPadding }}>
+          <TouchableOpacity
+            onPress={() => handleMoveClass(index, 'up')}
+            disabled={index === 0}
+            style={{ padding: smallPadding }}
+          >
+            <Feather name="arrow-up" size={iconSize} color={index === 0 ? '#ccc' : '#3b82f6'} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => handleMoveClass(index, 'down')}
+            disabled={index === settings.classes.length - 1}
+            style={{ padding: smallPadding }}
+          >
+            <Feather
+              name="arrow-down"
+              size={iconSize}
+              color={index === settings.classes.length - 1 ? '#ccc' : '#3b82f6'}
+            />
+          </TouchableOpacity>
+        </View>
         <TouchableOpacity onPress={() => handleDeleteClass(index)} style={{ padding: smallPadding }}>
           <Feather name="trash-2" size={iconSize} color="red" />
         </TouchableOpacity>
@@ -150,63 +216,103 @@ const ClassesSettingsTab = () => {
           </View>
         </View>
 
-        <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
-          <View className="flex-1">
-            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
-              {t('start_time')}
-            </Text>
-            <TextInput
-              value={item.start}
-              onChangeText={(value) => handleUpdateClass(index, 'start', value)}
-              className="border border-gray-300 rounded-md text-center"
-              style={{ padding: smallPadding, fontSize: textSize }}
-              placeholder="HH:MM"
-              textAlign={rtl ? 'right' : 'left'}
-            />
-          </View>
+        <View style={{ gap: smallPadding }}>
+          <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
+            <View className="flex-1">
+              <Text
+                className="text-gray-600 text-center"
+                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
+              >
+                {rtl ? t('end_time') : t('start_time')}
+              </Text>
+              <TextInput
+                value={rtl ? item.end : item.start}
+                onChangeText={(value) => handleUpdateClass(index, rtl ? 'end' : 'start', value)}
+                className="border border-gray-300 rounded-md text-center"
+                style={{ padding: smallPadding, fontSize: textSize }}
+                placeholder="HH:MM"
+                textAlign={rtl ? 'right' : 'left'}
+              />
+            </View>
 
-          <View className="flex-1">
-            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
-              {t('end_time')}
-            </Text>
-            <TextInput
-              value={item.end}
-              onChangeText={(value) => handleUpdateClass(index, 'end', value)}
-              className="border border-gray-300 rounded-md text-center"
-              style={{ padding: smallPadding, fontSize: textSize }}
-              placeholder="HH:MM"
-              textAlign={rtl ? 'right' : 'left'}
-            />
+            <View className="flex-1">
+              <Text
+                className="text-gray-600 text-center"
+                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
+              >
+                {rtl ? t('start_time') : t('end_time')}
+              </Text>
+              <TextInput
+                value={rtl ? item.start : item.end}
+                onChangeText={(value) => handleUpdateClass(index, rtl ? 'start' : 'end', value)}
+                className="border border-gray-300 rounded-md text-center"
+                style={{ padding: smallPadding, fontSize: textSize }}
+                placeholder="HH:MM"
+                textAlign={rtl ? 'right' : 'left'}
+              />
+            </View>
           </View>
+          {(() => {
+            const warning = getTimeWarning(item.start, item.end);
+            return warning ? (
+              <View className="bg-yellow-50 border border-yellow-400 rounded-md" style={{ padding: smallPadding }}>
+                <Text className="text-yellow-800 text-center" style={{ fontSize: labelSize }}>
+                  ⚠️ {warning}
+                </Text>
+              </View>
+            ) : null;
+          })()}
         </View>
 
-        <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
-          <View className="flex-1">
+        <View style={{ gap: padding }}>
+          <View>
             <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
-              {t('tutor')}
+              {t('class_title')}
             </Text>
             <TextInput
-              value={item.tutor}
-              onChangeText={(value) => handleUpdateClass(index, 'tutor', value)}
+              value={item.title || ''}
+              onChangeText={(value) => handleUpdateClass(index, 'title', value)}
               className="border border-gray-300 rounded-md text-center"
               style={{ padding: smallPadding, fontSize: textSize }}
-              placeholder={t('tutor')}
+              placeholder={t('class_title_placeholder')}
               textAlign={rtl ? 'right' : 'left'}
             />
           </View>
 
-          <View className="flex-1">
-            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
-              {t('subject')}
-            </Text>
-            <TextInput
-              value={item.subject}
-              onChangeText={(value) => handleUpdateClass(index, 'subject', value)}
-              className="border border-gray-300 rounded-md text-center"
-              style={{ padding: smallPadding, fontSize: textSize }}
-              placeholder={t('subject')}
-              textAlign={rtl ? 'right' : 'left'}
-            />
+          <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
+            <View className="flex-1">
+              <Text
+                className="text-gray-600 text-center"
+                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
+              >
+                {t('tutor')}
+              </Text>
+              <TextInput
+                value={item.tutor}
+                onChangeText={(value) => handleUpdateClass(index, 'tutor', value)}
+                className="border border-gray-300 rounded-md text-center"
+                style={{ padding: smallPadding, fontSize: textSize }}
+                placeholder={t('tutor')}
+                textAlign={rtl ? 'right' : 'left'}
+              />
+            </View>
+
+            <View className="flex-1">
+              <Text
+                className="text-gray-600 text-center"
+                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
+              >
+                {t('subject')}
+              </Text>
+              <TextInput
+                value={item.subject}
+                onChangeText={(value) => handleUpdateClass(index, 'subject', value)}
+                className="border border-gray-300 rounded-md text-center"
+                style={{ padding: smallPadding, fontSize: textSize }}
+                placeholder={t('subject')}
+                textAlign={rtl ? 'right' : 'left'}
+              />
+            </View>
           </View>
         </View>
       </View>

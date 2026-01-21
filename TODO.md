@@ -1,12 +1,11 @@
 ## Feature list
 
+- in classes settings add lesson# title
 - screen of custome message with picture
-- birthday screen
 - daf yomi...
+- birthday screen
 - allow set prey time automaticlly by sunset\sunrise offset with rounding backward
-- move graphic to new sub menu
-- make zmanim submenue
-- ~~in classes settings add lesson# title~~
+- ~~make zmanim submenue~~
 - ~~in hebrew view when adding lesson the start time-end time should be reversed~~
 - ~~try to show warnnings when user set bad times for classes, e.g. start time after end time, don't fail just warn~~
 - ~~in classes settings view add buttons to sort lessons and then show then in Classes view by this order~~

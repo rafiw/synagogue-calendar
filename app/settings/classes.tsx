@@ -155,7 +155,7 @@ const ClassesSettingsTab = () => {
 
   const renderClassItem = ({ rtl, item, index }: { rtl: boolean; item: Class; index: number }) => (
     <View className="bg-white rounded-lg shadow-sm border border-gray-500" style={{ padding, marginBottom: margin }}>
-      <View className={`flex-row justify-between items-center`}>
+      <View className={`flex-row items-center`} style={{ gap: smallPadding }}>
         <View className="flex-row" style={{ gap: smallPadding }}>
           <TouchableOpacity
             onPress={() => handleMoveClass(index, 'up')}
@@ -175,6 +175,16 @@ const ClassesSettingsTab = () => {
               color={index === settings.classesSettings.classes.length - 1 ? '#ccc' : '#3b82f6'}
             />
           </TouchableOpacity>
+        </View>
+        <View className="flex-1">
+          <TextInput
+            value={item.title || ''}
+            onChangeText={(value) => handleUpdateClass(index, 'title', value)}
+            className="border border-gray-300 rounded-md text-center"
+            style={{ padding: smallPadding, fontSize: textSize }}
+            placeholder={t('class_title_placeholder')}
+            textAlign={rtl ? 'right' : 'left'}
+          />
         </View>
         <TouchableOpacity onPress={() => handleDeleteClass(index)} style={{ padding: smallPadding }}>
           <Feather name="trash-2" size={iconSize} color="red" />
@@ -265,55 +275,33 @@ const ClassesSettingsTab = () => {
           })()}
         </View>
 
-        <View style={{ gap: padding }}>
-          <View>
+        <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
+          <View className="flex-1">
             <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
-              {t('class_title')}
+              {t('tutor')}
             </Text>
             <TextInput
-              value={item.title || ''}
-              onChangeText={(value) => handleUpdateClass(index, 'title', value)}
+              value={item.tutor}
+              onChangeText={(value) => handleUpdateClass(index, 'tutor', value)}
               className="border border-gray-300 rounded-md text-center"
               style={{ padding: smallPadding, fontSize: textSize }}
-              placeholder={t('class_title_placeholder')}
+              placeholder={t('tutor')}
               textAlign={rtl ? 'right' : 'left'}
             />
           </View>
 
-          <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
-            <View className="flex-1">
-              <Text
-                className="text-gray-600 text-center"
-                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
-              >
-                {t('tutor')}
-              </Text>
-              <TextInput
-                value={item.tutor}
-                onChangeText={(value) => handleUpdateClass(index, 'tutor', value)}
-                className="border border-gray-300 rounded-md text-center"
-                style={{ padding: smallPadding, fontSize: textSize }}
-                placeholder={t('tutor')}
-                textAlign={rtl ? 'right' : 'left'}
-              />
-            </View>
-
-            <View className="flex-1">
-              <Text
-                className="text-gray-600 text-center"
-                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
-              >
-                {t('subject')}
-              </Text>
-              <TextInput
-                value={item.subject}
-                onChangeText={(value) => handleUpdateClass(index, 'subject', value)}
-                className="border border-gray-300 rounded-md text-center"
-                style={{ padding: smallPadding, fontSize: textSize }}
-                placeholder={t('subject')}
-                textAlign={rtl ? 'right' : 'left'}
-              />
-            </View>
+          <View className="flex-1">
+            <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
+              {t('subject')}
+            </Text>
+            <TextInput
+              value={item.subject}
+              onChangeText={(value) => handleUpdateClass(index, 'subject', value)}
+              className="border border-gray-300 rounded-md text-center"
+              style={{ padding: smallPadding, fontSize: textSize }}
+              placeholder={t('subject')}
+              textAlign={rtl ? 'right' : 'left'}
+            />
           </View>
         </View>
       </View>

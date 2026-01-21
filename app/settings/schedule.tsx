@@ -91,7 +91,7 @@ const ScheduleSettingsTab = () => {
         title: columnTitle,
         prayers: [],
       };
-      columns.push(newColumn);
+      columns.unshift(newColumn);
     }
 
     updateSettings({

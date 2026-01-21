@@ -1,16 +1,11 @@
 ## Feature list
 
-- ~~different time for each screen~~
-- ~~load deceased from csv file~~
-- ~~message with start time and ttl of X days~~
 - screen of custome message with picture
 - birthday screen
 - daf yomi...
 - allow set prey time automaticlly by sunset\sunrise offset with rounding backward
 - move graphic to new sub menu
 - make zmanim submenue
-- ~~add headline to Schedule view~~
-- ~~don't display Schedule column without preyrs~~
 - ~~in classes settings add lesson# title~~
 - ~~in hebrew view when adding lesson the start time-end time should be reversed~~
 - ~~try to show warnnings when user set bad times for classes, e.g. start time after end time, don't fail just warn~~
@@ -19,3 +14,8 @@
 - ~~the add deceased in settings should be smaller maybe add ass modal~~
 - datepicker should support hebrew months names
 - ~~is there a usage in male femail in deceased?~~ (Yes, used for gender-appropriate labels)
+- ~~different time for each screen~~
+- ~~load deceased from csv file~~
+- ~~message with start time and ttl of X days~~
+- ~~add headline to Schedule view~~
+- ~~don't display Schedule column without preyrs~~

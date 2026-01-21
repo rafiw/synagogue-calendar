@@ -10,14 +10,16 @@ import MessagesSettingsTab from './messages';
 import ClassesSettingsTab from './classes';
 import DeceasedSettingsTab from './deceased';
 import ScheduleSettingsTab from './schedule';
+import ZmanimSettingsTab from './zmanim';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const Tab = createMaterialTopTabNavigator();
 
-type TabKey = 'general' | 'messages' | 'schedule' | 'classes' | 'deceased';
+type TabKey = 'general' | 'messages' | 'schedule' | 'classes' | 'deceased' | 'zmanim';
 
 const TAB_COMPONENTS: Record<TabKey, React.ComponentType> = {
   general: GeneralSettingsTab,
+  zmanim: ZmanimSettingsTab,
   messages: MessagesSettingsTab,
   schedule: ScheduleSettingsTab,
   classes: ClassesSettingsTab,
@@ -78,6 +80,7 @@ export default function SettingsLayout() {
 
   const tabs: { key: TabKey; title: string }[] = [
     { key: 'general', title: t('general_title') },
+    { key: 'zmanim', title: t('zmanim_title') },
     { key: 'messages', title: t('messages_title') },
     { key: 'schedule', title: t('schedule_title') },
     { key: 'classes', title: t('classes_title') },
@@ -162,6 +165,7 @@ export default function SettingsLayout() {
         <View className="w-full max-w-2xl flex-1">
           <Tab.Navigator>
             <Tab.Screen name="general" component={GeneralSettingsTab} options={{ title: t('general_title') }} />
+            <Tab.Screen name="zmanim" component={ZmanimSettingsTab} options={{ title: t('zmanim_title') }} />
             <Tab.Screen name="messages" component={MessagesSettingsTab} options={{ title: t('messages_title') }} />
             <Tab.Screen name="schedule" component={ScheduleSettingsTab} options={{ title: t('schedule_title') }} />
             <Tab.Screen name="classes" component={ClassesSettingsTab} options={{ title: t('classes_title') }} />

@@ -10,6 +10,7 @@ import {
   Image,
   ScrollView,
   useWindowDimensions,
+  Modal,
 } from 'react-native';
 import { showAlert, showConfirm } from '../../utils/alert';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
@@ -18,6 +19,7 @@ import { DeceasedPerson, DeceasedSettings } from '../../utils/defs';
 import { DatePicker } from '../../components/DatePicker';
 import { HDate } from '@hebcal/core';
 import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import ExternalLink from '../../utils/PressableLink';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
@@ -315,7 +317,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
   };
 
   return (
-    <View className="bg-white rounded-lg shadow-sm" style={{ padding, marginBottom: margin }}>
+    <ScrollView className="bg-white rounded-lg" style={{ padding, maxHeight: '80%' }}>
       <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
         {person ? t('deceased_edit') : t('deceased_add_person')}
       </Text>
@@ -606,8 +608,60 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
+};
+
+const parseCSV = (csvText: string): Array<Partial<DeceasedPerson>> => {
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2) return [];
+
+  const headers = lines[0]?.split(',').map((h) => h.trim().toLowerCase()) || [];
+  const nameIndex = headers.findIndex((h) => h === 'name' || h === 'שם');
+  const genderIndex = headers.findIndex((h) => h === 'gender' || h === 'מין' || h === 'male' || h === 'ismale');
+  const dobIndex = headers.findIndex((h) => h === 'dateofbirth' || h === 'dob' || h === 'birth' || h === 'תאריך לידה');
+  const dodIndex = headers.findIndex((h) => h === 'dateofdeath' || h === 'dod' || h === 'death' || h === 'תאריך פטירה');
+  const hebrewDobIndex = headers.findIndex(
+    (h) => h === 'hebrewdateofbirth' || h === 'hebrewdob' || h === 'תאריך לידה עברי',
+  );
+  const hebrewDodIndex = headers.findIndex(
+    (h) => h === 'hebrewdateofdeath' || h === 'hebrewdod' || h === 'תאריך פטירה עברי',
+  );
+  const photoIndex = headers.findIndex((h) => h === 'photo' || h === 'photourl' || h === 'תמונה');
+  const tributeIndex = headers.findIndex((h) => h === 'tribute' || h === 'memorial' || h === 'זיכרון');
+
+  const people: Array<Partial<DeceasedPerson>> = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (!line?.trim()) continue;
+
+    const values = line.split(',').map((v) => v.trim());
+    if (nameIndex === -1 || !values[nameIndex]) continue;
+
+    const person: Partial<DeceasedPerson> = {
+      id: `csv_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
+      name: values[nameIndex] || '',
+    };
+
+    if (genderIndex !== -1 && values[genderIndex]) {
+      const genderValue = values[genderIndex]?.toLowerCase();
+      person.isMale = genderValue === 'male' || genderValue === 'true' || genderValue === '1' || genderValue === 'זכר';
+    }
+
+    if (dobIndex !== -1 && values[dobIndex]) person.dateOfBirth = values[dobIndex];
+    if (dodIndex !== -1 && values[dodIndex]) person.dateOfDeath = values[dodIndex];
+    if (hebrewDobIndex !== -1 && values[hebrewDobIndex]) person.hebrewDateOfBirth = values[hebrewDobIndex];
+    if (hebrewDodIndex !== -1 && values[hebrewDodIndex]) person.hebrewDateOfDeath = values[hebrewDodIndex];
+    if (photoIndex !== -1 && values[photoIndex]) person.photo = values[photoIndex];
+    if (tributeIndex !== -1 && values[tributeIndex]) person.tribute = values[tributeIndex];
+
+    person.template = 'simple';
+
+    people.push(person);
+  }
+
+  return people;
 };
 
 const DeceasedSettingsTab = () => {
@@ -686,6 +740,40 @@ const DeceasedSettingsTab = () => {
     setShowForm(true);
   };
 
+  const handleImportCSV = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: 'text/csv',
+        copyToCacheDirectory: true,
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      const file = result.assets[0];
+      if (!file) return;
+
+      const response = await fetch(file.uri);
+      const csvText = await response.text();
+
+      const parsedPeople = parseCSV(csvText);
+
+      if (parsedPeople.length === 0) {
+        showAlert(t('error'), 'No valid data found in CSV file');
+        return;
+      }
+
+      const updatedDeceased = [...settings.deceasedSettings.deceased, ...(parsedPeople as DeceasedPerson[])];
+      updateDeceasedSettings({ deceased: updatedDeceased });
+
+      showAlert('Success', `Imported ${parsedPeople.length} people from CSV`);
+    } catch (error) {
+      console.error('Error importing CSV:', error);
+      showAlert(t('error'), 'Failed to import CSV file');
+    }
+  };
+
   if (isLoading || !i18n?.isInitialized) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -711,9 +799,26 @@ const DeceasedSettingsTab = () => {
         <View className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin, gap: margin }}>
           {/* Table Configuration */}
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
-              {t('deceased_table_configuration')}
-            </Text>
+            <View className="flex-row justify-between items-center" style={{ marginBottom: margin }}>
+              <Text className="font-bold" style={{ fontSize: titleSize }}>
+                {t('deceased_table_configuration')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => showAlert(t('deceased_table_configuration'), t('deceased_config_help'))}
+                className="bg-blue-100 rounded-full"
+                style={{
+                  padding: smallPadding / 2,
+                  width: 24 * heightScale,
+                  height: 24 * heightScale,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Text className="text-blue-600 font-bold" style={{ fontSize: labelSize }}>
+                  ?
+                </Text>
+              </TouchableOpacity>
+            </View>
             <View style={{ gap: padding }}>
               {/* First Row: Table Columns and Table Rows */}
               <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
@@ -893,28 +998,55 @@ const DeceasedSettingsTab = () => {
               <Text className="font-bold" style={{ fontSize: titleSize }}>
                 {t('deceased_people')}
               </Text>
-              <TouchableOpacity
-                onPress={() => setShowForm(true)}
-                className="bg-green-500 rounded-lg"
-                style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
-              >
-                <Text className="text-white font-medium" style={{ fontSize: buttonTextSize }}>
-                  {t('deceased_add_person')}
-                </Text>
-              </TouchableOpacity>
+              <View className="flex-row" style={{ gap: smallPadding }}>
+                <TouchableOpacity
+                  onPress={() => void handleImportCSV()}
+                  className="bg-blue-500 rounded-lg flex-row items-center"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+                >
+                  <Feather name="upload" size={Math.round(12 * heightScale)} color="white" />
+                  <Text
+                    className="text-white font-medium"
+                    style={{ fontSize: buttonTextSize, marginLeft: smallPadding / 2 }}
+                  >
+                    {t('import_csv')}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setShowForm(true)}
+                  className="bg-green-500 rounded-lg"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+                >
+                  <Text className="text-white font-medium" style={{ fontSize: buttonTextSize }}>
+                    {t('deceased_add_person')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
 
-            {showForm && (
-              <DeceasedPersonForm
-                person={editingPerson}
-                onSave={editingPerson ? editDeceasedPerson : addDeceasedPerson}
-                onCancel={() => {
-                  setShowForm(false);
-                  setEditingPerson(undefined);
-                }}
-                imgbbApiKey={settings.deceasedSettings.imgbbApiKey || ''}
-              />
-            )}
+            <Modal
+              visible={showForm}
+              transparent
+              animationType="slide"
+              onRequestClose={() => {
+                setShowForm(false);
+                setEditingPerson(undefined);
+              }}
+            >
+              <View className="flex-1 justify-center items-center bg-black/50" style={{ padding }}>
+                <View className="w-11/12 max-w-2xl">
+                  <DeceasedPersonForm
+                    person={editingPerson}
+                    onSave={editingPerson ? editDeceasedPerson : addDeceasedPerson}
+                    onCancel={() => {
+                      setShowForm(false);
+                      setEditingPerson(undefined);
+                    }}
+                    imgbbApiKey={settings.deceasedSettings.imgbbApiKey || ''}
+                  />
+                </View>
+              </View>
+            </Modal>
 
             {settings.deceasedSettings.deceased.length === 0 ? (
               <Text className="text-gray-500 text-center" style={{ fontSize: textSize, paddingVertical: padding }}>

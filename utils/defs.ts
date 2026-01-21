@@ -7,6 +7,7 @@ export interface Shiur {
   end: string;
   tutor: string;
   subject: string;
+  title?: string;
 }
 
 export interface DeceasedPerson {
@@ -83,6 +84,14 @@ export interface BackgroundSettings {
   customImageUri?: string;
 }
 
+export interface ScreenDisplayTimes {
+  zmanim: number;
+  classes: number;
+  deceased: number;
+  messages: number;
+  schedule: number;
+}
+
 export interface Settings {
   name: string;
   gistId: string;
@@ -104,6 +113,7 @@ export interface Settings {
   enableDeceased: boolean;
   enableMessages: boolean;
   enableSchedule: boolean;
+  screenDisplayTimes?: ScreenDisplayTimes;
   messages: Message[];
   classes: Shiur[];
   deceasedSettings: DeceasedSettings;

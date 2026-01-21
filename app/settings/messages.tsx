@@ -80,21 +80,23 @@ const MessagesSettingsTab = () => {
 
   return (
     <View className="flex-1" style={{ marginTop: margin }}>
-      <BouncyCheckbox
-        size={checkboxSize}
-        isChecked={settings.messagesSettings.enable}
-        fillColor="green"
-        iconStyle={{ borderColor: 'green' }}
-        innerIconStyle={{ borderWidth: 2 }}
-        text={t('enable_messages')}
-        textComponent={<Text style={{ fontSize: textSize }}>{t('enable_messages')}</Text>}
-        onPress={(value) => void saveChecked(value)}
-      />
+      <View className="flex-row items-center justify-center" style={{ gap: padding }}>
+        <BouncyCheckbox
+          size={checkboxSize}
+          isChecked={settings.messagesSettings.enable}
+          fillColor="green"
+          iconStyle={{ borderColor: 'green' }}
+          innerIconStyle={{ borderWidth: 2 }}
+          text={t('enable_messages')}
+          textComponent={<Text style={{ fontSize: textSize }}>{t('enable_messages')}</Text>}
+          onPress={(value) => void saveChecked(value)}
+        />
+      </View>
       {settings.messagesSettings.enable && (
         <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
-          <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+          <View className="flex-row items-center justify-center" style={{ gap: padding }}>
             <Text className="text-gray-600" style={{ fontSize: labelSize }}>
-              {t('screen_display_time')}
+              {t('screen_display_time_description')}
             </Text>
             <View className="flex-row items-center" style={{ gap: smallPadding }}>
               <TouchableOpacity
@@ -126,7 +128,7 @@ const MessagesSettingsTab = () => {
               <TouchableOpacity
                 onPress={() => {
                   const currentTime = settings.messagesSettings.screenDisplayTime || 10;
-                  const newTime = Math.min(60, currentTime + 5);
+                  const newTime = Math.min(60, currentTime + 1);
                   updateSettings({
                     messagesSettings: {
                       ...settings.messagesSettings,

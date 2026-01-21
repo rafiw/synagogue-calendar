@@ -254,27 +254,29 @@ const ScheduleSettingsTab = () => {
 
   return (
     <View className="flex-1" style={{ marginTop: margin }}>
-      <BouncyCheckbox
-        size={checkboxSize}
-        isChecked={settings.scheduleSettings.enable}
-        fillColor="green"
-        iconStyle={{ borderColor: 'green' }}
-        innerIconStyle={{ borderWidth: 2 }}
-        text={t('enable_schedule')}
-        textComponent={<Text style={{ fontSize: textSize }}>{t('enable_schedule')}</Text>}
-        onPress={(value) => void saveChecked(value)}
-      />
+      <View className="flex-row items-center justify-center" style={{ gap: padding }}>
+        <BouncyCheckbox
+          size={checkboxSize}
+          isChecked={settings.scheduleSettings.enable}
+          fillColor="green"
+          iconStyle={{ borderColor: 'green' }}
+          innerIconStyle={{ borderWidth: 2 }}
+          text={t('enable_schedule')}
+          textComponent={<Text style={{ fontSize: textSize }}>{t('enable_schedule')}</Text>}
+          onPress={(value) => void saveChecked(value)}
+        />
+      </View>
       {settings.scheduleSettings.enable && (
         <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
-          <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+          <View className="flex-row items-center justify-center" style={{ gap: padding }}>
             <Text className="text-gray-600" style={{ fontSize: labelSize }}>
-              {t('screen_display_time')}
+              {t('screen_display_time_description')}
             </Text>
             <View className="flex-row items-center" style={{ gap: smallPadding }}>
               <TouchableOpacity
                 onPress={() => {
                   const currentTime = settings.scheduleSettings.screenDisplayTime || 10;
-                  const newTime = Math.max(5, currentTime - 5);
+                  const newTime = Math.max(1, currentTime - 1);
                   updateSettings({
                     scheduleSettings: {
                       ...settings.scheduleSettings,
@@ -294,13 +296,13 @@ const ScheduleSettingsTab = () => {
                 style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
               >
                 <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
-                  {settings.scheduleSettings.screenDisplayTime || 10}s
+                  {settings.scheduleSettings.screenDisplayTime || 10}
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => {
                   const currentTime = settings.scheduleSettings.screenDisplayTime || 10;
-                  const newTime = Math.min(60, currentTime + 5);
+                  const newTime = Math.min(60, currentTime + 1);
                   updateSettings({
                     scheduleSettings: {
                       ...settings.scheduleSettings,

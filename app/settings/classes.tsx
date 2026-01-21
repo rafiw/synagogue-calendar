@@ -330,27 +330,29 @@ const ClassesSettingsTab = () => {
 
   return (
     <View className="flex-1" style={{ marginTop: margin }}>
-      <BouncyCheckbox
-        size={checkboxSize}
-        isChecked={settings.classesSettings.enable}
-        fillColor="green"
-        iconStyle={checkboxStyles.green.iconStyle}
-        innerIconStyle={checkboxStyles.green.innerIconStyle}
-        text={t('enable_classes')}
-        textComponent={<Text style={{ fontSize: textSize }}>{t('enable_classes')}</Text>}
-        onPress={(value) => saveChecked(value)}
-      />
+      <View className="flex-row items-center justify-center" style={{ gap: padding }}>
+        <BouncyCheckbox
+          size={checkboxSize}
+          isChecked={settings.classesSettings.enable}
+          fillColor="green"
+          iconStyle={checkboxStyles.green.iconStyle}
+          innerIconStyle={checkboxStyles.green.innerIconStyle}
+          text={t('enable_classes')}
+          textComponent={<Text style={{ fontSize: textSize }}>{t('enable_classes')}</Text>}
+          onPress={(value) => saveChecked(value)}
+        />
+      </View>
       {settings.classesSettings.enable && (
         <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
-          <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+          <View className="flex-row items-center justify-center" style={{ gap: padding }}>
             <Text className="text-gray-600" style={{ fontSize: labelSize }}>
-              {t('screen_display_time')}
+              {t('screen_display_time_description')}
             </Text>
             <View className="flex-row items-center" style={{ gap: smallPadding }}>
               <TouchableOpacity
                 onPress={() => {
                   const currentTime = settings.classesSettings.screenDisplayTime || 10;
-                  const newTime = Math.max(5, currentTime - 5);
+                  const newTime = Math.max(1, currentTime - 1);
                   updateSettings({
                     classesSettings: {
                       ...settings.classesSettings,
@@ -370,13 +372,13 @@ const ClassesSettingsTab = () => {
                 style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
               >
                 <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
-                  {settings.classesSettings.screenDisplayTime || 10}s
+                  {settings.classesSettings.screenDisplayTime || 10}
                 </Text>
               </View>
               <TouchableOpacity
                 onPress={() => {
                   const currentTime = settings.classesSettings.screenDisplayTime || 10;
-                  const newTime = Math.min(60, currentTime + 5);
+                  const newTime = Math.min(60, currentTime + 1);
                   updateSettings({
                     classesSettings: {
                       ...settings.classesSettings,

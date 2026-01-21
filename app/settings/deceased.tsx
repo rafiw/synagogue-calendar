@@ -816,71 +816,70 @@ const DeceasedSettingsTab = () => {
 
   return (
     <ScrollView className="flex-1" style={{ marginTop: margin }}>
-      <BouncyCheckbox
-        size={checkboxSize}
-        isChecked={settings.deceasedSettings.enable}
-        fillColor="green"
-        iconStyle={{ borderColor: 'green' }}
-        innerIconStyle={{ borderWidth: 2 }}
-        text={t('enable_deceased')}
-        textComponent={<Text style={{ fontSize: textSize }}>{t('enable_deceased')}</Text>}
-        onPress={(value) => saveChecked(value)}
-      />
-
+      <View className="flex-row items-center justify-center" style={{ gap: padding }}>
+        <BouncyCheckbox
+          size={checkboxSize}
+          isChecked={settings.deceasedSettings.enable}
+          fillColor="green"
+          iconStyle={{ borderColor: 'green' }}
+          innerIconStyle={{ borderWidth: 2 }}
+          text={t('enable_deceased')}
+          textComponent={<Text style={{ fontSize: textSize }}>{t('enable_deceased')}</Text>}
+          onPress={(value) => saveChecked(value)}
+        />
+      </View>
       {settings.deceasedSettings.enable && (
-        <View className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin, gap: margin }}>
+        <View className="flex-1" style={{ marginTop: margin }}>
           {/* Display Time */}
-          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <View className="flex-row items-center justify-between" style={{ gap: padding }}>
-              <Text className="text-gray-600 font-medium" style={{ fontSize: labelSize }}>
-                {t('screen_display_time')}
-              </Text>
-              <View className="flex-row items-center" style={{ gap: smallPadding }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
-                    const newTime = Math.max(5, currentTime - 5);
-                    updateSettings({
-                      deceasedSettings: {
-                        ...settings.deceasedSettings,
-                        screenDisplayTime: newTime,
-                      },
-                    });
-                  }}
-                  className="bg-gray-200 rounded-lg items-center justify-center"
-                  style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-                >
-                  <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                    -
-                  </Text>
-                </TouchableOpacity>
-                <View
-                  className="bg-blue-100 rounded-lg items-center justify-center"
-                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
-                >
-                  <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
-                    {settings.deceasedSettings.screenDisplayTime || 10}s
-                  </Text>
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
-                    const newTime = Math.min(60, currentTime + 5);
-                    updateSettings({
-                      deceasedSettings: {
-                        ...settings.deceasedSettings,
-                        screenDisplayTime: newTime,
-                      },
-                    });
-                  }}
-                  className="bg-gray-200 rounded-lg items-center justify-center"
-                  style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-                >
-                  <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                    +
-                  </Text>
-                </TouchableOpacity>
+          <View className="flex-row items-center justify-center" style={{ gap: padding }}>
+            <Text className="text-gray-600 font-medium" style={{ fontSize: labelSize }}>
+              {t('screen_display_time_description')}
+            </Text>
+            <View className="flex-row items-center" style={{ gap: smallPadding }}>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
+                  const newTime = Math.max(1, currentTime - 1);
+                  updateSettings({
+                    deceasedSettings: {
+                      ...settings.deceasedSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  -
+                </Text>
+              </TouchableOpacity>
+              <View
+                className="bg-blue-100 rounded-lg items-center justify-center"
+                style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+              >
+                <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
+                  {settings.deceasedSettings.screenDisplayTime || 10}
+                </Text>
               </View>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
+                  const newTime = Math.min(60, currentTime + 1);
+                  updateSettings({
+                    deceasedSettings: {
+                      ...settings.deceasedSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  +
+                </Text>
+              </TouchableOpacity>
             </View>
           </View>
           {/* Table Configuration */}

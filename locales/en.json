@@ -61,6 +61,7 @@
   "enable_messages": "Enable messages page",
   "enable_deceased": "Enable memorial page",
   "enable_schedule": "Enable schedule page",
+  "enable_zmanim": "Enable zmanim page",
   "no_classes": "No classes to display",
   "msg_empty_description": "Add messages to display important announcements and information",
   "add_message": "Add message",

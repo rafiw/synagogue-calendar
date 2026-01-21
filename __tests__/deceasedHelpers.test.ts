@@ -14,7 +14,7 @@ import {
   calculateDeceasedPages,
   DeceasedFilterable,
 } from '../utils/deceasedHelpers';
-import { DeceasedPerson } from '../utils/defs';
+import { DeceasedPerson, DeceasedSettings } from '../utils/defs';
 
 describe('deceasedHelpers', () => {
   describe('getScaleFactor', () => {
@@ -539,67 +539,148 @@ describe('deceasedHelpers', () => {
   describe('calculateDeceasedPages', () => {
     const mockDeceased: DeceasedPerson[] = [
       {
+        id: '1',
         name: 'Person 1',
+        isMale: true,
         dateOfBirth: '1950-01-01',
         dateOfDeath: '2020-01-15',
         hebrewDateOfBirth: '1950-01-01',
         hebrewDateOfDeath: '2020-01-15',
+        template: 'simple',
         tribute: '',
-        photo: null,
+        photo: 'https://example.com/photo1.jpg',
       },
       {
+        id: '2',
         name: 'Person 2',
+        isMale: false,
         dateOfBirth: '1960-02-01',
         dateOfDeath: '2021-02-15',
         hebrewDateOfBirth: '1960-02-01',
         hebrewDateOfDeath: '2021-02-15',
+        template: 'simple',
         tribute: '',
-        photo: null,
+        photo: 'https://example.com/photo2.jpg',
       },
       {
+        id: '3',
         name: 'Person 3',
+        isMale: true,
         dateOfBirth: '1955-03-01',
         dateOfDeath: '2019-03-15',
         hebrewDateOfBirth: '1955-03-01',
         hebrewDateOfDeath: '2019-03-15',
+        template: 'simple',
         tribute: '',
-        photo: null,
+        photo: 'https://example.com/photo3.jpg',
       },
     ];
 
     it('should return empty result for empty array', () => {
-      const result = calculateDeceasedPages([], 'all', 2, 2);
+      const settings: DeceasedSettings = {
+        enable: true,
+        deceased: [],
+        screenDisplayTime: 10,
+        imgbbApiKey: '',
+        displaySettings: {
+          defaultTemplate: 'simple',
+          displayMode: 'all',
+          tableRows: 2,
+          tableColumns: 2,
+        },
+      };
+      const result = calculateDeceasedPages(settings);
       expect(result.filteredDeceased).toHaveLength(0);
       expect(result.totalPages).toBe(0);
     });
 
     it('should return all deceased in "all" mode', () => {
-      const result = calculateDeceasedPages(mockDeceased, 'all', 2, 2);
+      const settings: DeceasedSettings = {
+        enable: true,
+        deceased: mockDeceased,
+        screenDisplayTime: 10,
+        imgbbApiKey: '',
+        displaySettings: {
+          defaultTemplate: 'simple',
+          displayMode: 'all',
+          tableRows: 2,
+          tableColumns: 2,
+        },
+      };
+      const result = calculateDeceasedPages(settings);
       expect(result.filteredDeceased).toHaveLength(3);
       expect(result.totalPages).toBe(1); // 3 items / 4 cells = 1 page
     });
 
     it('should calculate correct number of pages', () => {
-      const result = calculateDeceasedPages(mockDeceased, 'all', 2, 1);
+      const settings: DeceasedSettings = {
+        enable: true,
+        deceased: mockDeceased,
+        screenDisplayTime: 10,
+        imgbbApiKey: '',
+        displaySettings: {
+          defaultTemplate: 'simple',
+          displayMode: 'all',
+          tableRows: 2,
+          tableColumns: 1,
+        },
+      };
+      const result = calculateDeceasedPages(settings);
       expect(result.filteredDeceased).toHaveLength(3);
       expect(result.totalPages).toBe(2); // 3 items / 2 cells = 2 pages
     });
 
     it('should filter by month in "monthly" mode', () => {
-      const result = calculateDeceasedPages(mockDeceased, 'monthly', 2, 2);
+      const settings: DeceasedSettings = {
+        enable: true,
+        deceased: mockDeceased,
+        screenDisplayTime: 10,
+        imgbbApiKey: '',
+        displaySettings: {
+          defaultTemplate: 'simple',
+          displayMode: 'monthly',
+          tableRows: 2,
+          tableColumns: 2,
+        },
+      };
+      const result = calculateDeceasedPages(settings);
       expect(Array.isArray(result.filteredDeceased)).toBe(true);
       expect(typeof result.totalPages).toBe('number');
       expect(result.totalPages).toBeGreaterThanOrEqual(0);
     });
 
     it('should handle 1x1 grid', () => {
-      const result = calculateDeceasedPages(mockDeceased, 'all', 1, 1);
+      const settings: DeceasedSettings = {
+        enable: true,
+        deceased: mockDeceased,
+        screenDisplayTime: 10,
+        imgbbApiKey: '',
+        displaySettings: {
+          defaultTemplate: 'simple',
+          displayMode: 'all',
+          tableRows: 1,
+          tableColumns: 1,
+        },
+      };
+      const result = calculateDeceasedPages(settings);
       expect(result.filteredDeceased).toHaveLength(3);
       expect(result.totalPages).toBe(3); // 3 items / 1 cell = 3 pages
     });
 
     it('should handle large grid', () => {
-      const result = calculateDeceasedPages(mockDeceased, 'all', 5, 5);
+      const settings: DeceasedSettings = {
+        enable: true,
+        deceased: mockDeceased,
+        screenDisplayTime: 10,
+        imgbbApiKey: '',
+        displaySettings: {
+          defaultTemplate: 'simple',
+          displayMode: 'all',
+          tableRows: 5,
+          tableColumns: 5,
+        },
+      };
+      const result = calculateDeceasedPages(settings);
       expect(result.filteredDeceased).toHaveLength(3);
       expect(result.totalPages).toBe(1); // 3 items / 25 cells = 1 page
     });

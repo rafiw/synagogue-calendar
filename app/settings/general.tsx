@@ -163,17 +163,19 @@ const GeneralSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
   const { height } = useWindowDimensions();
-  const [latitude, setLatitude] = useState(settings.latitude.toString());
-  const [longitude, setLongitude] = useState(settings.longitude.toString());
-  const [elevation, setElevation] = useState(settings.elevation?.toString() || '0');
-  const [gistId, setGistId] = useState(settings.gistId);
-  const [githubKeyUrl, setGithubKeyUrl] = useState(settings.githubKey);
-  // const [gistFileName, setGistFileName] = useState(settings.gistFileName);
-  const [synagogueName, setSynagogueName] = useState(settings.name);
+  const [latitude, setLatitude] = useState(settings.zmanimSettings.latitude.toString());
+  const [longitude, setLongitude] = useState(settings.zmanimSettings.longitude.toString());
+  const [elevation, setElevation] = useState(settings.zmanimSettings.elevation?.toString() || '0');
+  const [gistId, setGistId] = useState(settings.githubSettings.gistId);
+  const [githubKeyUrl, setGithubKeyUrl] = useState(settings.githubSettings.githubKey);
+  // const [gistFileName, setGistFileName] = useState(settings.githubSettings.gistFileName);
+  const [synagogueName, setSynagogueName] = useState(settings.synagogueSettings.name);
   const [selectedLocation, setSelectedLocation] = useState(cities[0]!.name);
-  const [olson, setOlson] = useState(settings.olson);
-  const [background, setBackground] = useState(settings.backgroundSettings?.imageUrl || '');
-  const [purimSettings, setPurimSettings] = useState(settings.purimSettings || { regular: true, shushan: false });
+  const [olson, setOlson] = useState(settings.zmanimSettings.olson);
+  const [background, setBackground] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
+  const [purimSettings, setPurimSettings] = useState(
+    settings.zmanimSettings.purimSettings || { regular: true, shushan: false },
+  );
   const [rtl, setRtl] = useState(false);
   const heightScale = useHeightScale() * 0.5;
   const isSmallHeight = height < 600;
@@ -199,23 +201,25 @@ const GeneralSettingsTab = () => {
   }, []);
 
   // New background settings state
-  const [backgroundMode, setBackgroundMode] = useState(settings.backgroundSettings?.mode || 'image');
-  const [solidColor, setSolidColor] = useState(settings.backgroundSettings?.solidColor || '#E3F2FD');
+  const [backgroundMode, setBackgroundMode] = useState(settings.synagogueSettings.backgroundSettings.mode || 'image');
+  const [solidColor, setSolidColor] = useState(settings.synagogueSettings.backgroundSettings.solidColor || '#E3F2FD');
   const [gradientColors, setGradientColors] = useState(
-    settings.backgroundSettings?.gradientColors || ['#E3F2FD', '#BBDEFB', '#90CAF9'],
+    settings.synagogueSettings.backgroundSettings.gradientColors || ['#E3F2FD', '#BBDEFB', '#90CAF9'],
   );
   const [gradientDirection, setGradientDirection] = useState<'vertical' | 'horizontal' | 'diagonal'>(
-    settings.backgroundSettings?.gradientStart?.x === 0 &&
-      settings.backgroundSettings?.gradientStart?.y === 0 &&
-      settings.backgroundSettings?.gradientEnd?.x === 0
+    settings.synagogueSettings.backgroundSettings.gradientStart?.x === 0 &&
+      settings.synagogueSettings.backgroundSettings.gradientStart?.y === 0 &&
+      settings.synagogueSettings.backgroundSettings.gradientEnd?.x === 0
       ? 'vertical'
-      : settings.backgroundSettings?.gradientStart?.x === 0 &&
-          settings.backgroundSettings?.gradientStart?.y === 0 &&
-          settings.backgroundSettings?.gradientEnd?.y === 0
+      : settings.synagogueSettings.backgroundSettings.gradientStart?.x === 0 &&
+          settings.synagogueSettings.backgroundSettings.gradientStart?.y === 0 &&
+          settings.synagogueSettings.backgroundSettings.gradientEnd?.y === 0
         ? 'horizontal'
         : 'diagonal',
   );
-  const [customImageUri, setCustomImageUri] = useState(settings.backgroundSettings?.customImageUri || '');
+  const [customImageUri, setCustomImageUri] = useState(
+    settings.synagogueSettings.backgroundSettings.customImageUri || '',
+  );
 
   // Color picker modal states
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -224,33 +228,33 @@ const GeneralSettingsTab = () => {
 
   const handleSynagogueName = (synagogueName: string) => {
     setSynagogueName(synagogueName);
-    updateSettings({ name: synagogueName });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, name: synagogueName } });
   };
 
   const handleGistId = (gistId: string) => {
     setGistId(gistId);
-    updateSettings({ gistId: gistId });
+    updateSettings({ githubSettings: { ...settings.githubSettings, gistId: gistId } });
   };
 
   // const handleGistFileName = (gistFileName: string) => {
   //   setGistFileName(gistFileName);
-  //   updateSettings({ gistFileName: gistFileName });
+  //   updateSettings({ githubSettings: { ...settings.githubSettings, gistFileName: gistFileName } });
   // };
 
   const handleGithubKey = (githubKey: string) => {
     setGithubKeyUrl(githubKey);
-    updateSettings({ githubKey: githubKey });
+    updateSettings({ githubSettings: { ...settings.githubSettings, githubKey: githubKey } });
   };
 
   const handleChangeLanguage = async (newLanguage: 'he' | 'en') => {
-    updateSettings({ language: newLanguage });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, language: newLanguage } });
     if (i18n) await i18n.changeLanguage(newLanguage);
     const isRTL = newLanguage === 'he';
     I18nManager.forceRTL(isRTL);
   };
 
   const handleChangeNusach = (newNusach: 'ashkenaz' | 'sephardic') => {
-    updateSettings({ nusach: newNusach });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, nusach: newNusach } });
   };
 
   const handleCityChange = (city: string) => {
@@ -258,34 +262,34 @@ const GeneralSettingsTab = () => {
     setLatitude(chosen_city.latitude.toString());
     setLongitude(chosen_city.longitude.toString());
     setSelectedLocation(city);
-    updateSettings({ city: city });
+    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, city: city } });
   };
 
   const handleLatitudeChange = (latitude: string) => {
     setLatitude(latitude);
-    updateSettings({ latitude: Number(latitude) });
+    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, latitude: Number(latitude) } });
   };
 
   const handleLongitudeChange = (longitude: string) => {
     setLongitude(longitude);
-    updateSettings({ longitude: Number(longitude) });
+    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, longitude: Number(longitude) } });
   };
 
   const handleElevationChange = (elevation: string) => {
     setElevation(elevation);
-    updateSettings({ elevation: Number(elevation) });
+    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, elevation: Number(elevation) } });
   };
 
   const handleOlsonChange = (olson: string) => {
     setOlson(olson);
-    updateSettings({ olson: longitude });
+    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, olson: olson } });
   };
 
   const handleBackgroundChange = (background: string) => {
     setBackground(background);
     setCustomImageUri(''); // Clear custom image when selecting predefined background
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode: 'image' as const,
       imageUrl: background,
       customImageUri: '',
@@ -294,42 +298,42 @@ const GeneralSettingsTab = () => {
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const handlePurimToggle = (type: 'regular' | 'shushan') => {
     const newSettings = { ...purimSettings, [type]: !purimSettings[type] };
     setPurimSettings(newSettings);
-    updateSettings({ purimSettings: newSettings });
+    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, purimSettings: newSettings } });
   };
 
   const handleBackgroundModeChange = (mode: 'image' | 'solid' | 'gradient') => {
     setBackgroundMode(mode);
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode,
-      imageUrl: customImageUri || settings.backgroundSettings?.imageUrl || background,
+      imageUrl: customImageUri || settings.synagogueSettings.backgroundSettings.imageUrl || background,
       solidColor,
       gradientColors,
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
       customImageUri,
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const handleSolidColorChange = (color: string) => {
     setSolidColor(color);
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode: backgroundMode,
-      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      imageUrl: settings.synagogueSettings.backgroundSettings.imageUrl || background,
       solidColor: color,
       gradientColors,
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const openColorPicker = (colorIndex: number | null, currentColor: string) => {
@@ -353,30 +357,30 @@ const GeneralSettingsTab = () => {
     newColors[index] = color;
     setGradientColors(newColors);
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode: backgroundMode,
-      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      imageUrl: settings.synagogueSettings.backgroundSettings.imageUrl || background,
       solidColor,
       gradientColors: newColors,
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const handleAddGradientColor = () => {
     const newColors = [...gradientColors, '#90CAF9'];
     setGradientColors(newColors);
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode: backgroundMode,
-      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      imageUrl: settings.synagogueSettings.backgroundSettings.imageUrl || background,
       solidColor,
       gradientColors: newColors,
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const handleRemoveGradientColor = (index: number) => {
@@ -384,29 +388,29 @@ const GeneralSettingsTab = () => {
     const newColors = gradientColors.filter((_, i) => i !== index);
     setGradientColors(newColors);
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode: backgroundMode,
-      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      imageUrl: settings.synagogueSettings.backgroundSettings.imageUrl || background,
       solidColor,
       gradientColors: newColors,
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const handleGradientDirectionChange = (direction: 'vertical' | 'horizontal' | 'diagonal') => {
     setGradientDirection(direction);
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode: backgroundMode,
-      imageUrl: settings.backgroundSettings?.imageUrl || background,
+      imageUrl: settings.synagogueSettings.backgroundSettings.imageUrl || background,
       solidColor,
       gradientColors,
       gradientStart: getGradientStart(direction),
       gradientEnd: getGradientEnd(direction),
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const getGradientStart = (_direction: 'vertical' | 'horizontal' | 'diagonal') => {
@@ -449,7 +453,7 @@ const GeneralSettingsTab = () => {
 
         // Update background settings with custom image
         const newBackgroundSettings = {
-          ...(settings.backgroundSettings || {}),
+          ...settings.synagogueSettings.backgroundSettings,
           mode: 'image' as const,
           imageUrl: imageUri,
           customImageUri: imageUri,
@@ -458,7 +462,9 @@ const GeneralSettingsTab = () => {
           gradientStart: getGradientStart(gradientDirection),
           gradientEnd: getGradientEnd(gradientDirection),
         };
-        updateSettings({ backgroundSettings: newBackgroundSettings });
+        updateSettings({
+          synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings },
+        });
       }
     } catch (error) {
       console.error('Error picking image:', error);
@@ -469,7 +475,7 @@ const GeneralSettingsTab = () => {
   const handleRemoveCustomImage = () => {
     setCustomImageUri('');
     const newBackgroundSettings = {
-      ...(settings.backgroundSettings || {}),
+      ...settings.synagogueSettings.backgroundSettings,
       mode: 'image' as const,
       imageUrl: background,
       customImageUri: '',
@@ -478,7 +484,7 @@ const GeneralSettingsTab = () => {
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
     };
-    updateSettings({ backgroundSettings: newBackgroundSettings });
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   if (isLoading) {
@@ -516,7 +522,7 @@ const GeneralSettingsTab = () => {
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker
-                  selectedValue={settings.language}
+                  selectedValue={settings.synagogueSettings.language}
                   onValueChange={(value) => void handleChangeLanguage(value)}
                   style={{ height: pickerHeight }}
                 >
@@ -532,7 +538,7 @@ const GeneralSettingsTab = () => {
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker
-                  selectedValue={settings.nusach}
+                  selectedValue={settings.synagogueSettings.nusach}
                   onValueChange={handleChangeNusach}
                   style={{ height: pickerHeight }}
                 >
@@ -596,7 +602,7 @@ const GeneralSettingsTab = () => {
                   onValueChange={handleCityChange}
                   style={{ height: pickerHeight }}
                 >
-                  {settings.language === 'en'
+                  {settings.synagogueSettings.language === 'en'
                     ? cities.map((location) => (
                         <Picker.Item key={location.name} label={location.name} value={location.name} />
                       ))
@@ -710,77 +716,61 @@ const GeneralSettingsTab = () => {
               </TouchableOpacity>
             </View>
           </View>
-          {/* Screen Display Times */}
+          {/* Zmanim Display Time */}
           <View style={{ gap: smallPadding }}>
             <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
-              {t('screen_display_times')}
+              {t('zmanim_display_time')}
             </Text>
-            <View style={{ gap: padding }}>
-              {(['zmanim', 'classes', 'deceased', 'messages', 'schedule'] as const).map((screenName) => (
-                <View key={screenName} className="flex-row items-center justify-between" style={{ gap: padding }}>
-                  <Text className="flex-1 text-gray-700" style={{ fontSize: textSize }}>
-                    {t(`${screenName}_title` as any)}
+            <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+              <Text className="flex-1 text-gray-500" style={{ fontSize: textSize * 0.9 }}>
+                {t('screen_display_time_description')}
+              </Text>
+              <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    const currentTime = settings.zmanimSettings.screenDisplayTime || 10;
+                    const newTime = Math.max(5, currentTime - 5);
+                    updateSettings({
+                      zmanimSettings: {
+                        ...settings.zmanimSettings,
+                        screenDisplayTime: newTime,
+                      },
+                    });
+                  }}
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                >
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                    -
                   </Text>
-                  <View className="flex-row items-center" style={{ gap: smallPadding }}>
-                    <TouchableOpacity
-                      onPress={() => {
-                        const currentTime = settings.screenDisplayTimes?.[screenName] || 10;
-                        const newTime = Math.max(5, currentTime - 5);
-                        updateSettings({
-                          screenDisplayTimes: {
-                            ...(settings.screenDisplayTimes || {
-                              zmanim: 10,
-                              classes: 10,
-                              deceased: 10,
-                              messages: 10,
-                              schedule: 10,
-                            }),
-                            [screenName]: newTime,
-                          },
-                        });
-                      }}
-                      className="bg-gray-200 rounded-lg items-center justify-center"
-                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                    >
-                      <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                        -
-                      </Text>
-                    </TouchableOpacity>
-                    <View
-                      className="bg-blue-100 rounded-lg items-center justify-center"
-                      style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 60 * heightScale }}
-                    >
-                      <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
-                        {settings.screenDisplayTimes?.[screenName] || 10}s
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        const currentTime = settings.screenDisplayTimes?.[screenName] || 10;
-                        const newTime = Math.min(60, currentTime + 5);
-                        updateSettings({
-                          screenDisplayTimes: {
-                            ...(settings.screenDisplayTimes || {
-                              zmanim: 10,
-                              classes: 10,
-                              deceased: 10,
-                              messages: 10,
-                              schedule: 10,
-                            }),
-                            [screenName]: newTime,
-                          },
-                        });
-                      }}
-                      className="bg-gray-200 rounded-lg items-center justify-center"
-                      style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                    >
-                      <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                        +
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
+                </TouchableOpacity>
+                <View
+                  className="bg-blue-100 rounded-lg items-center justify-center"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 60 * heightScale }}
+                >
+                  <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
+                    {settings.zmanimSettings.screenDisplayTime || 10}s
+                  </Text>
                 </View>
-              ))}
+                <TouchableOpacity
+                  onPress={() => {
+                    const currentTime = settings.zmanimSettings.screenDisplayTime || 10;
+                    const newTime = Math.min(60, currentTime + 5);
+                    updateSettings({
+                      zmanimSettings: {
+                        ...settings.zmanimSettings,
+                        screenDisplayTime: newTime,
+                      },
+                    });
+                  }}
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
+                >
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                    +
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
           {/* background */}

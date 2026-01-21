@@ -3,7 +3,7 @@
  * Extracted for better testability
  */
 
-import { Shiur, Message } from './defs';
+import { Class, Message } from './defs';
 
 // Day of week definitions
 export const daysOfWeek = [
@@ -44,18 +44,6 @@ export function calculateSubPages(classesCount: number, classesPerPage: number):
 }
 
 /**
- * Get classes for the current page
- * @param classes - Array of all classes (Shiur objects)
- * @param currentPage - Current page index (0-based)
- * @param classesPerPage - Number of classes per page
- * @returns Array of classes for the current page
- */
-export function getCurrentPageClasses(classes: Shiur[], currentPage: number, classesPerPage: number): Shiur[] {
-  const startIndex = currentPage * classesPerPage;
-  return classes.slice(startIndex, startIndex + classesPerPage);
-}
-
-/**
  * Format time range for display
  * @param startTime - Start time string
  * @param endTime - End time string
@@ -79,7 +67,7 @@ export function validateDayNumbers(dayNumbers: number[]): boolean {
  * @param classes - Array of classes to sort
  * @returns Sorted array of classes
  */
-export function sortClassesByTime(classes: Shiur[]): Shiur[] {
+export function sortClassesByTime(classes: Class[]): Class[] {
   return [...classes].sort((a, b) => {
     const timeA = a.start.replace(':', '');
     const timeB = b.start.replace(':', '');
@@ -93,18 +81,18 @@ export function sortClassesByTime(classes: Shiur[]): Shiur[] {
  * @param dayNumber - Day number to filter by (0-6)
  * @returns Array of classes that occur on the specified day
  */
-export function filterClassesByDay(classes: Shiur[], dayNumber: number): Shiur[] {
-  return classes.filter((shiur) => shiur.day.includes(dayNumber));
+export function filterClassesByDay(classes: Class[], dayNumber: number): Class[] {
+  return classes.filter((classItem) => classItem.day.includes(dayNumber));
 }
 
 /**
  * Check if a class occurs today
- * @param shiur - The class to check
+ * @param classItem - The class to check
  * @param currentDayOfWeek - Current day of week (0-6)
  * @returns True if the class occurs today
  */
-export function isClassToday(shiur: Shiur, currentDayOfWeek: number): boolean {
-  return shiur.day.includes(currentDayOfWeek);
+export function isClassToday(classItem: Class, currentDayOfWeek: number): boolean {
+  return classItem.day.includes(currentDayOfWeek);
 }
 
 export function getDayMonthYearFromString(dateString: string): { day: number; month: number; year: number } {

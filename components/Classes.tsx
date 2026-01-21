@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { daysOfWeek } from 'utils/classesHelpers';
-import { Shiur } from 'utils/defs';
+import { Class } from 'utils/defs';
 import { defaultPageDisplayTime, isRTL2 } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
@@ -12,8 +12,8 @@ const classesPerPage = 3.0;
 export async function getSubPages(): Promise<number> {
   const localSettingsString = await AsyncStorage.getItem('settings');
   const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
-  if (!localSettings) return 0;
-  return Math.ceil(localSettings.classes.length / classesPerPage);
+  if (!localSettings?.classesSettings?.classes) return 0;
+  return Math.ceil(localSettings.classesSettings.classes.length / classesPerPage);
 }
 
 const Classes: React.FC = () => {
@@ -53,7 +53,7 @@ const Classes: React.FC = () => {
 
   const getCurrentPageData = () => {
     const startIndex = currentPage * classesPerPage;
-    return settings.classes.slice(startIndex, startIndex + classesPerPage);
+    return settings.classesSettings.classes.slice(startIndex, startIndex + classesPerPage);
   };
   const header = [
     <Text
@@ -90,49 +90,51 @@ const Classes: React.FC = () => {
   }
   return (
     <View>
-      {settings.classes.length ? (
+      {settings.classesSettings.classes.length ? (
         <View className="border-2 border-grey-600/50 rounded-xl overflow-hidden shadow-md" style={{ margin }}>
           {/* Header */}
           <View className="flex-row bg-gray-600/70 border-b-2 border-gray-800/50">{header}</View>
           {/* Data Rows */}
-          {getCurrentPageData().map((shiur: Shiur, index: number) => {
+          {getCurrentPageData().map((classItem: Class, index: number) => {
             const rowData = [
               <Text
-                key={`${shiur.id}_day`}
+                key={`${classItem.id}_day`}
                 className="flex-1 text-center font-bold text-gray-900"
                 style={{ fontSize: textSize, padding }}
               >
-                {getDayNames(shiur.day)}
+                {getDayNames(classItem.day)}
               </Text>,
               <Text
-                key={`${shiur.id}_time`}
+                key={`${classItem.id}_time`}
                 className="flex-1 text-center font-bold text-gray-900"
                 style={{ fontSize: textSize, padding }}
               >
-                {isRTL2(settings.language) ? `${shiur.end}-${shiur.start}` : `${shiur.start}-${shiur.end}`}
+                {isRTL2(settings.synagogueSettings.language)
+                  ? `${classItem.end}-${classItem.start}`
+                  : `${classItem.start}-${classItem.end}`}
               </Text>,
               <Text
-                key={`${shiur.id}_tutor`}
+                key={`${classItem.id}_tutor`}
                 className="flex-1 text-center font-bold text-gray-900"
                 style={{ fontSize: textSize, padding }}
               >
-                {shiur.tutor}
+                {classItem.tutor}
               </Text>,
               <Text
-                key={`${shiur.id}_subject`}
+                key={`${classItem.id}_subject`}
                 className="flex-1 text-center font-bold text-gray-900"
                 style={{ fontSize: textSize, padding }}
               >
-                {shiur.subject}
+                {classItem.subject}
               </Text>,
             ];
 
-            if (isRTL2(settings.language)) {
+            if (isRTL2(settings.synagogueSettings.language)) {
               rowData.reverse();
             }
 
             return (
-              <View key={shiur.id || `class_${index}`} className="flex-row border-b border-gray-200/50 bg-white/50">
+              <View key={classItem.id || `class_${index}`} className="flex-row border-b border-gray-200/50 bg-white/50">
                 {rowData}
               </View>
             );

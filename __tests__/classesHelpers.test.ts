@@ -3,7 +3,6 @@ import {
   daysOfWeek,
   getDayNames,
   calculateSubPages,
-  getCurrentPageClasses,
   formatTimeRange,
   validateDayNumbers,
   sortClassesByTime,
@@ -15,7 +14,7 @@ import {
   isMessageScheduled,
   filterActiveMessages,
 } from '../utils/classesHelpers';
-import { Shiur, Message } from '../utils/defs';
+import { Class, Message } from '../utils/defs';
 
 describe('classesHelpers', () => {
   describe('daysOfWeek', () => {
@@ -24,13 +23,13 @@ describe('classesHelpers', () => {
     });
 
     it('should have correct day numbers', () => {
-      expect(daysOfWeek[0].number).toBe(0);
-      expect(daysOfWeek[6].number).toBe(6);
+      expect(daysOfWeek[0]?.number).toBe(0);
+      expect(daysOfWeek[6]?.number).toBe(6);
     });
 
     it('should have correct day keys', () => {
-      expect(daysOfWeek[0].key).toBe('sunday');
-      expect(daysOfWeek[6].key).toBe('saturday');
+      expect(daysOfWeek[0]?.key).toBe('sunday');
+      expect(daysOfWeek[6]?.key).toBe('saturday');
     });
   });
 
@@ -81,41 +80,6 @@ describe('classesHelpers', () => {
     });
   });
 
-  describe('getCurrentPageClasses', () => {
-    const mockClasses: Shiur[] = [
-      { name: 'Class 1', start: '08:00', end: '09:00', day: [0], description: '' },
-      { name: 'Class 2', start: '09:00', end: '10:00', day: [1], description: '' },
-      { name: 'Class 3', start: '10:00', end: '11:00', day: [2], description: '' },
-      { name: 'Class 4', start: '11:00', end: '12:00', day: [3], description: '' },
-      { name: 'Class 5', start: '12:00', end: '13:00', day: [4], description: '' },
-    ];
-
-    it('should return correct classes for first page', () => {
-      const result = getCurrentPageClasses(mockClasses, 0, 2);
-      expect(result).toHaveLength(2);
-      expect(result[0].name).toBe('Class 1');
-      expect(result[1].name).toBe('Class 2');
-    });
-
-    it('should return correct classes for second page', () => {
-      const result = getCurrentPageClasses(mockClasses, 1, 2);
-      expect(result).toHaveLength(2);
-      expect(result[0].name).toBe('Class 3');
-      expect(result[1].name).toBe('Class 4');
-    });
-
-    it('should return remaining classes on last page', () => {
-      const result = getCurrentPageClasses(mockClasses, 2, 2);
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe('Class 5');
-    });
-
-    it('should return empty array for page beyond available', () => {
-      const result = getCurrentPageClasses(mockClasses, 10, 2);
-      expect(result).toHaveLength(0);
-    });
-  });
-
   describe('formatTimeRange', () => {
     it('should format time range correctly', () => {
       expect(formatTimeRange('08:00', '09:00')).toBe('08:00-09:00');
@@ -147,54 +111,54 @@ describe('classesHelpers', () => {
 
   describe('sortClassesByTime', () => {
     it('should sort classes by start time', () => {
-      const classes: Shiur[] = [
-        { name: 'Late', start: '14:00', end: '15:00', day: [0], description: '' },
-        { name: 'Early', start: '08:00', end: '09:00', day: [0], description: '' },
-        { name: 'Mid', start: '11:00', end: '12:00', day: [0], description: '' },
+      const classes: Class[] = [
+        { id: '2', start: '08:00', end: '09:00', day: [0], subject: '', tutor: '' },
+        { id: '3', start: '11:00', end: '12:00', day: [0], subject: '', tutor: '' },
+        { id: '1', start: '14:00', end: '15:00', day: [0], subject: '', tutor: '' },
       ];
 
       const sorted = sortClassesByTime(classes);
-      expect(sorted[0].name).toBe('Early');
-      expect(sorted[1].name).toBe('Mid');
-      expect(sorted[2].name).toBe('Late');
+      expect(sorted[0]?.id).toBe('2');
+      expect(sorted[1]?.id).toBe('3');
+      expect(sorted[2]?.id).toBe('1');
     });
 
     it('should not mutate original array', () => {
-      const classes: Shiur[] = [
-        { name: 'Late', start: '14:00', end: '15:00', day: [0], description: '' },
-        { name: 'Early', start: '08:00', end: '09:00', day: [0], description: '' },
+      const classes: Class[] = [
+        { id: '1', start: '14:00', end: '15:00', day: [0], subject: '', tutor: '' },
+        { id: '2', start: '08:00', end: '09:00', day: [0], subject: '', tutor: '' },
       ];
 
       const sorted = sortClassesByTime(classes);
-      expect(classes[0].name).toBe('Late'); // Original unchanged
-      expect(sorted[0].name).toBe('Early'); // Sorted version
+      expect(classes[0]?.id).toBe('1'); // Original unchanged
+      expect(sorted[0]?.id).toBe('2'); // Sorted version
     });
 
     it('should handle times with single digit hours', () => {
-      const classes: Shiur[] = [
-        { name: 'Nine', start: '9:00', end: '10:00', day: [0], description: '' },
-        { name: 'Ten', start: '10:00', end: '11:00', day: [0], description: '' },
+      const classes: Class[] = [
+        { id: '1', start: '9:00', end: '10:00', day: [0], subject: '', tutor: '' },
+        { id: '2', start: '10:00', end: '11:00', day: [0], subject: '', tutor: '' },
       ];
 
       const sorted = sortClassesByTime(classes);
-      expect(sorted[0].name).toBe('Nine');
-      expect(sorted[1].name).toBe('Ten');
+      expect(sorted[0]?.id).toBe('1');
+      expect(sorted[1]?.id).toBe('2');
     });
   });
 
   describe('filterClassesByDay', () => {
-    const classes: Shiur[] = [
-      { name: 'Sunday Class', start: '08:00', end: '09:00', day: [0], description: '' },
-      { name: 'Monday Class', start: '09:00', end: '10:00', day: [1], description: '' },
-      { name: 'Multiple Days', start: '10:00', end: '11:00', day: [0, 1, 2], description: '' },
-      { name: 'Tuesday Class', start: '11:00', end: '12:00', day: [2], description: '' },
+    const classes: Class[] = [
+      { id: '1', start: '08:00', end: '09:00', day: [0], subject: '', tutor: '' },
+      { id: '2', start: '09:00', end: '10:00', day: [1], subject: '', tutor: '' },
+      { id: '3', start: '10:00', end: '11:00', day: [0, 1, 2], subject: '', tutor: '' },
+      { id: '4', start: '11:00', end: '12:00', day: [2], subject: '', tutor: '' },
     ];
 
     it('should filter classes by day', () => {
       const sunday = filterClassesByDay(classes, 0);
       expect(sunday).toHaveLength(2);
-      expect(sunday[0].name).toBe('Sunday Class');
-      expect(sunday[1].name).toBe('Multiple Days');
+      expect(sunday[0]?.id).toBe('1');
+      expect(sunday[1]?.id).toBe('3');
     });
 
     it('should return empty array for day with no classes', () => {
@@ -205,19 +169,20 @@ describe('classesHelpers', () => {
     it('should handle classes with multiple days', () => {
       const tuesday = filterClassesByDay(classes, 2);
       expect(tuesday).toHaveLength(2);
-      expect(tuesday.map((c) => c.name)).toContain('Multiple Days');
-      expect(tuesday.map((c) => c.name)).toContain('Tuesday Class');
+      expect(tuesday.map((c) => c.id)).toContain('3');
+      expect(tuesday.map((c) => c.id)).toContain('4');
     });
   });
 
   describe('isClassToday', () => {
     it('should return true if class is today', () => {
-      const shiur: Shiur = {
-        name: 'Test',
+      const shiur: Class = {
+        id: '1',
         start: '08:00',
         end: '09:00',
         day: [0, 1, 2],
-        description: '',
+        subject: '',
+        tutor: '',
       };
 
       expect(isClassToday(shiur, 0)).toBe(true);
@@ -226,12 +191,13 @@ describe('classesHelpers', () => {
     });
 
     it('should return false if class is not today', () => {
-      const shiur: Shiur = {
-        name: 'Test',
+      const shiur: Class = {
+        id: '1',
         start: '08:00',
         end: '09:00',
         day: [0, 1, 2],
-        description: '',
+        subject: '',
+        tutor: '',
       };
 
       expect(isClassToday(shiur, 3)).toBe(false);

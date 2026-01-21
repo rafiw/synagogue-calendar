@@ -5,7 +5,7 @@
 
 import { HDate, months } from '@hebcal/core';
 import { getDayMonthYearFromString } from './classesHelpers';
-import { DeceasedPerson } from './defs';
+import { DeceasedPerson, DeceasedSettings } from './defs';
 
 // Types for dynamic sizing
 export interface FontSizes {
@@ -251,27 +251,25 @@ export function calculateAgeAtDeath(dateOfBirth: Date, dateOfDeath: Date): numbe
  * @param tableColumns - Number of columns in the display grid
  * @returns Object with filteredDeceased array and totalPages count
  */
-export function calculateDeceasedPages(
-  deceased: DeceasedPerson[],
-  displayMode: 'all' | 'monthly',
-  tableRows: number,
-  tableColumns: number,
-): { filteredDeceased: DeceasedPerson[]; totalPages: number } {
-  if (!deceased || deceased.length === 0) {
+export function calculateDeceasedPages(settings: DeceasedSettings): {
+  filteredDeceased: DeceasedPerson[];
+  totalPages: number;
+} {
+  if (!settings.deceased || settings.deceased.length === 0) {
     return { filteredDeceased: [], totalPages: 0 };
   }
 
   let filteredDeceased: DeceasedPerson[];
 
-  if (displayMode === 'all') {
-    filteredDeceased = deceased;
+  if (settings.displaySettings.displayMode === 'all') {
+    filteredDeceased = settings.deceased;
   } else {
     // Monthly mode: Show only deceased whose yahrzeit is this Hebrew month
     const today = new HDate();
     const currentMonth = today.getMonth();
     const isCurrentYearLeap = today.isLeapYear();
 
-    filteredDeceased = deceased.filter((person) => {
+    filteredDeceased = settings.deceased.filter((person) => {
       if (!person.dateOfDeath) return false;
 
       // Parse the death date
@@ -310,8 +308,8 @@ export function calculateDeceasedPages(
     });
   }
 
-  const cellsPerPage = tableRows * tableColumns || 1;
-  const totalPages = Math.ceil(filteredDeceased.length / cellsPerPage);
+  const cellsPerPage = settings.displaySettings.tableRows * settings.displaySettings.tableColumns;
+  const totalPages = Math.ceil(filteredDeceased.length / cellsPerPage || 1);
 
   return { filteredDeceased, totalPages };
 }

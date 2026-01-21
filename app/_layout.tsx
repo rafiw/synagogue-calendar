@@ -14,11 +14,11 @@ function AppContent() {
 
   useEffect(() => {
     const initI18n = async () => {
-      await initializeI18n(settings.language);
+      await initializeI18n(settings.synagogueSettings.language);
       setIsI18nInitialized(true);
     };
     initI18n();
-  }, [settings.language]);
+  }, [settings.synagogueSettings.language]);
 
   if (isLoading || !isI18nInitialized) {
     return (

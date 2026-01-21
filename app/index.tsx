@@ -53,11 +53,11 @@ export default function App() {
   );
 
   useEffect(() => {
-    const shouldBeRTL = settings.language === 'he'; // or use your isRTL2 function
+    const shouldBeRTL = settings.synagogueSettings.language === 'he'; // or use your isRTL2 function
     if (I18nManager.isRTL !== shouldBeRTL) {
       I18nManager.forceRTL(shouldBeRTL);
     }
-  }, [settings.language]);
+  }, [settings.synagogueSettings.language]);
 
   const createScreens = useCallback(async (): Promise<Screen[]> => {
     const [classSubPages, messagesSubPages, deceasedSubPages] = await Promise.all([
@@ -66,41 +66,36 @@ export default function App() {
       getDeceasedSubPages(),
     ]);
 
-    const displayTimes = settings.screenDisplayTimes;
-    const getDisplayTime = (screenName: keyof typeof displayTimes, defaultTime: number): number => {
-      return displayTimes?.[screenName] ? displayTimes[screenName] * 1000 : defaultTime;
-    };
-
     return [
       {
         id: 1,
         name: 'zmanim',
-        content: () => (settings.enableZmanim ? <Zmanim /> : null),
-        presentTime: getDisplayTime('zmanim', defaultPageDisplayTime),
+        content: () => (settings.zmanimSettings.enable ? <Zmanim /> : null),
+        presentTime: settings.zmanimSettings.screenDisplayTime * 1000 || defaultPageDisplayTime,
       },
       {
         id: 2,
         name: 'classes',
-        content: () => (settings.enableClasses ? <Classes /> : null),
-        presentTime: getDisplayTime('classes', classSubPages * defaultPageDisplayTime),
+        content: () => (settings.classesSettings.enable ? <Classes /> : null),
+        presentTime: settings.classesSettings.screenDisplayTime * 1000 || classSubPages * defaultPageDisplayTime,
       },
       {
         id: 3,
         name: 'deceased',
-        content: () => (settings.enableDeceased ? <Deceased /> : null),
-        presentTime: getDisplayTime('deceased', deceasedSubPages * defaultPageDisplayTime),
+        content: () => (settings.deceasedSettings.enable ? <Deceased /> : null),
+        presentTime: settings.deceasedSettings.screenDisplayTime * 1000 || deceasedSubPages * defaultPageDisplayTime,
       },
       {
         id: 4,
         name: 'messages',
-        content: () => (settings.enableMessages ? <Messages /> : null),
-        presentTime: getDisplayTime('messages', messagesSubPages * defaultPageDisplayTime),
+        content: () => (settings.messagesSettings.enable ? <Messages /> : null),
+        presentTime: settings.messagesSettings.screenDisplayTime * 1000 || messagesSubPages * defaultPageDisplayTime,
       },
       {
         id: 5,
         name: 'schedule',
-        content: () => (settings.enableSchedule ? <Schedule /> : null),
-        presentTime: getDisplayTime('schedule', defaultPageDisplayTime),
+        content: () => (settings.scheduleSettings.enable ? <Schedule /> : null),
+        presentTime: settings.scheduleSettings.screenDisplayTime * 1000 || defaultPageDisplayTime,
       },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
   }, [settings]);
@@ -145,12 +140,12 @@ export default function App() {
   if (!isValid) {
     return (
       <View className="flex-1 justify-center items-center">
-        <Text className="text-lg font-medium text-red-500">{getNoScreenText(settings.language)}</Text>
+        <Text className="text-lg font-medium text-red-500">{getNoScreenText(settings.synagogueSettings.language)}</Text>
       </View>
     );
   }
 
-  const backgroundSettings = settings.backgroundSettings || {
+  const backgroundSettings = settings.synagogueSettings.backgroundSettings || {
     mode: 'image' as const,
     imageUrl: '',
     solidColor: '#E3F2FD',
@@ -167,7 +162,7 @@ export default function App() {
       <View className="flex-1" style={{ padding: containerPadding }}>
         {/* Header Section */}
         <View style={{ marginBottom: headerMargin }}>
-          <Header title={settings.name} />
+          <Header title={settings.synagogueSettings.name} />
         </View>
 
         {/* Main Content Section - Card Style (no backdrop-blur for RN compatibility) */}

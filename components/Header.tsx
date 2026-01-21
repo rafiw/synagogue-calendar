@@ -26,10 +26,10 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title }) => {
   const { settings } = useSettings();
   const { t } = useTranslation();
-  const locale = settings.language === 'he' ? 'he-IL' : 'en-US';
+  const locale = settings.synagogueSettings.language === 'he' ? 'he-IL' : 'en-US';
   const [currentTime, setCurrentTime] = useState(getCurrentTime(locale));
   const router = useRouter();
-  const isRTL = isRTL2(settings.language);
+  const isRTL = isRTL2(settings.synagogueSettings.language);
   const deviceType = useDeviceType();
   const heightScale = useHeightScale();
 
@@ -46,13 +46,13 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const padding = Math.round(useResponsiveSpacing(6) * heightScale);
 
   const zmanim = new ZmanimWrapper(
-    settings.nusach,
-    settings.latitude,
-    settings.longitude,
-    settings.olson,
-    settings.language,
-    settings.purimSettings,
-    settings.elevation,
+    settings.synagogueSettings.nusach,
+    settings.zmanimSettings.latitude,
+    settings.zmanimSettings.longitude,
+    settings.zmanimSettings.olson,
+    settings.synagogueSettings.language,
+    settings.zmanimSettings.purimSettings,
+    settings.zmanimSettings.elevation,
   );
   const [dayOfWeek] = useState(t(zmanim.greg().toLocaleString('en-US', { weekday: 'long' }).toLowerCase()));
   useEffect(() => {

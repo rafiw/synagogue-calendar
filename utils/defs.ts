@@ -1,6 +1,6 @@
 import { JSX } from 'react';
 
-export interface Shiur {
+export interface Class {
   id: string;
   day: number[];
   start: string;
@@ -8,6 +8,12 @@ export interface Shiur {
   tutor: string;
   subject: string;
   title?: string;
+}
+
+export interface ClassSettings {
+  enable: boolean;
+  screenDisplayTime: number;
+  classes: Class[];
 }
 
 export interface DeceasedPerson {
@@ -23,13 +29,19 @@ export interface DeceasedPerson {
   tribute?: string; // Optional memorial text
 }
 
-export interface DeceasedSettings {
-  deceased: DeceasedPerson[];
+export interface DeceasedDisplaySettings {
   tableRows: number;
   tableColumns: number;
   displayMode: 'all' | 'monthly';
   defaultTemplate: 'simple' | 'card' | 'photo';
+}
+
+export interface DeceasedSettings {
+  enable: boolean;
+  screenDisplayTime: number;
+  deceased: DeceasedPerson[];
   imgbbApiKey: string;
+  displaySettings: DeceasedDisplaySettings;
 }
 
 export interface Prayer {
@@ -45,6 +57,8 @@ export interface ScheduleColumn {
 }
 
 export interface ScheduleSettings {
+  enable: boolean;
+  screenDisplayTime: number;
   columns: ScheduleColumn[];
 }
 
@@ -61,6 +75,12 @@ export interface Message {
   startDate?: string; // Optional ISO date string (YYYY-MM-DD)
   endDate?: string; // Optional ISO date string (YYYY-MM-DD)
   enabled: boolean; // Can be re-enabled after expiring
+}
+
+export interface MessageSettings {
+  enable: boolean;
+  screenDisplayTime: number;
+  messages: Message[];
 }
 
 export type Language = 'he' | 'en';
@@ -84,38 +104,38 @@ export interface BackgroundSettings {
   customImageUri?: string;
 }
 
-export interface ScreenDisplayTimes {
-  zmanim: number;
-  classes: number;
-  deceased: number;
-  messages: number;
-  schedule: number;
-}
-
-export interface Settings {
-  name: string;
-  gistId: string;
-  gistFileName: string;
-  githubKey: string;
-  lastUpdateTime: Date;
-  language: Language;
-  nusach: Nusach;
+export interface ZmanimSettings {
+  enable: boolean;
+  screenDisplayTime: number;
   city: string;
   latitude: number;
   longitude: number;
   elevation: number;
   olson: string;
   il: boolean;
-  backgroundSettings?: BackgroundSettings;
   purimSettings: PurimSettings;
-  enableZmanim: boolean;
-  enableClasses: boolean;
-  enableDeceased: boolean;
-  enableMessages: boolean;
-  enableSchedule: boolean;
-  screenDisplayTimes?: ScreenDisplayTimes;
-  messages: Message[];
-  classes: Shiur[];
+}
+
+export interface GitHubSettings {
+  gistId: string;
+  gistFileName: string;
+  githubKey: string;
+}
+
+export interface SynagogueSettings {
+  name: string;
+  language: Language;
+  nusach: Nusach;
+  backgroundSettings: BackgroundSettings;
+}
+
+export interface Settings {
+  lastUpdateTime: Date;
+  githubSettings: GitHubSettings;
+  synagogueSettings: SynagogueSettings;
+  zmanimSettings: ZmanimSettings;
+  messagesSettings: MessageSettings;
+  classesSettings: ClassSettings;
   deceasedSettings: DeceasedSettings;
   scheduleSettings: ScheduleSettings;
 }

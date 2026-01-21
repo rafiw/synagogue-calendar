@@ -16,14 +16,7 @@ export async function getSubPages(): Promise<number> {
   const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
   if (!localSettings?.deceasedSettings) return 0;
 
-  const { filteredDeceased, totalPages } = calculateDeceasedPages(
-    localSettings.deceasedSettings.deceased || [],
-    localSettings.deceasedSettings.displayMode || 'all',
-    localSettings.deceasedSettings.tableRows || 1,
-    localSettings.deceasedSettings.tableColumns || 1,
-  );
-
-  return Math.max(0, totalPages);
+  return Math.max(0, calculateDeceasedPages(localSettings.deceasedSettings).totalPages);
 }
 
 // Types for dynamic sizing
@@ -55,7 +48,7 @@ interface DeceasedCellProps {
 const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSize }) => {
   const { settings } = useSettings();
   const { t } = useTranslation();
-  const isRightToLeft = isRTL2(settings.language);
+  const isRightToLeft = isRTL2(settings.synagogueSettings.language);
 
   // Gender-appropriate labels (default to male if not specified)
   const bornLabel = person.isMale !== false ? t('deceased_born_male') : t('deceased_born_female');
@@ -63,7 +56,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(settings.language === 'he' ? 'he-IL' : 'en-US', {
+    return date.toLocaleDateString(settings.synagogueSettings.language === 'he' ? 'he-IL' : 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -234,7 +227,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
   );
 
   // Use person's template, or fall back to default template from settings
-  const template = person.template || settings.deceasedSettings?.defaultTemplate || 'simple';
+  const template = person.template || settings.deceasedSettings?.displaySettings?.defaultTemplate || 'simple';
 
   switch (template) {
     case 'card':
@@ -310,8 +303,8 @@ const Deceased: React.FC = () => {
   const heightScale = useHeightScale();
 
   // Calculate sizes once based on grid configuration and device type
-  const tableRowsCount = settings.deceasedSettings?.tableRows || 1;
-  const tableColumnsCount = settings.deceasedSettings?.tableColumns || 1;
+  const tableRowsCount = settings.deceasedSettings?.displaySettings?.tableRows || 1;
+  const tableColumnsCount = settings.deceasedSettings?.displaySettings?.tableColumns || 1;
   const { fontSize, candleSize } = useMemo(
     () => calculateSizes(tableRowsCount, tableColumnsCount, deviceScale * heightScale),
     [tableRowsCount, tableColumnsCount, deviceScale, heightScale],
@@ -323,12 +316,7 @@ const Deceased: React.FC = () => {
       return { filteredDeceased: [], totalPages: 0 };
     }
 
-    return calculateDeceasedPages(
-      settings.deceasedSettings.deceased,
-      settings.deceasedSettings.displayMode,
-      settings.deceasedSettings.tableRows,
-      settings.deceasedSettings.tableColumns,
-    );
+    return calculateDeceasedPages(settings.deceasedSettings);
   }, [settings.deceasedSettings]);
 
   const cellsPerPage = tableRowsCount * tableColumnsCount;
@@ -353,7 +341,7 @@ const Deceased: React.FC = () => {
     return (
       <View className="flex-1 justify-center items-center bg-white/90 rounded-xl" style={{ margin: emptyPadding }}>
         <Text className="text-gray-500 text-center" style={{ fontSize: emptyTextSize, padding: emptyPadding }}>
-          {settings.deceasedSettings.displayMode === 'monthly'
+          {settings.deceasedSettings.displaySettings.displayMode === 'monthly'
             ? 'No deceased people this month'
             : t('deceased_no_people')}
         </Text>

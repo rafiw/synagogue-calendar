@@ -8,88 +8,105 @@ import { Settings } from 'utils/defs';
 const defaultName = 'בית כנסת לדוגמא';
 
 const defaultSettings: Settings = {
-  name: defaultName,
-  gistId: '',
-  gistFileName: 'synagogue-settings.json',
-  githubKey: '',
   lastUpdateTime: new Date(),
-  language: 'he',
-  nusach: 'ashkenaz',
-  city: cities[0]?.hebrew_name || '',
-  latitude: 31.7667,
-  longitude: 35.2333,
-  elevation: 0,
-  olson: 'Asia/Jerusalem',
-  il: true,
-  backgroundSettings: {
-    mode: 'gradient',
-    imageUrl: '',
-    solidColor: '#E3F2FD',
-    gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
-    gradientStart: { x: 1, y: 1 },
-    gradientEnd: { x: 0, y: 0 },
+  githubSettings: {
+    gistId: '',
+    gistFileName: 'synagogue-settings.json',
+    githubKey: '',
   },
-  purimSettings: {
-    regular: true,
-    shushan: false,
+  synagogueSettings: {
+    name: defaultName,
+    language: 'he',
+    nusach: 'ashkenaz',
+    backgroundSettings: {
+      mode: 'gradient',
+      imageUrl: '',
+      solidColor: '#E3F2FD',
+      gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
+      gradientStart: { x: 1, y: 1 },
+      gradientEnd: { x: 0, y: 0 },
+    },
   },
-  enableZmanim: true,
-  enableClasses: true,
-  enableDeceased: true,
-  enableMessages: true,
-  enableSchedule: true,
-  messages: [
-    {
-      id: 'msg_default_1',
-      text: 'מזל טוב למשפחת כהן לרגל הולדת הבן 👶 יהי רצון שיגדל לתורה, לחופה ולמעשים טובים.',
-      enabled: true,
+  zmanimSettings: {
+    enable: true,
+    screenDisplayTime: 10,
+    city: cities[0]?.hebrew_name || '',
+    latitude: 31.7667,
+    longitude: 35.2333,
+    elevation: 0,
+    olson: 'Asia/Jerusalem',
+    il: true,
+    purimSettings: {
+      regular: true,
+      shushan: false,
     },
-    {
-      id: 'msg_default_2',
-      text: 'אנו שמחים לברך את המתפללים והאורחים החדשים שהצטרפו אלינו היום. תרגישו בבית',
-      enabled: true,
-    },
-    {
-      id: 'msg_default_3',
-      text: 'החל מהשבוע: שיעור בגמרא עם הרב לוי כל יום שלישי בשעה 20:30 בבית הכנסת.',
-      enabled: true,
-    },
-  ],
-  classes: [
-    {
-      id: 'class_1768698520454_52xjbtgq6',
-      day: [0, 1, 2, 3, 4, 6],
-      start: '22:00',
-      end: '21:00',
-      tutor: 'משה כהן',
-      subject: 'דף יומי',
-    },
-    {
-      id: 'class_1768767659451_j99pmr5ea',
-      day: [5],
-      start: '12:00',
-      end: '13:00',
-      tutor: 'משה כהן',
-      subject: 'דף יומי',
-    },
-    {
-      id: 'class_1768767679349_gyuwn19ix',
-      day: [0, 3],
-      start: '21:00',
-      end: '21:00',
-      tutor: 'הרב יפרח',
-      subject: 'מסילת ישרים',
-    },
-  ],
+  },
+  messagesSettings: {
+    enable: true,
+    screenDisplayTime: 10,
+    messages: [
+      {
+        id: 'msg_default_1',
+        text: 'מזל טוב למשפחת כהן לרגל הולדת הבן 👶 יהי רצון שיגדל לתורה, לחופה ולמעשים טובים.',
+        enabled: true,
+      },
+      {
+        id: 'msg_default_2',
+        text: 'אנו שמחים לברך את המתפללים והאורחים החדשים שהצטרפו אלינו היום. תרגישו בבית',
+        enabled: true,
+      },
+      {
+        id: 'msg_default_3',
+        text: 'החל מהשבוע: שיעור בגמרא עם הרב לוי כל יום שלישי בשעה 20:30 בבית הכנסת.',
+        enabled: true,
+      },
+    ],
+  },
+  classesSettings: {
+    enable: true,
+    screenDisplayTime: 10,
+    classes: [
+      {
+        id: 'class_1768698520454_52xjbtgq6',
+        day: [0, 1, 2, 3, 4, 6],
+        start: '22:00',
+        end: '21:00',
+        tutor: 'משה כהן',
+        subject: 'דף יומי',
+      },
+      {
+        id: 'class_1768767659451_j99pmr5ea',
+        day: [5],
+        start: '12:00',
+        end: '13:00',
+        tutor: 'משה כהן',
+        subject: 'דף יומי',
+      },
+      {
+        id: 'class_1768767679349_gyuwn19ix',
+        day: [0, 3],
+        start: '21:00',
+        end: '21:00',
+        tutor: 'הרב יפרח',
+        subject: 'מסילת ישרים',
+      },
+    ],
+  },
   deceasedSettings: {
+    enable: true,
+    screenDisplayTime: 10,
     deceased: [],
-    tableRows: 3,
-    tableColumns: 2,
-    displayMode: 'all',
-    defaultTemplate: 'simple',
     imgbbApiKey: '',
+    displaySettings: {
+      tableRows: 3,
+      tableColumns: 2,
+      displayMode: 'all',
+      defaultTemplate: 'simple',
+    },
   },
   scheduleSettings: {
+    enable: true,
+    screenDisplayTime: 10,
     columns: [
       {
         id: '1768569282274',
@@ -265,8 +282,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const githubKey = await getSecureGithubKey();
 
       // Use local settings values if available, otherwise fall back to current state
-      const gistId = localSettings?.gistId || settings.gistId;
-      const gistFileName = localSettings?.gistFileName || settings.gistFileName;
+      const gistId = localSettings?.githubSettings?.gistId || localSettings?.gistId || settings.githubSettings.gistId;
+      const gistFileName =
+        localSettings?.githubSettings?.gistFileName ||
+        localSettings?.gistFileName ||
+        settings.githubSettings.gistFileName;
 
       // Try to fetch remote settings
       const remoteSettings = await fetchRemoteSettings(gistId, githubKey, gistFileName);
@@ -293,53 +313,107 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
 
-      // Ensure deceased settings are properly initialized
+      // Ensure settings are properly initialized and migrated
       if (finalSettings) {
-        // Add githubKey from encrypted storage
-        finalSettings.githubKey = githubKey;
+        // Migrate old structure to new structure if needed
+        if (!finalSettings.githubSettings) {
+          finalSettings.githubSettings = {
+            gistId: finalSettings.gistId || '',
+            gistFileName: finalSettings.gistFileName || 'synagogue-settings.json',
+            githubKey: githubKey,
+          };
+        } else {
+          finalSettings.githubSettings.githubKey = githubKey;
+        }
 
-        finalSettings.deceasedSettings = {
-          deceased: [],
-          tableRows: 3,
-          tableColumns: 2,
-          displayMode: 'all',
-          defaultTemplate: 'simple',
-          imgbbApiKey: '',
-          ...finalSettings.deceasedSettings,
-        };
-        finalSettings.scheduleSettings = finalSettings.scheduleSettings || {
-          columns: [
-            {
-              id: '1',
-              title: 'Regular Day',
-              prayers: [],
-            },
-            {
-              id: '2',
-              title: 'Holiday',
-              prayers: [],
-            },
-          ],
-        };
-        // Ensure background settings are properly initialized
-        finalSettings.backgroundSettings = finalSettings.backgroundSettings || {
-          mode: 'image',
-          imageUrl: '',
-          solidColor: '#E3F2FD',
-          gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
-          gradientStart: { x: 1, y: 1 },
-          gradientEnd: { x: 0, y: 0 },
-        };
+        if (!finalSettings.synagogueSettings) {
+          finalSettings.synagogueSettings = {
+            name: finalSettings.name || defaultName,
+            language: finalSettings.language || 'he',
+            nusach: finalSettings.nusach || 'ashkenaz',
+            backgroundSettings:
+              finalSettings.backgroundSettings || defaultSettings.synagogueSettings.backgroundSettings,
+          };
+        }
+
+        if (!finalSettings.zmanimSettings) {
+          finalSettings.zmanimSettings = {
+            enable: finalSettings.enableZmanim !== undefined ? finalSettings.enableZmanim : true,
+            screenDisplayTime: finalSettings.screenDisplayTimes?.zmanim || 10,
+            city: finalSettings.city || cities[0]?.hebrew_name || '',
+            latitude: finalSettings.latitude || 31.7667,
+            longitude: finalSettings.longitude || 35.2333,
+            elevation: finalSettings.elevation || 0,
+            olson: finalSettings.olson || 'Asia/Jerusalem',
+            il: finalSettings.il !== undefined ? finalSettings.il : true,
+            purimSettings: finalSettings.purimSettings || { regular: true, shushan: false },
+          };
+        }
+
+        if (!finalSettings.messagesSettings) {
+          finalSettings.messagesSettings = {
+            enable: finalSettings.enableMessages !== undefined ? finalSettings.enableMessages : true,
+            screenDisplayTime: finalSettings.screenDisplayTimes?.messages || 10,
+            messages: finalSettings.messages || [],
+          };
+        }
+
+        if (!finalSettings.classesSettings) {
+          finalSettings.classesSettings = {
+            enable: finalSettings.enableClasses !== undefined ? finalSettings.enableClasses : true,
+            screenDisplayTime: finalSettings.screenDisplayTimes?.classes || 10,
+            classes: finalSettings.classes || [],
+          };
+        }
+
+        if (!finalSettings.deceasedSettings) {
+          finalSettings.deceasedSettings = defaultSettings.deceasedSettings;
+        } else {
+          // Ensure nested structure
+          if (!finalSettings.deceasedSettings.displaySettings) {
+            finalSettings.deceasedSettings = {
+              enable: finalSettings.enableDeceased !== undefined ? finalSettings.enableDeceased : true,
+              screenDisplayTime: finalSettings.screenDisplayTimes?.deceased || 10,
+              deceased: finalSettings.deceasedSettings.deceased || [],
+              imgbbApiKey: finalSettings.deceasedSettings.imgbbApiKey || '',
+              displaySettings: {
+                tableRows: finalSettings.deceasedSettings.tableRows || 3,
+                tableColumns: finalSettings.deceasedSettings.tableColumns || 2,
+                displayMode: finalSettings.deceasedSettings.displayMode || 'all',
+                defaultTemplate: finalSettings.deceasedSettings.defaultTemplate || 'simple',
+              },
+            };
+          }
+        }
+
+        if (!finalSettings.scheduleSettings) {
+          finalSettings.scheduleSettings = defaultSettings.scheduleSettings;
+        } else {
+          // Ensure enable and screenDisplayTime fields
+          if (!('enable' in finalSettings.scheduleSettings)) {
+            finalSettings.scheduleSettings = {
+              enable: finalSettings.enableSchedule !== undefined ? finalSettings.enableSchedule : true,
+              screenDisplayTime: finalSettings.screenDisplayTimes?.schedule || 10,
+              columns: finalSettings.scheduleSettings.columns || [],
+            };
+          }
+        }
       }
 
       const settingsToSet = finalSettings || defaultSettings;
       // Ensure githubKey is included in settings state
-      settingsToSet.githubKey = githubKey;
+      if (settingsToSet.githubSettings) {
+        settingsToSet.githubSettings.githubKey = githubKey;
+      }
       setSettings(settingsToSet);
       latestSettings.current = settingsToSet;
 
       // Save the resolved settings to AsyncStorage (without githubKey)
-      const { githubKey: _, ...settingsWithoutKey } = settingsToSet;
+      const settingsWithoutKey = { ...settingsToSet };
+      if (settingsWithoutKey.githubSettings) {
+        const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
+        settingsWithoutKey.githubSettings = githubSettingsWithoutKey;
+      }
       await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -350,17 +424,22 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const updateRemoteSettings = async (settings: Settings): Promise<boolean> => {
     try {
-      const { githubKey, ...settingsWithoutKey } = settings;
-      const response = await fetch(`https://api.github.com/gists/${settings.gistId}`, {
+      const settingsWithoutKey = { ...settings };
+      const githubKey = settings.githubSettings.githubKey;
+      if (settingsWithoutKey.githubSettings) {
+        const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
+        settingsWithoutKey.githubSettings = githubSettingsWithoutKey as any;
+      }
+      const response = await fetch(`https://api.github.com/gists/${settings.githubSettings.gistId}`, {
         method: 'PATCH',
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `Bearer ${settings.githubKey}`,
+          Authorization: `Bearer ${githubKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           files: {
-            [settings.gistFileName]: {
+            [settings.githubSettings.gistFileName]: {
               content: JSON.stringify(settingsWithoutKey, null, 4),
             },
           },
@@ -383,26 +462,33 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   useEffect(() => {
-    if (!settings.gistId) return;
+    if (!settings.githubSettings.gistId) return;
 
     const interval = setInterval(() => {
       void (async () => {
         const currentSettings = latestSettings.current;
         const remoteSettings = await fetchRemoteSettings(
-          currentSettings.gistId,
-          currentSettings.githubKey,
-          currentSettings.gistFileName,
+          currentSettings.githubSettings.gistId,
+          currentSettings.githubSettings.githubKey,
+          currentSettings.githubSettings.gistFileName,
         );
         if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
           // Add githubKey from encrypted storage
           const githubKey = await getSecureGithubKey();
-          const settingsWithKey = { ...remoteSettings, githubKey };
+          const settingsWithKey = { ...remoteSettings };
+          if (settingsWithKey.githubSettings) {
+            settingsWithKey.githubSettings.githubKey = githubKey;
+          }
 
           setSettings(settingsWithKey);
           latestSettings.current = settingsWithKey;
 
           // Store without githubKey in AsyncStorage
-          const { githubKey: _, ...settingsWithoutKey } = settingsWithKey;
+          const settingsWithoutKey = { ...settingsWithKey };
+          if (settingsWithoutKey.githubSettings) {
+            const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
+            settingsWithoutKey.githubSettings = githubSettingsWithoutKey;
+          }
           await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
         }
       })();
@@ -418,11 +504,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
     };
-  }, [settings.gistId]);
+  }, [settings.githubSettings.gistId]);
 
   // Monitor network connectivity and refresh settings when connection is restored
   useEffect(() => {
-    if (!settings.gistId) return;
+    if (!settings.githubSettings.gistId) return;
 
     let wasConnected: boolean | null = true;
 
@@ -435,18 +521,29 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
         // Fetch and update remote settings
         const currentSettings = latestSettings.current;
-        fetchRemoteSettings(currentSettings.gistId, currentSettings.githubKey, currentSettings.gistFileName)
+        fetchRemoteSettings(
+          currentSettings.githubSettings.gistId,
+          currentSettings.githubSettings.githubKey,
+          currentSettings.githubSettings.gistFileName,
+        )
           .then(async (remoteSettings) => {
             if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
               // Add githubKey from encrypted storage
               const githubKey = await getSecureGithubKey();
-              const settingsWithKey = { ...remoteSettings, githubKey };
+              const settingsWithKey = { ...remoteSettings };
+              if (settingsWithKey.githubSettings) {
+                settingsWithKey.githubSettings.githubKey = githubKey;
+              }
 
               setSettings(settingsWithKey);
               latestSettings.current = settingsWithKey;
 
               // Store without githubKey in AsyncStorage
-              const { githubKey: _, ...settingsWithoutKey } = settingsWithKey;
+              const settingsWithoutKey = { ...settingsWithKey };
+              if (settingsWithoutKey.githubSettings) {
+                const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
+                settingsWithoutKey.githubSettings = githubSettingsWithoutKey;
+              }
               await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
               console.log('Settings refreshed from remote after reconnection');
             }
@@ -462,7 +559,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       unsubscribe();
     };
-  }, [settings.gistId]);
+  }, [settings.githubSettings.gistId]);
 
   useEffect(() => {
     // Cleanup function to clear any existing timer
@@ -483,12 +580,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       };
 
       // If githubKey is being updated, store it in encrypted storage
-      if ('githubKey' in newSettings) {
-        await setSecureGithubKey(newSettings.githubKey || '');
+      if (newSettings.githubSettings?.githubKey) {
+        await setSecureGithubKey(newSettings.githubSettings.githubKey);
       }
 
       // Remove githubKey from settings before storing in AsyncStorage
-      const { githubKey, ...settingsWithoutKey } = updatedSettings;
+      const settingsWithoutKey = { ...updatedSettings };
+      if (settingsWithoutKey.githubSettings) {
+        const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
+        settingsWithoutKey.githubSettings = githubSettingsWithoutKey as any;
+      }
 
       await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
       setSettings(updatedSettings);
@@ -503,7 +604,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Create new timer
       updateTimer.current = setTimeout(() => {
         void (async () => {
-          if (hasUnsavedChanges.current && latestSettings.current.gistId) {
+          if (hasUnsavedChanges.current && latestSettings.current.githubSettings.gistId) {
             const success = await updateRemoteSettings(latestSettings.current);
             if (success) {
               hasUnsavedChanges.current = false;

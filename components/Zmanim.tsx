@@ -55,13 +55,13 @@ const Zmanim: React.FC = () => {
 
   const [rtl, setRtl] = useState(false);
   const zmanim = new ZmanimWrapper(
-    settings.nusach,
-    settings.latitude,
-    settings.longitude,
-    settings.olson,
-    settings.language,
-    settings.purimSettings,
-    settings.elevation,
+    settings.synagogueSettings.nusach,
+    settings.zmanimSettings.latitude,
+    settings.zmanimSettings.longitude,
+    settings.zmanimSettings.olson,
+    settings.synagogueSettings.language,
+    settings.zmanimSettings.purimSettings,
+    settings.zmanimSettings.elevation,
   );
   const hallelType = zmanim.getHallel();
   const isShabbat = zmanim.getDOE() === 6;

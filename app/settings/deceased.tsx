@@ -685,14 +685,46 @@ const DeceasedSettingsTab = () => {
   const margin = Math.round(useResponsiveSpacing(16) * heightScale);
 
   const saveChecked = (value: boolean) => {
-    updateSettings({ enableDeceased: value });
+    updateSettings({ deceasedSettings: { ...settings.deceasedSettings, enable: value } });
   };
 
-  const updateDeceasedSettings = (newSettings: Partial<DeceasedSettings>) => {
+  // Extended type to accept both DeceasedSettings properties and displaySettings properties for convenience
+  type DeceasedSettingsUpdate = Partial<DeceasedSettings> & {
+    tableRows?: number;
+    tableColumns?: number;
+    displayMode?: 'all' | 'monthly';
+    defaultTemplate?: 'simple' | 'card' | 'photo';
+  };
+
+  const updateDeceasedSettings = (newSettings: DeceasedSettingsUpdate) => {
     const updatedSettings = {
       ...settings.deceasedSettings,
-      ...newSettings,
     };
+
+    // Handle displaySettings properties
+    if (
+      'tableRows' in newSettings ||
+      'tableColumns' in newSettings ||
+      'displayMode' in newSettings ||
+      'defaultTemplate' in newSettings
+    ) {
+      updatedSettings.displaySettings = {
+        ...settings.deceasedSettings.displaySettings,
+        ...(newSettings.tableRows !== undefined && { tableRows: newSettings.tableRows }),
+        ...(newSettings.tableColumns !== undefined && { tableColumns: newSettings.tableColumns }),
+        ...(newSettings.displayMode !== undefined && { displayMode: newSettings.displayMode }),
+        ...(newSettings.defaultTemplate !== undefined && { defaultTemplate: newSettings.defaultTemplate }),
+      };
+    }
+
+    // Handle other DeceasedSettings properties
+    if ('enable' in newSettings) updatedSettings.enable = newSettings.enable!;
+    if ('screenDisplayTime' in newSettings) updatedSettings.screenDisplayTime = newSettings.screenDisplayTime!;
+    if ('deceased' in newSettings) updatedSettings.deceased = newSettings.deceased!;
+    if ('imgbbApiKey' in newSettings) updatedSettings.imgbbApiKey = newSettings.imgbbApiKey!;
+    if ('displaySettings' in newSettings)
+      updatedSettings.displaySettings = { ...updatedSettings.displaySettings, ...newSettings.displaySettings };
+
     updateSettings({ deceasedSettings: updatedSettings });
   };
 
@@ -786,7 +818,7 @@ const DeceasedSettingsTab = () => {
     <ScrollView className="flex-1" style={{ marginTop: margin }}>
       <BouncyCheckbox
         size={checkboxSize}
-        isChecked={settings.enableDeceased}
+        isChecked={settings.deceasedSettings.enable}
         fillColor="green"
         iconStyle={{ borderColor: 'green' }}
         innerIconStyle={{ borderWidth: 2 }}
@@ -795,8 +827,62 @@ const DeceasedSettingsTab = () => {
         onPress={(value) => saveChecked(value)}
       />
 
-      {settings.enableDeceased && (
+      {settings.deceasedSettings.enable && (
         <View className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin, gap: margin }}>
+          {/* Display Time */}
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+              <Text className="text-gray-600 font-medium" style={{ fontSize: labelSize }}>
+                {t('screen_display_time')}
+              </Text>
+              <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
+                    const newTime = Math.max(5, currentTime - 5);
+                    updateSettings({
+                      deceasedSettings: {
+                        ...settings.deceasedSettings,
+                        screenDisplayTime: newTime,
+                      },
+                    });
+                  }}
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+                >
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                    -
+                  </Text>
+                </TouchableOpacity>
+                <View
+                  className="bg-blue-100 rounded-lg items-center justify-center"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+                >
+                  <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
+                    {settings.deceasedSettings.screenDisplayTime || 10}s
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  onPress={() => {
+                    const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
+                    const newTime = Math.min(60, currentTime + 5);
+                    updateSettings({
+                      deceasedSettings: {
+                        ...settings.deceasedSettings,
+                        screenDisplayTime: newTime,
+                      },
+                    });
+                  }}
+                  className="bg-gray-200 rounded-lg items-center justify-center"
+                  style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+                >
+                  <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                    +
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
           {/* Table Configuration */}
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
             <View className="flex-row justify-between items-center" style={{ marginBottom: margin }}>
@@ -831,12 +917,12 @@ const DeceasedSettingsTab = () => {
                     <TouchableOpacity
                       onPress={() =>
                         updateDeceasedSettings({
-                          tableColumns: Math.max(1, settings.deceasedSettings.tableColumns - 1),
+                          tableColumns: Math.max(1, settings.deceasedSettings.displaySettings.tableColumns - 1),
                         })
                       }
                       className="bg-gray-200 rounded-lg items-center justify-center"
                       style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                      disabled={settings.deceasedSettings.tableColumns <= 1}
+                      disabled={settings.deceasedSettings.displaySettings.tableColumns <= 1}
                     >
                       <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
                         -
@@ -847,18 +933,18 @@ const DeceasedSettingsTab = () => {
                       style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
                     >
                       <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
-                        {settings.deceasedSettings.tableColumns}
+                        {settings.deceasedSettings.displaySettings.tableColumns}
                       </Text>
                     </View>
                     <TouchableOpacity
                       onPress={() =>
                         updateDeceasedSettings({
-                          tableColumns: Math.min(5, settings.deceasedSettings.tableColumns + 1),
+                          tableColumns: Math.min(5, settings.deceasedSettings.displaySettings.tableColumns + 1),
                         })
                       }
                       className="bg-gray-200 rounded-lg items-center justify-center"
                       style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                      disabled={settings.deceasedSettings.tableColumns >= 5}
+                      disabled={settings.deceasedSettings.displaySettings.tableColumns >= 5}
                     >
                       <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
                         +
@@ -874,11 +960,13 @@ const DeceasedSettingsTab = () => {
                   <View className="flex-row items-center" style={{ gap: smallPadding }}>
                     <TouchableOpacity
                       onPress={() =>
-                        updateDeceasedSettings({ tableRows: Math.max(1, settings.deceasedSettings.tableRows - 1) })
+                        updateDeceasedSettings({
+                          tableRows: Math.max(1, settings.deceasedSettings.displaySettings.tableRows - 1),
+                        })
                       }
                       className="bg-gray-200 rounded-lg items-center justify-center"
                       style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                      disabled={settings.deceasedSettings.tableRows <= 1}
+                      disabled={settings.deceasedSettings.displaySettings.tableRows <= 1}
                     >
                       <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
                         -
@@ -889,16 +977,18 @@ const DeceasedSettingsTab = () => {
                       style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
                     >
                       <Text className="text-blue-900 font-bold" style={{ fontSize: titleSize }}>
-                        {settings.deceasedSettings.tableRows}
+                        {settings.deceasedSettings.displaySettings.tableRows}
                       </Text>
                     </View>
                     <TouchableOpacity
                       onPress={() =>
-                        updateDeceasedSettings({ tableRows: Math.min(5, settings.deceasedSettings.tableRows + 1) })
+                        updateDeceasedSettings({
+                          tableRows: Math.min(5, settings.deceasedSettings.displaySettings.tableRows + 1),
+                        })
                       }
                       className="bg-gray-200 rounded-lg items-center justify-center"
                       style={{ padding: smallPadding, width: 40 * heightScale, height: 40 * heightScale }}
-                      disabled={settings.deceasedSettings.tableRows >= 10}
+                      disabled={settings.deceasedSettings.displaySettings.tableRows >= 10}
                     >
                       <Text className="text-gray-700 font-bold" style={{ fontSize: titleSize }}>
                         +
@@ -921,14 +1011,18 @@ const DeceasedSettingsTab = () => {
                         key={mode}
                         onPress={() => updateDeceasedSettings({ displayMode: mode })}
                         className={`rounded-lg border ${
-                          settings.deceasedSettings.displayMode === mode
+                          settings.deceasedSettings.displaySettings.displayMode === mode
                             ? 'bg-blue-500 border-blue-500'
                             : 'bg-white border-gray-300'
                         }`}
                         style={{ paddingHorizontal: smallPadding * 1.5, paddingVertical: smallPadding }}
                       >
                         <Text
-                          className={settings.deceasedSettings.displayMode === mode ? 'text-white' : 'text-gray-700'}
+                          className={
+                            settings.deceasedSettings.displaySettings.displayMode === mode
+                              ? 'text-white'
+                              : 'text-gray-700'
+                          }
                           style={{ fontSize: textSize }}
                         >
                           {t(`deceased_display_${mode}`)}
@@ -948,7 +1042,7 @@ const DeceasedSettingsTab = () => {
                         key={temp}
                         onPress={() => updateDeceasedSettings({ defaultTemplate: temp })}
                         className={`rounded-lg border ${
-                          settings.deceasedSettings.defaultTemplate === temp
+                          settings.deceasedSettings.displaySettings.defaultTemplate === temp
                             ? 'bg-blue-500 border-blue-500'
                             : 'bg-white border-gray-300'
                         }`}
@@ -956,7 +1050,9 @@ const DeceasedSettingsTab = () => {
                       >
                         <Text
                           className={
-                            settings.deceasedSettings.defaultTemplate === temp ? 'text-white' : 'text-gray-700'
+                            settings.deceasedSettings.displaySettings.defaultTemplate === temp
+                              ? 'text-white'
+                              : 'text-gray-700'
                           }
                           style={{ fontSize: textSize }}
                         >

@@ -28,17 +28,17 @@ const MessagesSettingsTab = () => {
   const margin = Math.round(useResponsiveSpacing(16) * heightScale);
 
   const saveChecked = (value: boolean) => {
-    updateSettings({ enableMessages: value });
+    updateSettings({ messagesSettings: { ...settings.messagesSettings, enable: value } });
   };
 
   const updateMessage = (id: string, updates: Partial<Message>) => {
-    const newMessages = settings.messages.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg));
-    updateSettings({ messages: newMessages });
+    const newMessages = settings.messagesSettings.messages.map((msg) => (msg.id === id ? { ...msg, ...updates } : msg));
+    updateSettings({ messagesSettings: { ...settings.messagesSettings, messages: newMessages } });
   };
 
   const deleteMessage = (id: string) => {
-    const newMessages = settings.messages.filter((msg) => msg.id !== id);
-    updateSettings({ messages: newMessages });
+    const newMessages = settings.messagesSettings.messages.filter((msg) => msg.id !== id);
+    updateSettings({ messagesSettings: { ...settings.messagesSettings, messages: newMessages } });
   };
 
   const addNewMessage = () => {
@@ -47,7 +47,9 @@ const MessagesSettingsTab = () => {
       text: '',
       enabled: true,
     };
-    updateSettings({ messages: [newMessage, ...settings.messages] });
+    updateSettings({
+      messagesSettings: { ...settings.messagesSettings, messages: [newMessage, ...settings.messagesSettings.messages] },
+    });
   };
 
   const clearDate = (messageId: string, field: 'startDate' | 'endDate') => {
@@ -80,7 +82,7 @@ const MessagesSettingsTab = () => {
     <View className="flex-1" style={{ marginTop: margin }}>
       <BouncyCheckbox
         size={checkboxSize}
-        isChecked={settings.enableMessages}
+        isChecked={settings.messagesSettings.enable}
         fillColor="green"
         iconStyle={{ borderColor: 'green' }}
         innerIconStyle={{ borderWidth: 2 }}
@@ -88,11 +90,66 @@ const MessagesSettingsTab = () => {
         textComponent={<Text style={{ fontSize: textSize }}>{t('enable_messages')}</Text>}
         onPress={(value) => void saveChecked(value)}
       />
+      {settings.messagesSettings.enable && (
+        <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
+          <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+            <Text className="text-gray-600" style={{ fontSize: labelSize }}>
+              {t('screen_display_time')}
+            </Text>
+            <View className="flex-row items-center" style={{ gap: smallPadding }}>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.messagesSettings.screenDisplayTime || 10;
+                  const newTime = Math.max(1, currentTime - 1);
+                  updateSettings({
+                    messagesSettings: {
+                      ...settings.messagesSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  -
+                </Text>
+              </TouchableOpacity>
+              <View
+                className="bg-blue-100 rounded-lg items-center justify-center"
+                style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+              >
+                <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
+                  {settings.messagesSettings.screenDisplayTime || 10}
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.messagesSettings.screenDisplayTime || 10;
+                  const newTime = Math.min(60, currentTime + 5);
+                  updateSettings({
+                    messagesSettings: {
+                      ...settings.messagesSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  +
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
-      {settings.enableMessages && (
+      {settings.messagesSettings.enable && (
         <View className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin }}>
           <FlatList
-            data={settings.messages}
+            data={settings.messagesSettings.messages}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               const status = getMessageStatus(item);

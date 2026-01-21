@@ -45,7 +45,7 @@ const ScheduleSettingsTab = () => {
   }, []);
 
   const saveChecked = (value: boolean) => {
-    updateSettings({ enableSchedule: value });
+    updateSettings({ scheduleSettings: { ...settings.scheduleSettings, enable: value } });
   };
 
   const openAddColumnModal = () => {
@@ -256,7 +256,7 @@ const ScheduleSettingsTab = () => {
     <View className="flex-1" style={{ marginTop: margin }}>
       <BouncyCheckbox
         size={checkboxSize}
-        isChecked={settings.enableSchedule}
+        isChecked={settings.scheduleSettings.enable}
         fillColor="green"
         iconStyle={{ borderColor: 'green' }}
         innerIconStyle={{ borderWidth: 2 }}
@@ -264,8 +264,63 @@ const ScheduleSettingsTab = () => {
         textComponent={<Text style={{ fontSize: textSize }}>{t('enable_schedule')}</Text>}
         onPress={(value) => void saveChecked(value)}
       />
+      {settings.scheduleSettings.enable && (
+        <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
+          <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+            <Text className="text-gray-600" style={{ fontSize: labelSize }}>
+              {t('screen_display_time')}
+            </Text>
+            <View className="flex-row items-center" style={{ gap: smallPadding }}>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.scheduleSettings.screenDisplayTime || 10;
+                  const newTime = Math.max(5, currentTime - 5);
+                  updateSettings({
+                    scheduleSettings: {
+                      ...settings.scheduleSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  -
+                </Text>
+              </TouchableOpacity>
+              <View
+                className="bg-blue-100 rounded-lg items-center justify-center"
+                style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+              >
+                <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
+                  {settings.scheduleSettings.screenDisplayTime || 10}s
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.scheduleSettings.screenDisplayTime || 10;
+                  const newTime = Math.min(60, currentTime + 5);
+                  updateSettings({
+                    scheduleSettings: {
+                      ...settings.scheduleSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  +
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
-      {settings.enableSchedule && (
+      {settings.scheduleSettings.enable && (
         <ScrollView className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin }}>
           {/* Add Column Button */}
           <TouchableOpacity

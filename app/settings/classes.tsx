@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { View, Text, ActivityIndicator, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { daysOfWeek } from 'utils/classesHelpers';
-import { Shiur } from 'utils/defs';
+import { Class } from 'utils/defs';
 import { isRTL } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
@@ -47,10 +47,10 @@ const ClassesSettingsTab = () => {
   }, []);
 
   const saveChecked = (value: boolean) => {
-    updateSettings({ enableClasses: value });
+    updateSettings({ classesSettings: { ...settings.classesSettings, enable: value } });
   };
 
-  const defaultShiur: Shiur = {
+  const defaultClass: Class = {
     id: '',
     day: [0],
     start: '',
@@ -61,12 +61,13 @@ const ClassesSettingsTab = () => {
 
   const handleAddClass = () => {
     // Generate unique ID for new class to prevent duplicate keys
-    const newClass: Shiur = {
-      ...defaultShiur,
+    const newClass: Class = {
+      ...defaultClass,
       id: `class_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     };
-    const updatedClasses = [newClass, ...settings.classes];
-    updateSettings({ classes: updatedClasses });
+    const updatedClasses = [newClass, ...settings.classesSettings.classes];
+
+    updateSettings({ classesSettings: { ...settings.classesSettings, classes: updatedClasses } });
   };
 
   const validateTime = (timeStr: string): boolean => {
@@ -100,19 +101,19 @@ const ClassesSettingsTab = () => {
     return null;
   };
 
-  const handleUpdateClass = (index: number, field: keyof Shiur, value: string | number[]) => {
-    const updatedClasses = [...settings.classes];
-    const currentClass = updatedClasses[index] ?? defaultShiur;
+  const handleUpdateClass = (index: number, field: keyof Class, value: string | number[]) => {
+    const updatedClasses = [...settings.classesSettings.classes];
+    const currentClass = updatedClasses[index] ?? defaultClass;
     updatedClasses[index] = {
       ...currentClass,
       [field]: value,
     };
-    updateSettings({ classes: updatedClasses });
+    updateSettings({ classesSettings: { ...settings.classesSettings, classes: updatedClasses } });
   };
 
   const handleToggleDay = (classIndex: number, dayNumber: number) => {
-    const updatedClasses = [...settings.classes];
-    const currentClass = updatedClasses[classIndex] ?? defaultShiur;
+    const updatedClasses = [...settings.classesSettings.classes];
+    const currentClass = updatedClasses[classIndex] ?? defaultClass;
     const currentDays = currentClass.day ?? [];
 
     if (currentDays.includes(dayNumber)) {
@@ -129,16 +130,16 @@ const ClassesSettingsTab = () => {
       };
     }
 
-    updateSettings({ classes: updatedClasses });
+    updateSettings({ classesSettings: { ...settings.classesSettings, classes: updatedClasses } });
   };
 
   const handleDeleteClass = (index: number) => {
-    const updatedClasses = settings.classes.filter((_, i) => i !== index);
-    updateSettings({ classes: updatedClasses });
+    const updatedClasses = settings.classesSettings.classes.filter((_, i) => i !== index);
+    updateSettings({ classesSettings: { ...settings.classesSettings, classes: updatedClasses } });
   };
 
   const handleMoveClass = (index: number, direction: 'up' | 'down') => {
-    const updatedClasses = [...settings.classes];
+    const updatedClasses = [...settings.classesSettings.classes];
     const newIndex = direction === 'up' ? index - 1 : index + 1;
 
     if (newIndex < 0 || newIndex >= updatedClasses.length) return;
@@ -148,11 +149,11 @@ const ClassesSettingsTab = () => {
     if (temp && swap) {
       updatedClasses[index] = swap;
       updatedClasses[newIndex] = temp;
-      updateSettings({ classes: updatedClasses });
+      updateSettings({ classesSettings: { ...settings.classesSettings, classes: updatedClasses } });
     }
   };
 
-  const renderClassItem = ({ rtl, item, index }: { rtl: boolean; item: Shiur; index: number }) => (
+  const renderClassItem = ({ rtl, item, index }: { rtl: boolean; item: Class; index: number }) => (
     <View className="bg-white rounded-lg shadow-sm border border-gray-500" style={{ padding, marginBottom: margin }}>
       <View className={`flex-row justify-between items-center`}>
         <View className="flex-row" style={{ gap: smallPadding }}>
@@ -165,13 +166,13 @@ const ClassesSettingsTab = () => {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleMoveClass(index, 'down')}
-            disabled={index === settings.classes.length - 1}
+            disabled={index === settings.classesSettings.classes.length - 1}
             style={{ padding: smallPadding }}
           >
             <Feather
               name="arrow-down"
               size={iconSize}
-              color={index === settings.classes.length - 1 ? '#ccc' : '#3b82f6'}
+              color={index === settings.classesSettings.classes.length - 1 ? '#ccc' : '#3b82f6'}
             />
           </TouchableOpacity>
         </View>
@@ -331,7 +332,7 @@ const ClassesSettingsTab = () => {
     <View className="flex-1" style={{ marginTop: margin }}>
       <BouncyCheckbox
         size={checkboxSize}
-        isChecked={settings.enableClasses}
+        isChecked={settings.classesSettings.enable}
         fillColor="green"
         iconStyle={checkboxStyles.green.iconStyle}
         innerIconStyle={checkboxStyles.green.innerIconStyle}
@@ -339,10 +340,65 @@ const ClassesSettingsTab = () => {
         textComponent={<Text style={{ fontSize: textSize }}>{t('enable_classes')}</Text>}
         onPress={(value) => saveChecked(value)}
       />
-      {settings.enableClasses && (
+      {settings.classesSettings.enable && (
+        <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
+          <View className="flex-row items-center justify-between" style={{ gap: padding }}>
+            <Text className="text-gray-600" style={{ fontSize: labelSize }}>
+              {t('screen_display_time')}
+            </Text>
+            <View className="flex-row items-center" style={{ gap: smallPadding }}>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.classesSettings.screenDisplayTime || 10;
+                  const newTime = Math.max(5, currentTime - 5);
+                  updateSettings({
+                    classesSettings: {
+                      ...settings.classesSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  -
+                </Text>
+              </TouchableOpacity>
+              <View
+                className="bg-blue-100 rounded-lg items-center justify-center"
+                style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
+              >
+                <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
+                  {settings.classesSettings.screenDisplayTime || 10}s
+                </Text>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  const currentTime = settings.classesSettings.screenDisplayTime || 10;
+                  const newTime = Math.min(60, currentTime + 5);
+                  updateSettings({
+                    classesSettings: {
+                      ...settings.classesSettings,
+                      screenDisplayTime: newTime,
+                    },
+                  });
+                }}
+                className="bg-gray-200 rounded-lg items-center justify-center"
+                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
+              >
+                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
+                  +
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
+      {settings.classesSettings.enable && (
         <View className="flex-1" style={{ padding }}>
           <FlatList
-            data={settings.classes}
+            data={settings.classesSettings.classes}
             renderItem={({ item, index }) => renderClassItem({ rtl, item, index })}
             keyExtractor={(item, index) => item.id || index.toString()}
             showsVerticalScrollIndicator={false}

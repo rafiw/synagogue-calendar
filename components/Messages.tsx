@@ -43,8 +43,8 @@ const Messages: React.FC = () => {
 
   // Filter to only show active messages
   const activeMessages = useMemo(() => {
-    return filterActiveMessages(settings.messages);
-  }, [settings.messages]);
+    return filterActiveMessages(settings.messagesSettings.messages);
+  }, [settings.messagesSettings.messages]);
 
   useEffect(() => {
     const pages = Math.ceil(activeMessages.length / messagesPerPage);

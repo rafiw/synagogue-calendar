@@ -2036,7 +2036,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hebcal/core@npm:^6.0.0, @hebcal/core@npm:^6.0.5":
+"@hebcal/core@npm:^6.0.5, @hebcal/core@npm:^6.0.8":
   version: 6.0.8
   resolution: "@hebcal/core@npm:6.0.8"
   dependencies:
@@ -2049,21 +2049,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hebcal/hdate@npm:^0.21.0, @hebcal/hdate@npm:^0.21.1":
+"@hebcal/hdate@npm:^0.21.1":
   version: 0.21.1
   resolution: "@hebcal/hdate@npm:0.21.1"
   checksum: 10c0/23ccc00c876edbec12ceeb80a411adbd97ff393eab0c5f784ea0bb648e3ace95ec22736b369d7fcd62ac1b806b9e028a8f4ff0c1f810e2b50d22b40a801206fc
   languageName: node
   linkType: hard
 
-"@hebcal/leyning@npm:^9.3.0":
-  version: 9.3.0
-  resolution: "@hebcal/leyning@npm:9.3.0"
+"@hebcal/leyning@npm:^9.4.0":
+  version: 9.4.0
+  resolution: "@hebcal/leyning@npm:9.4.0"
   dependencies:
-    "@hebcal/core": "npm:^6.0.0"
-    "@hebcal/hdate": "npm:^0.21.0"
+    "@hebcal/core": "npm:^6.0.8"
+    "@hebcal/hdate": "npm:^0.21.1"
     tslib: "npm:^2.8.1"
-  checksum: 10c0/0bbbe33546eca3c22e27c1a651135e0659b32ba32a510149f4db46519093a79f75ba9704af441b3535e7a2e60af9f62448b2993267e7593ebe66e56f40956c9f
+  checksum: 10c0/785c74cc6a8083fb098f8a98b31cbcfccfd5b931e7ce57a15459c1320a45fa76f6789788a963f87cbf393eb095517527484e3093e1f4b5ef7e0e9ae6871804f3
   languageName: node
   linkType: hard
 
@@ -11597,7 +11597,7 @@ __metadata:
     "@eslint/js": "npm:^9.39.1"
     "@expo/vector-icons": "npm:^15.0.3"
     "@hebcal/core": "npm:^6.0.5"
-    "@hebcal/leyning": "npm:^9.3.0"
+    "@hebcal/leyning": "npm:^9.4.0"
     "@react-native-async-storage/async-storage": "npm:~2.2.0"
     "@react-native-community/datetimepicker": "npm:8.4.4"
     "@react-native-community/netinfo": "npm:^11.4.1"

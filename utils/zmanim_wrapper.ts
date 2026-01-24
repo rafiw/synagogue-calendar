@@ -206,17 +206,15 @@ export class ZmanimWrapper {
   }
 
   getHftara(): string {
-    if (this.language === 'he') {
-      // https://github.com/hebcal/hebcal-leyning/pull/711
-      return '';
+    const reading = getLeyningOnDate(this.hdate, this.il, false, this.language) as Leyning | undefined;
+    if (this.nusach === 'sephardic' && reading?.sephardic) {
+      return reading.sephardic;
     }
-    const reading = getLeyningOnDate(this.hdate, this.il, false) as Leyning | undefined;
     return reading?.haftara || '';
   }
 
   getHftaraReason(): string {
-    // const reading = getLeyningOnDate(this.hdate, this.il, false, this.language) as Leyning;
-    const reading = getLeyningOnDate(this.hdate, this.il, false) as Leyning | undefined;
+    const reading = getLeyningOnDate(this.hdate, this.il, false, this.language) as Leyning | undefined;
     return reading?.reason?.[0] || '';
   }
 

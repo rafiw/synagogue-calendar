@@ -67,7 +67,7 @@ const removeLocalDeleteUrl = async (personId: string): Promise<void> => {
 };
 
 // Default imgbb API key - users can override in settings
-const DEFAULT_IMGBB_API_KEY = '41e08868c7e489e384b456258277b511';
+const DEFAULT_IMGBB_API_KEY = '';
 
 interface UploadResult {
   url: string;

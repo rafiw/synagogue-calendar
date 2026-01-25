@@ -282,11 +282,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       const githubKey = await getSecureGithubKey();
 
       // Use local settings values if available, otherwise fall back to current state
-      const gistId = localSettings?.githubSettings?.gistId || localSettings?.gistId || settings.githubSettings.gistId;
+      const gistId =
+        localSettings?.githubSettings?.gistId || localSettings?.gistId || settings.githubSettings?.gistId || '';
       const gistFileName =
         localSettings?.githubSettings?.gistFileName ||
         localSettings?.gistFileName ||
-        settings.githubSettings.gistFileName;
+        settings.githubSettings?.gistFileName ||
+        defaultSettings.githubSettings.gistFileName;
 
       // Try to fetch remote settings
       const remoteSettings = await fetchRemoteSettings(gistId, githubKey, gistFileName);
@@ -314,10 +316,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       const settingsToSet = finalSettings || defaultSettings;
-      // Ensure githubKey is included in settings state
-      if (settingsToSet.githubSettings) {
-        settingsToSet.githubSettings.githubKey = githubKey;
+      // Ensure githubSettings always exists (merge with defaults if missing)
+      if (!settingsToSet.githubSettings) {
+        settingsToSet.githubSettings = { ...defaultSettings.githubSettings };
       }
+      // Ensure githubKey is included in settings state
+      settingsToSet.githubSettings.githubKey = githubKey;
       setSettings(settingsToSet);
       latestSettings.current = settingsToSet;
 
@@ -337,6 +341,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const updateRemoteSettings = async (settings: Settings): Promise<boolean> => {
     try {
+      if (!settings.githubSettings?.gistId) {
+        return false;
+      }
       const settingsWithoutKey = { ...settings };
       const githubKey = settings.githubSettings.githubKey;
       if (settingsWithoutKey.githubSettings) {
@@ -375,7 +382,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   useEffect(() => {
-    if (!settings.githubSettings.gistId) return;
+    if (!settings.githubSettings?.gistId) return;
 
     const interval = setInterval(() => {
       void (async () => {
@@ -389,9 +396,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Add githubKey from encrypted storage
           const githubKey = await getSecureGithubKey();
           const settingsWithKey = { ...remoteSettings };
-          if (settingsWithKey.githubSettings) {
-            settingsWithKey.githubSettings.githubKey = githubKey;
+          // Ensure githubSettings always exists (merge with defaults if missing)
+          if (!settingsWithKey.githubSettings) {
+            settingsWithKey.githubSettings = { ...defaultSettings.githubSettings };
           }
+          settingsWithKey.githubSettings.githubKey = githubKey;
 
           setSettings(settingsWithKey);
           latestSettings.current = settingsWithKey;
@@ -417,11 +426,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
     };
-  }, [settings.githubSettings.gistId]);
+  }, [settings.githubSettings?.gistId]);
 
   // Monitor network connectivity and refresh settings when connection is restored
   useEffect(() => {
-    if (!settings.githubSettings.gistId) return;
+    if (!settings.githubSettings?.gistId) return;
 
     let wasConnected: boolean | null = true;
 
@@ -444,9 +453,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               // Add githubKey from encrypted storage
               const githubKey = await getSecureGithubKey();
               const settingsWithKey = { ...remoteSettings };
-              if (settingsWithKey.githubSettings) {
-                settingsWithKey.githubSettings.githubKey = githubKey;
+              // Ensure githubSettings always exists (merge with defaults if missing)
+              if (!settingsWithKey.githubSettings) {
+                settingsWithKey.githubSettings = { ...defaultSettings.githubSettings };
               }
+              settingsWithKey.githubSettings.githubKey = githubKey;
 
               setSettings(settingsWithKey);
               latestSettings.current = settingsWithKey;
@@ -472,7 +483,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return () => {
       unsubscribe();
     };
-  }, [settings.githubSettings.gistId]);
+  }, [settings.githubSettings?.gistId]);
 
   useEffect(() => {
     // Cleanup function to clear any existing timer
@@ -491,6 +502,14 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         ...newSettings,
         lastUpdateTime: new Date(),
       };
+
+      // Ensure githubSettings always exists (merge with defaults if missing)
+      if (!updatedSettings.githubSettings) {
+        updatedSettings.githubSettings = { ...defaultSettings.githubSettings };
+        // Load githubKey from encrypted storage
+        const githubKey = await getSecureGithubKey();
+        updatedSettings.githubSettings.githubKey = githubKey;
+      }
 
       // If githubKey is being updated, store it in encrypted storage
       if (newSettings.githubSettings?.githubKey) {
@@ -517,7 +536,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       // Create new timer
       updateTimer.current = setTimeout(() => {
         void (async () => {
-          if (hasUnsavedChanges.current && latestSettings.current.githubSettings.gistId) {
+          if (hasUnsavedChanges.current && latestSettings.current.githubSettings?.gistId) {
             const success = await updateRemoteSettings(latestSettings.current);
             if (success) {
               hasUnsavedChanges.current = false;

@@ -71,31 +71,34 @@ export default function App() {
         id: 1,
         name: 'zmanim',
         content: () => (settings.zmanimSettings.enable ? <Zmanim /> : null),
-        presentTime: settings.zmanimSettings.screenDisplayTime * 1000 || defaultPageDisplayTime,
+        presentTime: settings.zmanimSettings.screenDisplayTime || defaultPageDisplayTime,
       },
       {
         id: 2,
         name: 'classes',
         content: () => (settings.classesSettings.enable ? <Classes /> : null),
-        presentTime: settings.classesSettings.screenDisplayTime * 1000 || classSubPages * defaultPageDisplayTime,
+        presentTime:
+          settings.classesSettings.screenDisplayTime * classSubPages || classSubPages * defaultPageDisplayTime,
       },
       {
         id: 3,
         name: 'deceased',
         content: () => (settings.deceasedSettings.enable ? <Deceased /> : null),
-        presentTime: settings.deceasedSettings.screenDisplayTime * 1000 || deceasedSubPages * defaultPageDisplayTime,
+        presentTime:
+          settings.deceasedSettings.screenDisplayTime * deceasedSubPages || deceasedSubPages * defaultPageDisplayTime,
       },
       {
         id: 4,
         name: 'messages',
         content: () => (settings.messagesSettings.enable ? <Messages /> : null),
-        presentTime: settings.messagesSettings.screenDisplayTime * 1000 || messagesSubPages * defaultPageDisplayTime,
+        presentTime:
+          settings.messagesSettings.screenDisplayTime * messagesSubPages || messagesSubPages * defaultPageDisplayTime,
       },
       {
         id: 5,
         name: 'schedule',
         content: () => (settings.scheduleSettings.enable ? <Schedule /> : null),
-        presentTime: settings.scheduleSettings.screenDisplayTime * 1000 || defaultPageDisplayTime,
+        presentTime: settings.scheduleSettings.screenDisplayTime || defaultPageDisplayTime,
       },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
   }, [settings]);

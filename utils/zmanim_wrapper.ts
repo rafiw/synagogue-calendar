@@ -100,18 +100,6 @@ export class ZmanimWrapper {
       molad: true,
       locale: this.language,
       addHebrewDates: true,
-      dailyLearning: {
-        dafYomi: true,
-        mishnaYomi: true,
-        nachYomi: true,
-        tanakhYomi: true,
-        psalms: true,
-        rambam1: true,
-        yerushalmi: 1, // 1 for Vilna edition, 2 for Schottenstein edition
-        chofetzChaim: true,
-        shemiratHaLashon: true,
-        pirkeiAvotSummer: true,
-      },
     };
     return HebrewCalendar.calendar(options);
   }

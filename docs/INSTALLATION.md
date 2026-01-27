@@ -131,7 +131,13 @@ Run these commands to ensure everything is set up correctly:
 node --version
 ```
 
-Should show v18.x.x or higher
+Should show v20.x.x or higher
+
+### 2. Enable Corepack
+
+```bash
+corepack enable
+```
 
 ### 2. Check Yarn Version
 
@@ -139,7 +145,8 @@ Should show v18.x.x or higher
 yarn --version
 ```
 
-Should show version 1.x.x or higher
+Should show 4.12.0 (or at least 4.x.x).
+Yarn is managed automatically via Corepack. You do not need to install Yarn manually.
 
 ### 3. Run Tests
 

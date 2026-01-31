@@ -23,22 +23,6 @@ export const backgroundImages = [
     label: 'empty',
     value: '',
   },
-  {
-    label: 'background1',
-    value: '../assets/images/background1.png',
-  },
-  {
-    label: 'background2',
-    value: '../assets/images/background2.png',
-  },
-  {
-    label: 'background3',
-    value: '../assets/images/background3.png',
-  },
-  {
-    label: 'background4',
-    value: '../assets/images/background4.png',
-  },
 ];
 
 export const olsons = [

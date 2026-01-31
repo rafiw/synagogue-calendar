@@ -13,7 +13,6 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useSettings } from '../../context/settingsContext';
-import { backgroundImages } from '../../assets/data';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
 import ExternalLink from '../../utils/PressableLink';
@@ -247,22 +246,6 @@ const GeneralSettingsTab = () => {
 
   const handleChangeNusach = (newNusach: 'ashkenaz' | 'sephardic') => {
     updateSettings({ synagogueSettings: { ...settings.synagogueSettings, nusach: newNusach } });
-  };
-
-  const handleBackgroundChange = (background: string) => {
-    setBackground(background);
-    setCustomImageUri(''); // Clear custom image when selecting predefined background
-    const newBackgroundSettings = {
-      ...settings.synagogueSettings.backgroundSettings,
-      mode: 'image' as const,
-      imageUrl: background,
-      customImageUri: '',
-      solidColor,
-      gradientColors,
-      gradientStart: getGradientStart(gradientDirection),
-      gradientEnd: getGradientEnd(gradientDirection),
-    };
-    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
   const handleBackgroundModeChange = (mode: 'image' | 'solid' | 'gradient') => {
@@ -644,24 +627,6 @@ const GeneralSettingsTab = () => {
                     </TouchableOpacity>
                   )}
                 </View>
-
-                {/* Predefined Images */}
-                {!customImageUri && (
-                  <View style={{ gap: smallPadding }}>
-                    <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
-                      {t('background_choose_from_library')}
-                    </Text>
-                    <Picker
-                      selectedValue={background}
-                      onValueChange={handleBackgroundChange}
-                      style={{ height: pickerHeight }}
-                    >
-                      {backgroundImages.map((bimg) => (
-                        <Picker.Item key={bimg.label} label={bimg.label} value={bimg.value}></Picker.Item>
-                      ))}
-                    </Picker>
-                  </View>
-                )}
               </View>
             )}
 

@@ -135,6 +135,59 @@ Honor the memory of departed community members with a dedicated memorial page.
 - Table layout customization
 - Photo URL or upload
 - Birth and death dates (Hebrew or English)
+- **CSV Import** - Bulk import deceased entries from CSV file
+
+### CSV Import Feature:
+
+Import multiple deceased entries at once using a CSV file for easy data migration and bulk entry.
+
+#### Supported CSV Columns:
+
+| English Headers                  | Hebrew Headers     | Description                     | Example             |
+| -------------------------------- | ------------------ | ------------------------------- | ------------------- |
+| `name`                           | `שם`               | Full name (required)            | `John Smith`        |
+| `gender`, `male`, `ismale`       | `מין`              | Gender (male/true/1/זכר = male) | `male` or `true`    |
+| `dateofbirth`, `dob`, `birth`    | `תאריך לידה`       | Birth date (English)            | `1950-01-15`        |
+| `dateofdeath`, `dod`, `death`    | `תאריך פטירה`      | Death date (English)            | `2020-05-20`        |
+| `hebrewdateofbirth`, `hebrewdob` | `תאריך לידה עברי`  | Birth date (Hebrew)             | `15 Shevat 5710`    |
+| `hebrewdateofdeath`, `hebrewdod` | `תאריך פטירה עברי` | Death date (Hebrew)             | `27 Iyar 5780`      |
+| `photo`, `photourl`              | `תמונה`            | Photo URL                       | `https://...`       |
+| `tribute`, `memorial`            | `זיכרון`           | Memorial text                   | `Beloved father...` |
+
+#### CSV File Format Example:
+
+```csv
+name,gender,dateofbirth,dateofdeath,hebrewdateofbirth,hebrewdateofdeath,photo,tribute
+John Smith,male,1950-01-15,2020-05-20,15 Shevat 5710,27 Iyar 5780,https://example.com/photo.jpg,Beloved father and grandfather
+Sarah Cohen,female,1945-03-10,2019-12-25,10 Adar 5705,25 Tevet 5780,,A devoted teacher
+```
+
+#### Hebrew CSV Example:
+
+```csv
+שם,מין,תאריך לידה,תאריך פטירה,תאריך לידה עברי,תאריך פטירה עברי,תמונה,זיכרון
+משה כהן,זכר,1940-05-10,2021-03-15,10 Iyar 5700,15 Adar 5781,https://example.com/photo.jpg,אב וסב אהוב
+שרה לוי,נקבה,1950-07-20,2022-01-10,20 Tammuz 5710,10 Shevat 5782,,מורה מסורה
+```
+
+#### How to Use:
+
+1. Prepare a CSV file with the required headers
+2. Fill in the data (at minimum: name is required)
+3. Go to Settings → Memorial/Deceased tab
+4. Tap the "Import CSV" button
+5. Select your CSV file
+6. The app will import all valid entries
+
+#### Notes:
+
+- **Name is required** - rows without a name will be skipped
+- Headers can be in **English or Hebrew**
+- Gender defaults to female if not specified
+- All imported entries use the **"simple" template** by default
+- You can edit individual entries after import
+- Invalid rows are skipped automatically
+- The import adds to existing entries (doesn't replace them)
 
 <img src="./images/memorial.png" alt="Memorial Page" width="1000">
 

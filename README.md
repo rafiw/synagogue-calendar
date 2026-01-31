@@ -21,7 +21,8 @@
 
 ### 📋 Quick Links
 
-- 📖 [Features](./docs/FEATURES.md)
+- 📖 [Features (English)](./docs/FEATURES.md)
+- 📖 [Features (עברית)](./docs/FEATURES_HE.md)
 - 🚀 [Installation](./docs/INSTALLATION.md)
 - 📦 [Deployment Guide](./docs/DEPLOYMENT.md)
 - 🔄 [GitHub Backup Setup](./docs/GITHUB_SETUP.md)
@@ -40,7 +41,7 @@ Synagogue Calendar is a modern, feature-rich application designed to help synago
 - 📅 **Hebrew Calendar** - Automatic integration with Parasha, holidays, and special days
 - 📚 **Classes & Learning** - Manage shiurim schedules
 - 📢 **Announcements** - Display time-based messages
-- 🕯️ **Memorial Page** - Track yahrzeit dates with photo support
+- 🕯️ **Memorial Page** - Track yahrzeit dates with photo support and CSV bulk import
 - ⏰ **Prayer Schedule** - Customizable prayer time displays
 - 🎨 **Beautiful Customization** - Images, solid colors, or gradient backgrounds
 - 🌍 **Bilingual** - Full Hebrew and English support

@@ -190,7 +190,13 @@ export class ZmanimWrapper {
     const sedraResult = sedra.lookup(this.hdate);
     // create event so we can render it
     const event = new ParshaEvent(sedraResult);
-    return event.render(this.language);
+    const ChoolHamoed = event.desc.includes('Chol ha-Moed');
+    let desc = event.render(this.language);
+    console.log(event.desc + ' ' + ChoolHamoed);
+    if (ChoolHamoed) {
+      desc = desc.split(' ').slice(1).join(' ');
+    }
+    return desc;
   }
 
   getHftara(): string {
@@ -199,6 +205,18 @@ export class ZmanimWrapper {
       return reading.sephardic;
     }
     return reading?.haftara || '';
+  }
+
+  getMegilla(): string {
+    try {
+      //getHolidaysOnDate
+      const reading = getLeyningOnDate(this.hdate, this.il, false, this.language) as Leyning | undefined;
+      console.log(reading);
+      return reading?.megillah?.[1]?.k || '';
+    } catch (e: any) {
+      console.error(e);
+      return '';
+    }
   }
 
   getHftaraReason(): string {
@@ -268,13 +286,14 @@ export class ZmanimWrapper {
 
   getHoliday(): string[] {
     const ignoreHolidays = [
-      'Chag HaBanot',
       'Ben-Gurion Day',
+      'Chag HaBanot',
+      'Family Day',
       'Hebrew Language Day',
       'Herzl Day',
       'Jabotinsky Day',
-      'Yom HaAliyah School Observance',
       'Leil Selichot', // taken care of by isSlichotTonight
+      'Yom HaAliyah School Observance',
     ];
     const events = this.getEvents(0);
     const holidays = [];

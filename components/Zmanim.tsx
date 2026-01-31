@@ -36,14 +36,7 @@ const Zmanim: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { settings } = useSettings();
   const { width } = useWindowDimensions();
-  const heightScale = useHeightScale();
   const isSmallWidth = width < 500;
-
-  // Responsive sizes with height adjustment
-  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
-  const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const padding = Math.round(useResponsiveSpacing(12) * heightScale);
-  const margin = Math.round(useResponsiveSpacing(4) * heightScale);
 
   if (!i18n.isInitialized) {
     return (
@@ -77,6 +70,51 @@ const Zmanim: React.FC = () => {
   const textColor = 'text-gray-999';
   const haveCandleLighting = isFriday || isShabbat || zmanim.isHolidayCandleLighting();
   const fastDay = zmanim.isFastDay();
+
+  // Build InfoGroup items array to check its size
+  const dailyInfoItems = [
+    ...(zmanim.getParsha() ? [{ text: t('parasha', { date: zmanim.getParsha() }) }] : []),
+    ...(zmanim.getHoliday() ? zmanim.getHoliday().map((holiday) => ({ text: t('holiday', { date: holiday }) })) : []),
+    ...(fastDay === FastDayType.MINOR_FAST
+      ? [
+          { text: t('fast_start', { date: zmanim.getAlotHaShachar() }) },
+          { text: t('fast_end', { date: zmanim.getMinorFastEnd() }) },
+        ]
+      : []),
+    ...(fastDay === FastDayType.MAJOR_FAST
+      ? [
+          { text: t('fast_start', { date: zmanim.getSunset() }) },
+          { text: t('fast_end', { date: zmanim.getMajorFastEnd() }) },
+        ]
+      : []),
+    ...(haveCandleLighting
+      ? [
+          { text: t('light_candle', { date: zmanim.getCandleLighting() }) },
+          { text: t('havdala', { date: zmanim.getHavdala(), date2: zmanim.getHavdalaRT() }) },
+        ]
+      : []),
+    ...(zmanim.getHftara() ? [{ text: t('hftara', { date: zmanim.getHftara() }) }] : []),
+    ...(zmanim.getMegilla() ? [{ text: t('megilla', { date: zmanim.getMegilla() }) }] : []),
+    ...(zmanim.haveAlHanisim() ? [{ text: t('al_hanisim') }] : []),
+    ...(zmanim.haveYaaleVeyavo() ? [{ text: t('yaale_veyavo') }] : []),
+    ...(zmanim.getMolad() ? [{ text: t('molad', { date: zmanim.getMolad() }) }] : []),
+    ...(zmanim.getOmer() ? [{ text: t('omer', { date: zmanim.getOmer() }) }] : []),
+    ...(zmanim.isMoridHatal() ? [{ text: t('morid_hatal') }] : [{ text: t('mashiv_haruach') }]),
+    ...(zmanim.isVetenBracha() ? [{ text: t('veten_bracha') }] : [{ text: t('tal_umatar') }]),
+    ...(hallelType === HallelType.WHOLE_HALLEL ? [{ text: t('whole_hallel') }] : []),
+    ...(hallelType === HallelType.HALF_HALLEL ? [{ text: t('half_hallel') }] : []),
+    ...(haveTachanun ? [{ text: t(haveTachanun) }] : []),
+    ...(zmanim.isSlichotTonight() ? [{ text: t('slichot') }] : []),
+  ];
+
+  // Adjust heightScale based on InfoGroup items array size
+  const heightScale = useHeightScale() * (dailyInfoItems.length > 10 ? 0.8 : dailyInfoItems.length > 8 ? 0.85 : 0.95);
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
+  const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
+  const padding = Math.round(useResponsiveSpacing(12) * heightScale);
+  const margin = Math.round(useResponsiveSpacing(4) * heightScale);
 
   const InfoGroup = ({ title, items }: { title: string; items: { text: string }[] }) => (
     <View
@@ -137,51 +175,11 @@ const Zmanim: React.FC = () => {
     <ScrollView className="flex-1" contentContainerStyle={{ padding: padding / 2 }}>
       {/* Top Row */}
       <View className={isSmallWidth ? 'flex-col' : 'flex-row justify-between'} style={{ marginBottom: margin }}>
-        <InfoGroup
-          title={t('daily_info')}
-          items={[
-            ...(zmanim.getParsha() ? [{ text: t('parasha', { date: zmanim.getParsha() }) }] : []),
-            ...(zmanim.getHftara() ? [{ text: t('hftara', { date: zmanim.getHftara() }) }] : []),
-            ...(zmanim.getHoliday()
-              ? zmanim.getHoliday().map((holiday) => ({ text: t('holiday', { date: holiday }) }))
-              : []),
-            ...(zmanim.haveAlHanisim() ? [{ text: t('al_hanisim') }] : []),
-            ...(zmanim.haveYaaleVeyavo() ? [{ text: t('yaale_veyavo') }] : []),
-            ...(zmanim.getMevarchimChodesh() ? [{ text: t('mevarchim', { date: zmanim.getMevarchimChodesh() }) }] : []),
-            ...(zmanim.getMolad() ? [{ text: t('molad', { date: zmanim.getMolad() }) }] : []),
-            ...(zmanim.getOmer() ? [{ text: t('omer', { date: zmanim.getOmer() }) }] : []),
-            ...(zmanim.isMoridHatal() ? [{ text: t('morid_hatal') }] : [{ text: t('mashiv_haruach') }]),
-            ...(zmanim.isVetenBracha() ? [{ text: t('veten_bracha') }] : [{ text: t('tal_umatar') }]),
-            ...(hallelType === HallelType.WHOLE_HALLEL ? [{ text: t('whole_hallel') }] : []),
-            ...(hallelType === HallelType.HALF_HALLEL ? [{ text: t('half_hallel') }] : []),
-            ...(haveTachanun ? [{ text: t(haveTachanun) }] : []),
-            ...(zmanim.isSlichotTonight() ? [{ text: t('slichot') }] : []),
-          ]}
-        />
+        <InfoGroup title={t('daily_info')} items={dailyInfoItems} />
 
         <TimeGroup
           title={t('day_times')}
           items={[
-            ...(fastDay === FastDayType.MINOR_FAST
-              ? [
-                  { text: t('fast_start', { date: zmanim.getAlotHaShachar() }) },
-                  { text: t('fast_end', { date: zmanim.getMinorFastEnd() }) },
-                ]
-              : []),
-            ...(fastDay === FastDayType.MAJOR_FAST
-              ? [
-                  { text: t('fast_start', { date: zmanim.getSunset() }) },
-                  { text: t('fast_end', { date: zmanim.getMajorFastEnd() }) },
-                ]
-              : []),
-            ...(haveCandleLighting
-              ? [
-                  { text: t('light_candle', { date: zmanim.getCandleLighting() }) },
-                  { text: t('havdala', { date: zmanim.getHavdala() }) },
-                  { text: t('havdala_rt', { date: zmanim.getHavdalaRT() }) },
-                  null,
-                ]
-              : []),
             { text: t('shachar', { date: zmanim.getAlotHaShachar() }) },
             { text: t('mishayakir', { date: zmanim.getMisheyakir() }) },
             { text: t('netz', { date: zmanim.getNetz() }) },

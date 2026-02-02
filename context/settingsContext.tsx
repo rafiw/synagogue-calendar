@@ -162,6 +162,13 @@ const defaultSettings: Settings = {
       },
     ],
   },
+  dailyHalakhaSettings: {
+    enable: true,
+    screenDisplayTime: 10,
+    selectedBooks: ['פניני הלכה, זמנים'],
+    showRelatedHolidaysHalachot: false,
+    halakhaItemsPerDay: 3,
+  },
 };
 
 interface SettingsContextType {
@@ -313,7 +320,76 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         }
       }
 
-      const settingsToSet = finalSettings || defaultSettings;
+      // Deep merge loaded settings with default settings to ensure all fields are present
+      const mergeSettings = (loaded: any, defaults: Settings): Settings => {
+        const merged = { ...defaults };
+
+        // Merge top-level settings
+        if (loaded) {
+          Object.keys(loaded).forEach((key) => {
+            if (key === 'lastUpdateTime') {
+              merged.lastUpdateTime = new Date(loaded.lastUpdateTime);
+            } else if (key === 'githubSettings' && loaded.githubSettings) {
+              merged.githubSettings = { ...defaults.githubSettings, ...loaded.githubSettings };
+            } else if (key === 'synagogueSettings' && loaded.synagogueSettings) {
+              merged.synagogueSettings = {
+                ...defaults.synagogueSettings,
+                ...loaded.synagogueSettings,
+                backgroundSettings: {
+                  ...defaults.synagogueSettings.backgroundSettings,
+                  ...loaded.synagogueSettings?.backgroundSettings,
+                },
+              };
+            } else if (key === 'zmanimSettings' && loaded.zmanimSettings) {
+              merged.zmanimSettings = {
+                ...defaults.zmanimSettings,
+                ...loaded.zmanimSettings,
+                purimSettings: {
+                  ...defaults.zmanimSettings.purimSettings,
+                  ...loaded.zmanimSettings?.purimSettings,
+                },
+              };
+            } else if (key === 'messagesSettings' && loaded.messagesSettings) {
+              merged.messagesSettings = {
+                ...defaults.messagesSettings,
+                ...loaded.messagesSettings,
+                messages: loaded.messagesSettings.messages || defaults.messagesSettings.messages,
+              };
+            } else if (key === 'classesSettings' && loaded.classesSettings) {
+              merged.classesSettings = {
+                ...defaults.classesSettings,
+                ...loaded.classesSettings,
+                classes: loaded.classesSettings.classes || defaults.classesSettings.classes,
+              };
+            } else if (key === 'deceasedSettings' && loaded.deceasedSettings) {
+              merged.deceasedSettings = {
+                ...defaults.deceasedSettings,
+                ...loaded.deceasedSettings,
+                deceased: loaded.deceasedSettings.deceased || defaults.deceasedSettings.deceased,
+                displaySettings: {
+                  ...defaults.deceasedSettings.displaySettings,
+                  ...loaded.deceasedSettings?.displaySettings,
+                },
+              };
+            } else if (key === 'scheduleSettings' && loaded.scheduleSettings) {
+              merged.scheduleSettings = {
+                ...defaults.scheduleSettings,
+                ...loaded.scheduleSettings,
+                columns: loaded.scheduleSettings.columns || defaults.scheduleSettings.columns,
+              };
+            } else if (key === 'dailyHalakhaSettings' && loaded.dailyHalakhaSettings) {
+              merged.dailyHalakhaSettings = {
+                ...defaults.dailyHalakhaSettings,
+                ...loaded.dailyHalakhaSettings,
+                selectedBooks: loaded.dailyHalakhaSettings.selectedBooks || defaults.dailyHalakhaSettings.selectedBooks,
+              };
+            }
+          });
+        }
+        return merged;
+      };
+
+      const settingsToSet = mergeSettings(finalSettings, defaultSettings);
       // Ensure githubKey is included in settings state
       if (settingsToSet.githubSettings) {
         settingsToSet.githubSettings.githubKey = githubKey;
@@ -322,7 +398,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       latestSettings.current = settingsToSet;
 
       // Save the resolved settings to AsyncStorage (without githubKey)
-      const settingsWithoutKey = { ...settingsToSet };
+      const settingsWithoutKey: any = { ...settingsToSet };
       if (settingsWithoutKey.githubSettings) {
         const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
         settingsWithoutKey.githubSettings = githubSettingsWithoutKey;

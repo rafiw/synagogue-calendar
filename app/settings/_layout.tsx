@@ -11,11 +11,12 @@ import ClassesSettingsTab from './classes';
 import DeceasedSettingsTab from './deceased';
 import ScheduleSettingsTab from './schedule';
 import ZmanimSettingsTab from './zmanim';
+import DailyHalakhaSettingsTab from './dailyHalakha';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const Tab = createMaterialTopTabNavigator();
 
-type TabKey = 'general' | 'messages' | 'schedule' | 'classes' | 'deceased' | 'zmanim';
+type TabKey = 'general' | 'messages' | 'schedule' | 'classes' | 'deceased' | 'zmanim' | 'dailyHalakha';
 
 const TAB_COMPONENTS: Record<TabKey, React.ComponentType> = {
   general: GeneralSettingsTab,
@@ -24,6 +25,7 @@ const TAB_COMPONENTS: Record<TabKey, React.ComponentType> = {
   schedule: ScheduleSettingsTab,
   classes: ClassesSettingsTab,
   deceased: DeceasedSettingsTab,
+  dailyHalakha: DailyHalakhaSettingsTab,
 };
 
 export default function SettingsLayout() {
@@ -85,6 +87,7 @@ export default function SettingsLayout() {
     { key: 'schedule', title: t('schedule_title') },
     { key: 'classes', title: t('classes_title') },
     { key: 'deceased', title: t('deceased_title') },
+    { key: 'dailyHalakha', title: t('daily_halakha_title') },
   ];
 
   // TV/Wide screen layout: Sidebar navigation on left, content on right
@@ -170,6 +173,11 @@ export default function SettingsLayout() {
             <Tab.Screen name="schedule" component={ScheduleSettingsTab} options={{ title: t('schedule_title') }} />
             <Tab.Screen name="classes" component={ClassesSettingsTab} options={{ title: t('classes_title') }} />
             <Tab.Screen name="deceased" component={DeceasedSettingsTab} options={{ title: t('deceased_title') }} />
+            <Tab.Screen
+              name="dailyHalakha"
+              component={DailyHalakhaSettingsTab}
+              options={{ title: t('daily_halakha_title') }}
+            />
           </Tab.Navigator>
         </View>
         <View className="w-full max-w-md" style={{ padding }}>

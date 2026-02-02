@@ -204,5 +204,12 @@
   "zmanim_title": "Zmanim",
   "class_title": "Class Title",
   "class_title_placeholder": "E.g., Lesson 1, Gemara Shiur",
-  "deceased_config_help": "Configure how deceased people are displayed:\n\n- Rows & Columns: Set the grid layout (e.g., 2x3 = 6 people per page)\n- Display Mode: 'All' shows everyone, 'Monthly' shows only those who passed away in the current month\n- Default Template: Choose the visual style for entries"
+  "deceased_config_help": "Configure how deceased people are displayed:\n\n- Rows & Columns: Set the grid layout (e.g., 2x3 = 6 people per page)\n- Display Mode: 'All' shows everyone, 'Monthly' shows only those who passed away in the current month\n- Default Template: Choose the visual style for entries",
+  "daily_halakha_title": "Daily Halakha",
+  "enable_daily_halakha": "Enable daily halakha page",
+  "select_books": "Select Books",
+  "daily_halakha_no_books_selected": "No books selected. Please select books in settings.",
+  "daily_halakha_no_items_today": "No items available for today.",
+  "show_holiday_halachot_before_holidays": "Show holiday halachot before holidays",
+  "halakha_items_per_day": "Halakha per day"
 }

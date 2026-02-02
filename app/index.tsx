@@ -22,6 +22,7 @@ import { defaultPageDisplayTime, getNoScreenText } from '../utils/utils';
 import { useScreenRotation } from '../utils/useScreenRotation';
 import { Screen } from '../utils/defs';
 import Schedule from '../components/Schedule';
+import DailyHalakha from '../components/DailyHalakha';
 import { useResponsiveSpacing, useDeviceType } from '../utils/responsive';
 import BackgroundWrapper from '../components/BackgroundWrapper';
 
@@ -99,6 +100,12 @@ export default function App() {
         name: 'schedule',
         content: () => (settings.scheduleSettings.enable ? <Schedule /> : null),
         presentTime: settings.scheduleSettings.screenDisplayTime || defaultPageDisplayTime,
+      },
+      {
+        id: 6,
+        name: 'dailyHalakha',
+        content: () => (settings.dailyHalakhaSettings?.enable ? <DailyHalakha /> : null),
+        presentTime: settings.dailyHalakhaSettings?.screenDisplayTime || defaultPageDisplayTime,
       },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
   }, [settings]);

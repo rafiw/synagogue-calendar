@@ -62,6 +62,14 @@ export interface ScheduleSettings {
   columns: ScheduleColumn[];
 }
 
+export interface DailyHalakhaSettings {
+  enable: boolean;
+  screenDisplayTime: number;
+  selectedBooks: string[];
+  showRelatedHolidaysHalachot: boolean;
+  halakhaItemsPerDay: number;
+}
+
 export interface Screen {
   id: number;
   name: string;
@@ -138,6 +146,7 @@ export interface Settings {
   classesSettings: ClassSettings;
   deceasedSettings: DeceasedSettings;
   scheduleSettings: ScheduleSettings;
+  dailyHalakhaSettings: DailyHalakhaSettings;
 }
 
 export interface City {

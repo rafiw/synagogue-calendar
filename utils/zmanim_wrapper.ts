@@ -192,7 +192,6 @@ export class ZmanimWrapper {
     const event = new ParshaEvent(sedraResult);
     const ChoolHamoed = event.desc.includes('Chol ha-Moed');
     let desc = event.render(this.language);
-    console.log(event.desc + ' ' + ChoolHamoed);
     if (ChoolHamoed) {
       desc = desc.split(' ').slice(1).join(' ');
     }
@@ -211,7 +210,6 @@ export class ZmanimWrapper {
     try {
       //getHolidaysOnDate
       const reading = getLeyningOnDate(this.hdate, this.il, false, this.language) as Leyning | undefined;
-      console.log(reading);
       return reading?.megillah?.[1]?.k || '';
     } catch (e: any) {
       console.error(e);

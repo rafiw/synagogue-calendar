@@ -17,6 +17,7 @@ import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useState, useEffect } from 'react';
 import { DeceasedPerson, DeceasedSettings } from '../../utils/defs';
 import { DatePicker } from '../../components/DatePicker';
+import { NumberInput } from '../../components/NumberInput';
 import { HDate } from '@hebcal/core';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -831,57 +832,25 @@ const DeceasedSettingsTab = () => {
       {settings.deceasedSettings.enable && (
         <View className="flex-1" style={{ marginTop: margin }}>
           {/* Display Time */}
-          <View className="flex-row items-center justify-center" style={{ gap: padding }}>
-            <Text className="text-gray-600 font-medium" style={{ fontSize: labelSize }}>
-              {t('screen_display_time_description')}
-            </Text>
-            <View className="flex-row items-center" style={{ gap: smallPadding }}>
-              <TouchableOpacity
-                onPress={() => {
-                  const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
-                  const newTime = Math.max(1, currentTime - 1);
-                  updateSettings({
-                    deceasedSettings: {
-                      ...settings.deceasedSettings,
-                      screenDisplayTime: newTime,
-                    },
-                  });
-                }}
-                className="bg-gray-200 rounded-lg items-center justify-center"
-                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-              >
-                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                  -
-                </Text>
-              </TouchableOpacity>
-              <View
-                className="bg-blue-100 rounded-lg items-center justify-center"
-                style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
-              >
-                <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
-                  {settings.deceasedSettings.screenDisplayTime || 10}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  const currentTime = settings.deceasedSettings.screenDisplayTime || 10;
-                  const newTime = Math.min(60, currentTime + 1);
-                  updateSettings({
-                    deceasedSettings: {
-                      ...settings.deceasedSettings,
-                      screenDisplayTime: newTime,
-                    },
-                  });
-                }}
-                className="bg-gray-200 rounded-lg items-center justify-center"
-                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-              >
-                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                  +
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <NumberInput
+            value={settings.deceasedSettings.screenDisplayTime || 10}
+            onChange={(newTime) => {
+              updateSettings({
+                deceasedSettings: {
+                  ...settings.deceasedSettings,
+                  screenDisplayTime: newTime,
+                },
+              });
+            }}
+            min={1}
+            max={60}
+            label={t('screen_display_time_description')}
+            labelSize={labelSize}
+            textSize={textSize}
+            padding={padding}
+            smallPadding={smallPadding}
+            heightScale={heightScale}
+          />
           {/* Table Configuration */}
           <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
             <View className="flex-row justify-between items-center" style={{ marginBottom: margin }}>

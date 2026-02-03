@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { ScheduleColumn, Prayer } from 'utils/defs';
 import { showConfirm, showAlert } from 'utils/alert';
 import { isRTL } from 'utils/utils';
+import { NumberInput } from '../../components/NumberInput';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
 const ScheduleSettingsTab = () => {
@@ -268,57 +269,25 @@ const ScheduleSettingsTab = () => {
       </View>
       {settings.scheduleSettings.enable && (
         <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
-          <View className="flex-row items-center justify-center" style={{ gap: padding }}>
-            <Text className="text-gray-600" style={{ fontSize: labelSize }}>
-              {t('screen_display_time_description')}
-            </Text>
-            <View className="flex-row items-center" style={{ gap: smallPadding }}>
-              <TouchableOpacity
-                onPress={() => {
-                  const currentTime = settings.scheduleSettings.screenDisplayTime || 10;
-                  const newTime = Math.max(1, currentTime - 1);
-                  updateSettings({
-                    scheduleSettings: {
-                      ...settings.scheduleSettings,
-                      screenDisplayTime: newTime,
-                    },
-                  });
-                }}
-                className="bg-gray-200 rounded-lg items-center justify-center"
-                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-              >
-                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                  -
-                </Text>
-              </TouchableOpacity>
-              <View
-                className="bg-blue-100 rounded-lg items-center justify-center"
-                style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
-              >
-                <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
-                  {settings.scheduleSettings.screenDisplayTime || 10}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  const currentTime = settings.scheduleSettings.screenDisplayTime || 10;
-                  const newTime = Math.min(60, currentTime + 1);
-                  updateSettings({
-                    scheduleSettings: {
-                      ...settings.scheduleSettings,
-                      screenDisplayTime: newTime,
-                    },
-                  });
-                }}
-                className="bg-gray-200 rounded-lg items-center justify-center"
-                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-              >
-                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                  +
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <NumberInput
+            value={settings.scheduleSettings.screenDisplayTime || 10}
+            onChange={(newTime) => {
+              updateSettings({
+                scheduleSettings: {
+                  ...settings.scheduleSettings,
+                  screenDisplayTime: newTime,
+                },
+              });
+            }}
+            min={1}
+            max={60}
+            label={t('screen_display_time_description')}
+            labelSize={labelSize}
+            textSize={textSize}
+            padding={padding}
+            smallPadding={smallPadding}
+            heightScale={heightScale}
+          />
         </View>
       )}
 

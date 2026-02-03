@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { View, Text, ActivityIndicator, TouchableOpacity, TextInput, FlatList } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { DatePicker } from '../../components/DatePicker';
+import { NumberInput } from '../../components/NumberInput';
 import { Message } from 'utils/defs';
 import { isMessageExpired, isMessageScheduled } from 'utils/classesHelpers';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
@@ -94,57 +95,25 @@ const MessagesSettingsTab = () => {
       </View>
       {settings.messagesSettings.enable && (
         <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
-          <View className="flex-row items-center justify-center" style={{ gap: padding }}>
-            <Text className="text-gray-600" style={{ fontSize: labelSize }}>
-              {t('screen_display_time_description')}
-            </Text>
-            <View className="flex-row items-center" style={{ gap: smallPadding }}>
-              <TouchableOpacity
-                onPress={() => {
-                  const currentTime = settings.messagesSettings.screenDisplayTime || 10;
-                  const newTime = Math.max(1, currentTime - 1);
-                  updateSettings({
-                    messagesSettings: {
-                      ...settings.messagesSettings,
-                      screenDisplayTime: newTime,
-                    },
-                  });
-                }}
-                className="bg-gray-200 rounded-lg items-center justify-center"
-                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-              >
-                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                  -
-                </Text>
-              </TouchableOpacity>
-              <View
-                className="bg-blue-100 rounded-lg items-center justify-center"
-                style={{ paddingHorizontal: padding, paddingVertical: smallPadding, minWidth: 50 * heightScale }}
-              >
-                <Text className="text-blue-900 font-bold" style={{ fontSize: textSize }}>
-                  {settings.messagesSettings.screenDisplayTime || 10}
-                </Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => {
-                  const currentTime = settings.messagesSettings.screenDisplayTime || 10;
-                  const newTime = Math.min(60, currentTime + 1);
-                  updateSettings({
-                    messagesSettings: {
-                      ...settings.messagesSettings,
-                      screenDisplayTime: newTime,
-                    },
-                  });
-                }}
-                className="bg-gray-200 rounded-lg items-center justify-center"
-                style={{ padding: smallPadding, width: 32 * heightScale, height: 32 * heightScale }}
-              >
-                <Text className="text-gray-700 font-bold" style={{ fontSize: textSize }}>
-                  +
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          <NumberInput
+            value={settings.messagesSettings.screenDisplayTime || 10}
+            onChange={(newTime) => {
+              updateSettings({
+                messagesSettings: {
+                  ...settings.messagesSettings,
+                  screenDisplayTime: newTime,
+                },
+              });
+            }}
+            min={1}
+            max={60}
+            label={t('screen_display_time_description')}
+            labelSize={labelSize}
+            textSize={textSize}
+            padding={padding}
+            smallPadding={smallPadding}
+            heightScale={heightScale}
+          />
         </View>
       )}
 

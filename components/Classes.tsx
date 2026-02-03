@@ -58,6 +58,11 @@ const Classes: React.FC = () => {
     const startIndex = currentPage * classesPerPage;
     return settings.classesSettings.classes.slice(startIndex, startIndex + classesPerPage);
   };
+
+  const hasLocation = settings.classesSettings.classes.some(
+    (c) => c?.location && typeof c.location === 'string' && c.location.trim() !== '',
+  );
+
   const header = [
     <Text
       key="day"
@@ -88,6 +93,19 @@ const Classes: React.FC = () => {
       {t('subject')}
     </Text>,
   ];
+
+  if (hasLocation) {
+    header.push(
+      <Text
+        key="location"
+        className="flex-1 text-center font-black text-white uppercase tracking-wide"
+        style={{ fontSize: headerSize, padding }}
+      >
+        {t('location')}
+      </Text>,
+    );
+  }
+
   if (isRTL2(settings.synagogueSettings.language)) {
     header.reverse();
   }
@@ -148,6 +166,18 @@ const Classes: React.FC = () => {
                   {classItem.subject}
                 </Text>,
               ];
+
+              if (hasLocation) {
+                rowData.push(
+                  <Text
+                    key={`${classItem.id}_location`}
+                    className="flex-1 text-center font-bold text-gray-900"
+                    style={{ fontSize: textSize, padding }}
+                  >
+                    {classItem?.location || ''}
+                  </Text>,
+                );
+              }
 
               if (isRTL2(settings.synagogueSettings.language)) {
                 rowData.reverse();

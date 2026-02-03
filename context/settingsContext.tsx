@@ -356,10 +356,21 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 messages: loaded.messagesSettings.messages || defaults.messagesSettings.messages,
               };
             } else if (key === 'classesSettings' && loaded.classesSettings) {
+              // Normalize classes to ensure backward compatibility - ensure location field exists
+              const normalizedClasses = (loaded.classesSettings.classes || defaults.classesSettings.classes).map(
+                (cls: any) => ({
+                  ...cls,
+                  // Ensure location is either a non-empty string or undefined (for backward compatibility)
+                  location:
+                    cls.location && typeof cls.location === 'string' && cls.location.trim() !== ''
+                      ? cls.location.trim()
+                      : undefined,
+                }),
+              );
               merged.classesSettings = {
                 ...defaults.classesSettings,
                 ...loaded.classesSettings,
-                classes: loaded.classesSettings.classes || defaults.classesSettings.classes,
+                classes: normalizedClasses,
               };
             } else if (key === 'deceasedSettings' && loaded.deceasedSettings) {
               merged.deceasedSettings = {

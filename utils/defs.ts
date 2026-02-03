@@ -8,6 +8,7 @@ export interface Class {
   tutor: string;
   subject: string;
   title?: string;
+  location?: string;
 }
 
 export interface ClassSettings {

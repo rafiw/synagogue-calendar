@@ -192,7 +192,7 @@ const ClassesSettingsTab = () => {
         </TouchableOpacity>
       </View>
       <View style={{ gap: padding }}>
-        {/* Days of the week selection */}
+        {/* Day */}
         <View>
           <Text
             className="text-gray-600 text-center font-medium"
@@ -228,6 +228,7 @@ const ClassesSettingsTab = () => {
           </View>
         </View>
 
+        {/* Time */}
         <View style={{ gap: smallPadding }}>
           <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
             <View className="flex-1">
@@ -275,7 +276,7 @@ const ClassesSettingsTab = () => {
             ) : null;
           })()}
         </View>
-
+        {/* Tutor */}
         <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
           <View className="flex-1">
             <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
@@ -290,7 +291,7 @@ const ClassesSettingsTab = () => {
               textAlign={rtl ? 'right' : 'left'}
             />
           </View>
-
+          {/* Subject */}
           <View className="flex-1">
             <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
               {t('subject')}
@@ -304,6 +305,20 @@ const ClassesSettingsTab = () => {
               textAlign={rtl ? 'right' : 'left'}
             />
           </View>
+        </View>
+        {/* Location */}
+        <View>
+          <Text className="text-gray-600 text-center" style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}>
+            {t('location')}
+          </Text>
+          <TextInput
+            value={item.location || ''}
+            onChangeText={(value) => handleUpdateClass(index, 'location', value)}
+            className="border border-gray-300 rounded-md text-center"
+            style={{ padding: smallPadding, fontSize: textSize }}
+            placeholder={t('location')}
+            textAlign={rtl ? 'right' : 'left'}
+          />
         </View>
       </View>
     </View>

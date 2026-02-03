@@ -146,16 +146,31 @@ const DailyHalakha: React.FC = () => {
   // During holiday periods, show items sequentially based on day number
   let todayItems: string[] = [];
   const itemsPerDay = settings.dailyHalakhaSettings?.halakhaItemsPerDay || 3;
+  const getItemsForIndex = (startIndex: number): string[] => {
+    if (items.length === 0) return [];
+    const normalizedStart = startIndex % items.length;
+    const normalizedEnd = (startIndex + itemsPerDay) % items.length;
+    if (normalizedEnd > normalizedStart) {
+      // No wrap around: simple slice
+      return items.slice(normalizedStart, normalizedEnd);
+    } else if (normalizedEnd === 0) {
+      // Exact wrap: take from start to end of array
+      return items.slice(normalizedStart);
+    } else {
+      // Wrap around: take from start to end, then from beginning
+      return [...items.slice(normalizedStart), ...items.slice(0, normalizedEnd)];
+    }
+  };
   if (holidayType !== null) {
     // Calculate which items to show based on the day number in the holiday period
     // Day 1 shows items 0-1, Day 2 shows items 2-3, etc.
     const startIndex = (holidayInfo.dayNumber - 1) * itemsPerDay;
-    todayItems = items.slice(startIndex, startIndex + itemsPerDay);
+    todayItems = getItemsForIndex(startIndex);
   } else {
     // Regular mode: use day-based indexing
     const dayNumber = calculateDayNumber();
     const startIndex = (dayNumber - 1) * itemsPerDay;
-    todayItems = items.slice(startIndex, startIndex + itemsPerDay);
+    todayItems = getItemsForIndex(startIndex);
   }
 
   if (items.length === 0) {

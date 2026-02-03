@@ -93,6 +93,16 @@ const DailyHalakhaSettingsTab = () => {
         <View className="flex-1" style={{ marginTop: margin }}>
           <View style={{ padding }}>
             <View style={{ gap: margin }}>
+              {/* Disclaimer about LLM-generated content */}
+              <View
+                className="border border-yellow-300 rounded-lg bg-yellow-50"
+                style={{ padding: padding, marginBottom: margin }}
+              >
+                <Text className="text-gray-700" style={{ fontSize: textSize * 0.9, lineHeight: textSize * 1.3 }}>
+                  {t('daily_halakha_llm_disclaimer')}
+                </Text>
+              </View>
+
               {/* Show Holiday Halachot Before Holidays and Screen Display Time in same row */}
               <View className="flex-row items-center justify-center" style={{ gap: padding }}>
                 <BouncyCheckbox

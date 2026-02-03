@@ -211,5 +211,6 @@
   "daily_halakha_no_books_selected": "No books selected. Please select books in settings.",
   "daily_halakha_no_items_today": "No items available for today.",
   "show_holiday_halachot_before_holidays": "Show holiday halachot before holidays",
-  "halakha_items_per_day": "Halakha per day"
+  "halakha_items_per_day": "Halakha per day",
+  "daily_halakha_llm_disclaimer": "Note: The halachot displayed in this feature are based on an LLM summary of raw text. There may be mistakes or typos in the content. Users should verify important halachic information from authoritative sources."
 }

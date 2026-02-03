@@ -211,5 +211,6 @@
   "daily_halakha_no_books_selected": "לא נבחרו ספרים. אנא בחר ספרים בהגדרות.",
   "daily_halakha_no_items_today": "אין פריטים זמינים להיום.",
   "show_holiday_halachot_before_holidays": "הצג הלכות חגים לפני החגים",
-  "halakha_items_per_day": "הלכות ליום"
+  "halakha_items_per_day": "הלכות ליום",
+  "daily_halakha_llm_disclaimer": "הערה: ההלכות המוצגות בתכונה זו מבוססות על סיכום של בינה מלאכותית מטקסט גולמי. עלולות להיות שגיאות או טעויות כתיב בתוכן. על המשתמשים לאמת מידע הלכתי חשוב ממקורות מהימנים."
 }

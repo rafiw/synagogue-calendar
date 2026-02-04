@@ -383,10 +383,23 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 },
               };
             } else if (key === 'scheduleSettings' && loaded.scheduleSettings) {
+              // Normalize prayers to ensure backward compatibility - ensure timeType and offsetMinutes fields exist
+              const normalizedColumns = (loaded.scheduleSettings.columns || defaults.scheduleSettings.columns).map(
+                (column: any) => ({
+                  ...column,
+                  prayers: (column.prayers || []).map((prayer: any) => ({
+                    ...prayer,
+                    // Ensure timeType defaults to 'time' if not present (for backward compatibility)
+                    timeType: prayer.timeType || 'time',
+                    // offsetMinutes can be undefined for old prayers (only needed for sunrise/sunset offsets)
+                    offsetMinutes: prayer.offsetMinutes !== undefined ? prayer.offsetMinutes : undefined,
+                  })),
+                }),
+              );
               merged.scheduleSettings = {
                 ...defaults.scheduleSettings,
                 ...loaded.scheduleSettings,
-                columns: loaded.scheduleSettings.columns || defaults.scheduleSettings.columns,
+                columns: normalizedColumns,
               };
             } else if (key === 'dailyHalakhaSettings' && loaded.dailyHalakhaSettings) {
               merged.dailyHalakhaSettings = {

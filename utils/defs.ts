@@ -45,10 +45,14 @@ export interface DeceasedSettings {
   displaySettings: DeceasedDisplaySettings;
 }
 
+export type PrayerTimeType = 'time' | 'sunrise_offset' | 'sunset_offset';
+
 export interface Prayer {
   id: string;
   name: string;
-  time: string;
+  time: string; // For backward compatibility and direct time entry
+  timeType?: PrayerTimeType; // Defaults to 'time' if not specified
+  offsetMinutes?: number; // Offset in minutes (positive or negative) for sunrise/sunset offsets
 }
 
 export interface ScheduleColumn {

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View, useWindowDimensions } from 'react-native';
 import { isRTL } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { getPrayerDisplayTime } from 'utils/scheduleHelpers';
 
 export async function getSubPages(): Promise<number> {
   return Promise.resolve(1);
@@ -111,7 +112,7 @@ const Schedule: React.FC = () => {
           <InfoGroup
             key={column.id}
             title={column.title}
-            items={column.prayers.map((p) => ({ name: p.name, time: p.time }))}
+            items={column.prayers.map((p) => ({ name: p.name, time: getPrayerDisplayTime(p, settings) }))}
             rtl={rtl}
           />
         ))}

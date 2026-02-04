@@ -165,7 +165,7 @@ export default function SettingsLayout() {
         </Text>
       </View>
       <View className="flex-1 items-center">
-        <View className="w-full max-w-2xl flex-1">
+        <View className="w-full max-w-3xl flex-1">
           <Tab.Navigator>
             <Tab.Screen name="general" component={GeneralSettingsTab} options={{ title: t('general_title') }} />
             <Tab.Screen name="zmanim" component={ZmanimSettingsTab} options={{ title: t('zmanim_title') }} />

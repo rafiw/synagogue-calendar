@@ -65,6 +65,7 @@ const DailyHalakha: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
   const [items, setItems] = useState<string[]>([]);
+  const [idxPairsName, setIdxPairsName] = useState<[number, number, string][]>([]);
   const [loading, setLoading] = useState(true);
   const heightScale = useHeightScale();
 
@@ -88,45 +89,41 @@ const DailyHalakha: React.FC = () => {
 
         // Filter items by selected books and merge sections
         // Note: When in holiday period, always include holiday sections regardless of book selection
-        const allSections: string[] = [];
-
-        // If we're in a holiday period, always include holiday sections (ignore book selection)
+        let allSections: string[] = [];
+        // Ranges [start, end, bookName] for section indices (end is exclusive)
+        const sectionRanges: [number, number, string][] = [];
+        let sectionIdx = 0;
         if (holidayType !== null) {
           (dailyHalakhaData as HalakhaItem[]).forEach((item) => {
-            // Show only sections matching the holiday type, regardless of selected books
             if (item.holiday === holidayType) {
-              item.sections.forEach((section) => {
-                if (section.trim()) {
-                  allSections.push(section);
-                }
-              });
+              const filtered = item.sections.filter((s) => s.trim());
+              allSections = allSections.concat(filtered);
+              sectionRanges.push([sectionIdx, sectionIdx + filtered.length, item.book_title]);
+              sectionIdx += filtered.length;
             }
           });
         } else {
-          // Regular mode: require book selection and show only non-holiday sections
           if (selectedBooks.length === 0) {
             setItems([]);
+            setIdxPairsName([]);
             setLoading(false);
             return;
           }
           (dailyHalakhaData as HalakhaItem[]).forEach((item) => {
             if (selectedBooks.includes(item.book_title)) {
-              if (!item.holiday || item.holiday === '') {
-                item.sections.forEach((section) => {
-                  if (section.trim()) {
-                    allSections.push(section);
-                  }
-                });
-              }
+              const filtered = item.sections.filter((s) => s.trim());
+              allSections = allSections.concat(filtered);
+              sectionRanges.push([sectionIdx, sectionIdx + filtered.length, item.book_title.replace(/,/g, '')]);
+              sectionIdx += filtered.length;
             }
           });
         }
-
-        setItems(allSections);
+        setIdxPairsName(sectionRanges);
         setItems(allSections);
       } catch (error) {
         console.error('Error loading daily halakha:', error);
         setItems([]);
+        setIdxPairsName([]);
       } finally {
         setLoading(false);
       }
@@ -161,16 +158,38 @@ const DailyHalakha: React.FC = () => {
       return [...items.slice(normalizedStart), ...items.slice(0, normalizedEnd)];
     }
   };
+  const getHeadersIdxForRange = (startIndex: number, itemsCount: number): [number, string][] => {
+    const headers: string[] = [];
+    for (let i = startIndex; i < startIndex + itemsCount; i++) {
+      const idx = i % items.length;
+      let found = false;
+      for (const [start, end, name] of idxPairsName) {
+        if (idx >= start && idx < end) {
+          headers.push(headers.includes(name) ? '' : name);
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        headers.push('');
+      }
+    }
+    return headers.map((name, idx) => [idx, name]);
+  };
+
+  let headersIdx: [number, string][] = [];
   if (holidayType !== null) {
     // Calculate which items to show based on the day number in the holiday period
     // Day 1 shows items 0-1, Day 2 shows items 2-3, etc.
     const startIndex = (holidayInfo.dayNumber - 1) * itemsPerDay;
     todayItems = getItemsForIndex(startIndex);
+    headersIdx = getHeadersIdxForRange(startIndex % items.length, itemsPerDay);
   } else {
     // Regular mode: use day-based indexing
     const dayNumber = calculateDayNumber();
     const startIndex = (dayNumber - 1) * itemsPerDay;
     todayItems = getItemsForIndex(startIndex);
+    headersIdx = getHeadersIdxForRange(startIndex % items.length, itemsPerDay);
   }
 
   if (items.length === 0) {
@@ -192,19 +211,29 @@ const DailyHalakha: React.FC = () => {
       </View>
     );
   }
-
   return (
     <View className="flex-1" style={{ padding: padding / 2 }}>
       <View className="flex-1" style={{ padding: itemPadding }}>
         {todayItems.map((item, index) => (
-          <View
-            key={index}
-            className={`${backgroundColor} rounded-2xl shadow-lg border border-gray-200`}
-            style={{ padding, marginBottom: margin, marginTop: margin }}
-          >
-            <Text className={`${textColor} text-center`} style={{ fontSize: textSize, lineHeight: textSize * 1.5 }}>
-              {item}
-            </Text>
+          <View key={index}>
+            <View className="flex-row items-center justify-center">
+              {headersIdx[index] && headersIdx[index][1] !== '' && (
+                <Text
+                  className={`${textColor} text-center`}
+                  style={{ fontSize: textSize, lineHeight: textSize * 1.5, fontWeight: 'bold' }}
+                >
+                  {headersIdx[index][1]}
+                </Text>
+              )}
+            </View>
+            <View
+              className={`${backgroundColor} rounded-2xl shadow-lg border border-gray-200`}
+              style={{ padding, marginBottom: margin, marginTop: margin }}
+            >
+              <Text className={`${textColor} text-center`} style={{ fontSize: textSize, lineHeight: textSize * 1.5 }}>
+                {item}
+              </Text>
+            </View>
           </View>
         ))}
       </View>

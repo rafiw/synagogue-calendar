@@ -38,16 +38,15 @@ const HelpSection = () => {
   const imageHeight = Math.round(160 * heightScale);
 
   return (
-    <View style={{ marginBottom: margin }}>
+    <View>
       <TouchableOpacity
         onPress={() => setIsExpanded(!isExpanded)}
         className="flex-row items-center justify-between bg-blue-50 rounded-lg"
-        style={{ padding: smallPadding * 1.5 }}
       >
         <Text className="text-blue-600 font-medium" style={{ fontSize: textSize }}>
           {t('setup_help')}
         </Text>
-        <Feather name={isExpanded ? 'chevron-up' : 'chevron-down'} size={iconSize} color="#2563eb" />
+        <Feather name={isExpanded ? 'chevron-down' : 'chevron-left'} size={iconSize} color="#2563eb" />
       </TouchableOpacity>
 
       {/* eslint-disable @typescript-eslint/no-require-imports */}
@@ -489,7 +488,7 @@ const GeneralSettingsTab = () => {
               </View>
             </View>
           </View>
-          {/* <HelpSection /> */}
+          <HelpSection />
           {/* gist sha512 */}
           <View style={{ gap: smallPadding }}>
             <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>

@@ -21,7 +21,6 @@ import { NumberInput } from '../../components/NumberInput';
 import { HDate } from '@hebcal/core';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import ExternalLink from '../../utils/PressableLink';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 
@@ -1032,28 +1031,6 @@ const DeceasedSettingsTab = () => {
                 </View>
               </View>
             </View>
-          </View>
-
-          {/* Image Upload API Key */}
-          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
-            <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding }}>
-              <Text className="font-bold" style={{ fontSize: titleSize }}>
-                {t('imgbb_api_key')}
-              </Text>
-              <ExternalLink url="https://api.imgbb.com/" label={t('imgbb_get_key')} />
-            </View>
-            <Text className="text-gray-500" style={{ fontSize: smallTextSize, marginBottom: smallPadding * 1.5 }}>
-              {t('imgbb_api_key_description')}
-            </Text>
-            <TextInput
-              className="border border-gray-300 rounded-lg"
-              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-              placeholder={t('imgbb_api_key_placeholder')}
-              value={settings.deceasedSettings.imgbbApiKey || ''}
-              onChangeText={(value) => updateDeceasedSettings({ imgbbApiKey: value })}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
           </View>
 
           {/* Deceased People List */}

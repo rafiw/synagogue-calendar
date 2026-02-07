@@ -527,6 +527,31 @@ const GeneralSettingsTab = () => {
               secureTextEntry={true}
             />
           </View>
+
+          {/* Image Upload API Key (imgbb) - used e.g. by deceased images */}
+          <View className="bg-white rounded-lg shadow-sm" style={{ padding }}>
+            <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding }}>
+              <Text className="font-bold text-gray-600" style={{ fontSize: labelSize }}>
+                {t('imgbb_api_key')}
+              </Text>
+              <ExternalLink url="https://api.imgbb.com/" label={t('imgbb_get_key')} />
+            </View>
+            <Text className="text-gray-500" style={{ fontSize: labelSize, marginBottom: smallPadding * 1.5 }}>
+              {t('imgbb_api_key_description')}
+            </Text>
+            <TextInput
+              className="border border-gray-300 rounded-lg bg-gray-50"
+              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+              placeholder={t('imgbb_api_key_placeholder')}
+              value={settings.deceasedSettings.imgbbApiKey || ''}
+              onChangeText={(value) =>
+                void updateSettings({ deceasedSettings: { ...settings.deceasedSettings, imgbbApiKey: value } })
+              }
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
           {/* background */}
           <View style={{ gap: margin }}>
             <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>

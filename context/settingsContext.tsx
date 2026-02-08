@@ -488,24 +488,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           currentSettings.githubSettings.githubKey,
           currentSettings.githubSettings.gistFileName,
         );
-        if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
-          // Add githubKey from encrypted storage
-          const githubKey = await getSecureGithubKey();
-          const settingsWithKey = { ...remoteSettings };
-          if (settingsWithKey.githubSettings) {
-            settingsWithKey.githubSettings.githubKey = githubKey;
-          }
-
-          setSettings(settingsWithKey);
-          latestSettings.current = settingsWithKey;
-
-          // Store without githubKey in AsyncStorage
-          const settingsWithoutKey = { ...settingsWithKey };
-          if (settingsWithoutKey.githubSettings) {
-            const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
-            settingsWithoutKey.githubSettings = githubSettingsWithoutKey;
-          }
-          await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
+        if (remoteSettings && shouldPreferRemote(currentSettings, remoteSettings)) {
+          await applyRemoteSettings(remoteSettings);
         }
       })();
     }, REMOTE_UPDATE_INTERVAL);
@@ -545,28 +529,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               currentSettings.githubSettings.gistFileName,
             );
 
-            const remoteIsNewer =
-              remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime);
+            const preferRemote = remoteSettings && shouldPreferRemote(currentSettings, remoteSettings);
 
-            if (remoteIsNewer) {
+            if (preferRemote) {
               // Remote has newer data -- pull it (supersedes any pending push)
-              const githubKey = await getSecureGithubKey();
-              const settingsWithKey = { ...remoteSettings };
-              if (settingsWithKey.githubSettings) {
-                settingsWithKey.githubSettings.githubKey = githubKey;
-              }
-
-              setSettings(settingsWithKey);
-              latestSettings.current = settingsWithKey;
+              await applyRemoteSettings(remoteSettings);
               pendingRemoteSync.current = false;
-
-              // Store without githubKey in AsyncStorage
-              const settingsWithoutKey = { ...settingsWithKey };
-              if (settingsWithoutKey.githubSettings) {
-                const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
-                settingsWithoutKey.githubSettings = githubSettingsWithoutKey;
-              }
-              await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
               console.log('Settings refreshed from remote after reconnection');
             } else if (pendingRemoteSync.current) {
               // Local is newer and we have a pending push -- retry it
@@ -601,6 +569,34 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     hasPendingEdits.current = true;
   };
 
+  const shouldPreferRemote = (local: Settings, remote: Settings): boolean => {
+    const localIsDefault = local.synagogueSettings.name === defaultName || !local.synagogueSettings.name;
+    const remoteHasName = remote.synagogueSettings?.name && remote.synagogueSettings.name !== defaultName;
+
+    if (localIsDefault && remoteHasName) return true;
+
+    return new Date(remote.lastUpdateTime) > new Date(local.lastUpdateTime);
+  };
+
+  const applyRemoteSettings = async (remoteSettings: Settings) => {
+    const githubKey = await getSecureGithubKey();
+    const settingsWithKey = { ...remoteSettings };
+    if (settingsWithKey.githubSettings) {
+      settingsWithKey.githubSettings.githubKey = githubKey;
+    }
+
+    setSettings(settingsWithKey);
+    latestSettings.current = settingsWithKey;
+
+    // Store without githubKey in AsyncStorage
+    const settingsWithoutKey = { ...settingsWithKey };
+    if (settingsWithoutKey.githubSettings) {
+      const { githubKey: _, ...rest } = settingsWithoutKey.githubSettings;
+      settingsWithoutKey.githubSettings = rest as any;
+    }
+    await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
+  };
+
   const saveSettings = async () => {
     try {
       const current = latestSettings.current;
@@ -620,10 +616,23 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
       hasPendingEdits.current = false;
 
-      // Push to remote gist immediately
+      // Sync with remote gist
       if (current.githubSettings.gistId) {
-        const success = await updateRemoteSettings(current);
-        pendingRemoteSync.current = !success;
+        const remoteSettings = await fetchRemoteSettings(
+          current.githubSettings.gistId,
+          current.githubSettings.githubKey,
+          current.githubSettings.gistFileName,
+        );
+
+        if (remoteSettings && shouldPreferRemote(current, remoteSettings)) {
+          // Remote is preferred -- pull it
+          await applyRemoteSettings(remoteSettings);
+          pendingRemoteSync.current = false;
+        } else {
+          // Local is preferred -- push it
+          const success = await updateRemoteSettings(current);
+          pendingRemoteSync.current = !success;
+        }
       }
     } catch (error) {
       console.error('Error saving settings:', error);

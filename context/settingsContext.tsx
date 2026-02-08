@@ -98,8 +98,8 @@ const defaultSettings: Settings = {
     deceased: [],
     imgbbApiKey: '',
     displaySettings: {
-      tableRows: 3,
-      tableColumns: 2,
+      tableRows: 2,
+      tableColumns: 3,
       displayMode: 'all',
       defaultTemplate: 'simple',
     },

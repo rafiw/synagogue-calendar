@@ -392,7 +392,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
           <Text className="text-gray-600" style={{ fontSize: smallLabelSize }}>
             {t('deceased_date_of_birth')} ({t('hebrew')}) <Text className="text-gray-400">({t('optional')})</Text>
           </Text>
-          {dateOfBirth && (
+          {!!dateOfBirth && (
             <TouchableOpacity
               onPress={() => {
                 const hebrewDate = convertToHebrewDate(dateOfBirth);
@@ -434,7 +434,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
           <Text className="text-gray-600" style={{ fontSize: smallLabelSize }}>
             {t('deceased_date_of_death')} ({t('hebrew')}) <Text className="text-gray-400">({t('optional')})</Text>
           </Text>
-          {dateOfDeath && (
+          {!!dateOfDeath && (
             <TouchableOpacity
               onPress={() => {
                 const hebrewDate = convertToHebrewDate(dateOfDeath);

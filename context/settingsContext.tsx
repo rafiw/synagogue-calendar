@@ -238,8 +238,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const gist = await response.json();
-      const requiredKeys = ['lastUpdateTime', 'name', 'language']; // Add your required keys
-
+      const requiredKeys = ['lastUpdateTime', 'synagogueSettings', 'zmanimSettings'];
       for (const filename of Object.keys(gist.files)) {
         try {
           if (filename !== gistFileName) continue;

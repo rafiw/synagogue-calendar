@@ -1,13 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  ScrollView,
-  ActivityIndicator,
-  TouchableOpacity,
-  useWindowDimensions,
-} from 'react-native';
+import { View, Text, TextInput, ActivityIndicator, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useSettings } from '../../context/settingsContext';
 import { cities, olsons } from '../../assets/data';
@@ -21,9 +13,6 @@ const ZmanimSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t } = useTranslation();
   const { height } = useWindowDimensions();
-  const [latitude, setLatitude] = useState(settings.zmanimSettings.latitude.toString());
-  const [longitude, setLongitude] = useState(settings.zmanimSettings.longitude.toString());
-  const [elevation, setElevation] = useState(settings.zmanimSettings.elevation?.toString() || '0');
   const [selectedLocation, setSelectedLocation] = useState(cities[0]!.name);
   const [olson, setOlson] = useState(settings.zmanimSettings.olson);
   const [purimSettings, setPurimSettings] = useState(
@@ -54,25 +43,15 @@ const ZmanimSettingsTab = () => {
 
   const handleCityChange = (city: string) => {
     const chosen_city = cities.find((x) => x.name === city || x.hebrew_name === city) || cities[0]!;
-    setLatitude(chosen_city.latitude.toString());
-    setLongitude(chosen_city.longitude.toString());
     setSelectedLocation(city);
-    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, city: city } });
-  };
-
-  const handleLatitudeChange = (latitude: string) => {
-    setLatitude(latitude);
-    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, latitude: Number(latitude) } });
-  };
-
-  const handleLongitudeChange = (longitude: string) => {
-    setLongitude(longitude);
-    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, longitude: Number(longitude) } });
-  };
-
-  const handleElevationChange = (elevation: string) => {
-    setElevation(elevation);
-    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, elevation: Number(elevation) } });
+    updateSettings({
+      zmanimSettings: {
+        ...settings.zmanimSettings,
+        city,
+        latitude: chosen_city.latitude,
+        longitude: chosen_city.longitude,
+      },
+    });
   };
 
   const handleOlsonChange = (olson: string) => {
@@ -231,8 +210,10 @@ const ZmanimSettingsTab = () => {
                     <TextInput
                       className="w-full border border-gray-300 rounded-lg bg-gray-50"
                       style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                      value={latitude}
-                      onChangeText={handleLatitudeChange}
+                      value={settings.zmanimSettings.latitude.toString()}
+                      onChangeText={(v) =>
+                        updateSettings({ zmanimSettings: { ...settings.zmanimSettings, latitude: Number(v) } })
+                      }
                       keyboardType="numeric"
                       placeholder="Enter latitude"
                     />
@@ -244,8 +225,10 @@ const ZmanimSettingsTab = () => {
                     <TextInput
                       className="w-full border border-gray-300 rounded-lg bg-gray-50"
                       style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                      value={longitude}
-                      onChangeText={handleLongitudeChange}
+                      value={settings.zmanimSettings.longitude.toString()}
+                      onChangeText={(v) =>
+                        updateSettings({ zmanimSettings: { ...settings.zmanimSettings, longitude: Number(v) } })
+                      }
                       keyboardType="numeric"
                       placeholder="Enter longitude"
                     />
@@ -259,8 +242,10 @@ const ZmanimSettingsTab = () => {
                   <TextInput
                     className="w-full border border-gray-300 rounded-lg bg-gray-50"
                     style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                    value={elevation}
-                    onChangeText={handleElevationChange}
+                    value={settings.zmanimSettings.elevation?.toString() || '0'}
+                    onChangeText={(v) =>
+                      updateSettings({ zmanimSettings: { ...settings.zmanimSettings, elevation: Number(v) } })
+                    }
                     keyboardType="numeric"
                     placeholder="0"
                   />

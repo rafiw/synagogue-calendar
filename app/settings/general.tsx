@@ -161,10 +161,6 @@ const GeneralSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
   const { height } = useWindowDimensions();
-  const [gistId, setGistId] = useState(settings.githubSettings.gistId);
-  const [githubKeyUrl, setGithubKeyUrl] = useState(settings.githubSettings.githubKey);
-  // const [gistFileName, setGistFileName] = useState(settings.githubSettings.gistFileName);
-  const [synagogueName, setSynagogueName] = useState(settings.synagogueSettings.name);
   const [background, setBackground] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
   const [rtl, setRtl] = useState(false);
   const heightScale = useHeightScale() * 0.5;
@@ -215,26 +211,6 @@ const GeneralSettingsTab = () => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [editingColorIndex, setEditingColorIndex] = useState<number | null>(null);
   const [tempColor, setTempColor] = useState('#E3F2FD');
-
-  const handleSynagogueName = (synagogueName: string) => {
-    setSynagogueName(synagogueName);
-    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, name: synagogueName } });
-  };
-
-  const handleGistId = (gistId: string) => {
-    setGistId(gistId);
-    updateSettings({ githubSettings: { ...settings.githubSettings, gistId: gistId } });
-  };
-
-  // const handleGistFileName = (gistFileName: string) => {
-  //   setGistFileName(gistFileName);
-  //   updateSettings({ githubSettings: { ...settings.githubSettings, gistFileName: gistFileName } });
-  // };
-
-  const handleGithubKey = (githubKey: string) => {
-    setGithubKeyUrl(githubKey);
-    updateSettings({ githubSettings: { ...settings.githubSettings, githubKey: githubKey } });
-  };
 
   const handleChangeLanguage = async (newLanguage: 'he' | 'en') => {
     updateSettings({ synagogueSettings: { ...settings.synagogueSettings, language: newLanguage } });
@@ -447,8 +423,8 @@ const GeneralSettingsTab = () => {
             <TextInput
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-              value={synagogueName}
-              onChangeText={handleSynagogueName}
+              value={settings.synagogueSettings.name}
+              onChangeText={(name) => updateSettings({ synagogueSettings: { ...settings.synagogueSettings, name } })}
               placeholder="Enter Synagogue Name"
             />
           </View>
@@ -497,8 +473,8 @@ const GeneralSettingsTab = () => {
             <TextInput
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-              value={gistId}
-              onChangeText={handleGistId}
+              value={settings.githubSettings.gistId}
+              onChangeText={(gistId) => updateSettings({ githubSettings: { ...settings.githubSettings, gistId } })}
             />
           </View>
           {/* gistFileName */}
@@ -522,8 +498,10 @@ const GeneralSettingsTab = () => {
             <TextInput
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-              value={githubKeyUrl}
-              onChangeText={handleGithubKey}
+              value={settings.githubSettings.githubKey}
+              onChangeText={(githubKey) =>
+                updateSettings({ githubSettings: { ...settings.githubSettings, githubKey } })
+              }
               secureTextEntry={true}
             />
           </View>
@@ -545,7 +523,7 @@ const GeneralSettingsTab = () => {
               placeholder={t('imgbb_api_key_placeholder')}
               value={settings.deceasedSettings.imgbbApiKey || ''}
               onChangeText={(value) =>
-                void updateSettings({ deceasedSettings: { ...settings.deceasedSettings, imgbbApiKey: value } })
+                updateSettings({ deceasedSettings: { ...settings.deceasedSettings, imgbbApiKey: value } })
               }
               autoCapitalize="none"
               autoCorrect={false}

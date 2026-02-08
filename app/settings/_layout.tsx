@@ -29,7 +29,7 @@ const TAB_COMPONENTS: Record<TabKey, React.ComponentType> = {
 };
 
 export default function SettingsLayout() {
-  const { isLoading } = useSettings();
+  const { isLoading, saveSettings } = useSettings();
   const { t } = useTranslation();
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('general');
@@ -49,6 +49,7 @@ export default function SettingsLayout() {
   const isTVLayout = height < 700 && width > height;
 
   const handleSave = useCallback(() => {
+    void saveSettings();
     setSettingsSaved(true);
     fadeAnim.setValue(0);
 
@@ -70,7 +71,7 @@ export default function SettingsLayout() {
       setSettingsSaved(false);
       router.navigate('/');
     });
-  }, [fadeAnim]);
+  }, [fadeAnim, saveSettings]);
 
   if (isLoading) {
     return (

@@ -174,8 +174,8 @@ const defaultSettings: Settings = {
 interface SettingsContextType {
   settings: Settings;
   isLoading: boolean;
-  updateSettings: (newSettings: Partial<Settings>) => Promise<void>;
-  refreshSettings: () => Promise<void>;
+  updateSettings: (newSettings: Partial<Settings>) => void;
+  saveSettings: () => Promise<void>;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -221,9 +221,9 @@ const setSecureGithubKey = async (key: string): Promise<void> => {
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
-  const updateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const hasUnsavedChanges = useRef(false);
   const latestSettings = useRef(settings);
+  const pendingRemoteSync = useRef(false);
+  const hasPendingEdits = useRef(false);
 
   const fetchRemoteSettings = async (gistId: string, key: string, gistFileName: string) => {
     if (!gistId || gistId.length <= 5) return null;
@@ -420,6 +420,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
       setSettings(settingsToSet);
       latestSettings.current = settingsToSet;
+      hasPendingEdits.current = false;
 
       // Save the resolved settings to AsyncStorage (without githubKey)
       const settingsWithoutKey: any = { ...settingsToSet };
@@ -478,6 +479,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!settings.githubSettings.gistId) return;
 
     const interval = setInterval(() => {
+      // Don't pull remote updates while user has unsaved edits
+      if (hasPendingEdits.current) return;
+
       void (async () => {
         const currentSettings = latestSettings.current;
         const remoteSettings = await fetchRemoteSettings(
@@ -509,13 +513,6 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
     return () => {
       clearInterval(interval);
-      // Handle any pending updates
-      if (updateTimer.current) {
-        clearTimeout(updateTimer.current);
-        if (hasUnsavedChanges.current) {
-          updateRemoteSettings(latestSettings.current);
-        }
-      }
     };
   }, [settings.githubSettings.gistId]);
 
@@ -532,16 +529,28 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!wasConnected && isConnected) {
         console.log('Internet connection restored, refreshing settings...');
 
-        // Fetch and update remote settings
-        const currentSettings = latestSettings.current;
-        fetchRemoteSettings(
-          currentSettings.githubSettings.gistId,
-          currentSettings.githubSettings.githubKey,
-          currentSettings.githubSettings.gistFileName,
-        )
-          .then(async (remoteSettings) => {
-            if (remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime)) {
-              // Add githubKey from encrypted storage
+        // Don't sync while user has unsaved in-memory edits
+        if (hasPendingEdits.current) {
+          wasConnected = isConnected;
+          return;
+        }
+
+        void (async () => {
+          try {
+            const currentSettings = latestSettings.current;
+
+            // Fetch remote first to check for newer data
+            const remoteSettings = await fetchRemoteSettings(
+              currentSettings.githubSettings.gistId,
+              currentSettings.githubSettings.githubKey,
+              currentSettings.githubSettings.gistFileName,
+            );
+
+            const remoteIsNewer =
+              remoteSettings && new Date(remoteSettings.lastUpdateTime) > new Date(currentSettings.lastUpdateTime);
+
+            if (remoteIsNewer) {
+              // Remote has newer data -- pull it (supersedes any pending push)
               const githubKey = await getSecureGithubKey();
               const settingsWithKey = { ...remoteSettings };
               if (settingsWithKey.githubSettings) {
@@ -550,6 +559,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
               setSettings(settingsWithKey);
               latestSettings.current = settingsWithKey;
+              pendingRemoteSync.current = false;
 
               // Store without githubKey in AsyncStorage
               const settingsWithoutKey = { ...settingsWithKey };
@@ -559,11 +569,18 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               }
               await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
               console.log('Settings refreshed from remote after reconnection');
+            } else if (pendingRemoteSync.current) {
+              // Local is newer and we have a pending push -- retry it
+              const success = await updateRemoteSettings(currentSettings);
+              if (success) {
+                pendingRemoteSync.current = false;
+                console.log('Pending remote sync completed after reconnection');
+              }
             }
-          })
-          .catch((error) => {
-            console.error('Error refreshing settings after reconnection:', error);
-          });
+          } catch (error) {
+            console.error('Error syncing settings after reconnection:', error);
+          }
+        })();
       }
 
       wasConnected = isConnected;
@@ -574,57 +591,41 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, [settings.githubSettings.gistId]);
 
-  useEffect(() => {
-    // Cleanup function to clear any existing timer
-    return () => {
-      if (updateTimer.current) {
-        clearTimeout(updateTimer.current);
-        updateTimer.current = null;
-      }
+  const updateSettings = (newSettings: Partial<Settings>) => {
+    const updatedSettings = {
+      ...latestSettings.current,
+      ...newSettings,
+      lastUpdateTime: new Date(),
     };
-  }, []);
+    setSettings(updatedSettings);
+    latestSettings.current = updatedSettings;
+    hasPendingEdits.current = true;
+  };
 
-  const updateSettings = async (newSettings: Partial<Settings>) => {
+  const saveSettings = async () => {
     try {
-      const updatedSettings = {
-        ...settings,
-        ...newSettings,
-        lastUpdateTime: new Date(),
-      };
+      const current = latestSettings.current;
 
-      // If githubKey is being updated, store it in encrypted storage
-      if (newSettings.githubSettings?.githubKey) {
-        await setSecureGithubKey(newSettings.githubSettings.githubKey);
+      // Store githubKey in encrypted storage
+      if (current.githubSettings?.githubKey) {
+        await setSecureGithubKey(current.githubSettings.githubKey);
       }
 
-      // Remove githubKey from settings before storing in AsyncStorage
-      const settingsWithoutKey = { ...updatedSettings };
+      // Remove githubKey before storing in AsyncStorage
+      const settingsWithoutKey = { ...current };
       if (settingsWithoutKey.githubSettings) {
-        const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
-        settingsWithoutKey.githubSettings = githubSettingsWithoutKey as any;
+        const { githubKey: _, ...rest } = settingsWithoutKey.githubSettings;
+        settingsWithoutKey.githubSettings = rest as any;
       }
 
       await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
-      setSettings(updatedSettings);
-      latestSettings.current = updatedSettings;
-      hasUnsavedChanges.current = true;
+      hasPendingEdits.current = false;
 
-      // Clear any existing timer
-      if (updateTimer.current) {
-        clearTimeout(updateTimer.current);
+      // Push to remote gist immediately
+      if (current.githubSettings.gistId) {
+        const success = await updateRemoteSettings(current);
+        pendingRemoteSync.current = !success;
       }
-
-      // Create new timer
-      updateTimer.current = setTimeout(() => {
-        void (async () => {
-          if (hasUnsavedChanges.current && latestSettings.current.githubSettings.gistId) {
-            const success = await updateRemoteSettings(latestSettings.current);
-            if (success) {
-              hasUnsavedChanges.current = false;
-            }
-          }
-        })();
-      }, REMOTE_UPDATE_INTERVAL);
     } catch (error) {
       console.error('Error saving settings:', error);
       throw error;
@@ -632,7 +633,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, isLoading, refreshSettings: loadSettings }}>
+    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, isLoading }}>
       {children}
     </SettingsContext.Provider>
   );

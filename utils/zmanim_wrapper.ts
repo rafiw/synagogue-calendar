@@ -103,6 +103,7 @@ export class ZmanimWrapper {
     };
     return HebrewCalendar.calendar(options);
   }
+
   getSunrise(): string {
     const sunrise = this.zmanim.sunrise();
     return `${sunrise.getHours()}:${sunrise.getMinutes().toString().padStart(2, '0')}`;
@@ -293,6 +294,7 @@ export class ZmanimWrapper {
       'Leil Selichot', // taken care of by isSlichotTonight
       'Yom HaAliyah School Observance',
     ];
+
     const events = this.getEvents(0);
     const holidays = [];
     for (const ev of events) {
@@ -301,6 +303,15 @@ export class ZmanimWrapper {
           continue;
         }
         holidays.push(ev.render(this.language));
+      }
+    }
+    // on friday display special shabbat
+    const tommorowHolidays = getHolidaysOnDate(this.hdate.next(), this.il);
+    if (tommorowHolidays) {
+      for (const ev of tommorowHolidays) {
+        if (ev instanceof HolidayEvent) {
+          if (ev.getFlags() & flags.SPECIAL_SHABBAT) holidays.push(ev.render(this.language));
+        }
       }
     }
     return holidays;

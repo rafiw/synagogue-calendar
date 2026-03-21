@@ -7,18 +7,18 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { defaultPageDisplayTime } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
-import { Message } from 'utils/defs';
+import { Message, Settings } from 'utils/defs';
 import { isMessageActive, filterActiveMessages } from 'utils/classesHelpers';
 
 const messagesPerPage = 3.0;
 
 export async function getSubPages(): Promise<number> {
   const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
-  if (!localSettings?.messages) return 0;
+  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
+  if (!localSettings?.messagesSettings?.enable || !localSettings?.messagesSettings?.messages) return 0;
 
   // Filter to only count active messages
-  const activeMessages = localSettings.messages.filter((msg: Message) => isMessageActive(msg));
+  const activeMessages = localSettings.messagesSettings.messages.filter((msg: Message) => isMessageActive(msg));
   return Math.ceil(activeMessages.length / messagesPerPage);
 }
 

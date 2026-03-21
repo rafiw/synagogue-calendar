@@ -5,14 +5,14 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { daysOfWeek } from 'utils/classesHelpers';
-import { Class } from 'utils/defs';
+import { Class, Settings } from 'utils/defs';
 import { defaultPageDisplayTime, isRTL2 } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useResponsiveIconSize } from 'utils/responsive';
 
 const classesPerPage = 3.0;
 export async function getSubPages(): Promise<number> {
   const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
+  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
   if (!localSettings?.classesSettings?.classes) return 0;
   return Math.ceil(localSettings.classesSettings.classes.length / classesPerPage);
 }

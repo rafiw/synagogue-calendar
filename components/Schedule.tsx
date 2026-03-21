@@ -6,10 +6,6 @@ import { isRTL } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 import { getPrayerDisplayTime } from 'utils/scheduleHelpers';
 
-export async function getSubPages(): Promise<number> {
-  return Promise.resolve(1);
-}
-
 const Schedule: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();

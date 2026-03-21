@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Text, View, Image, TouchableOpacity } from 'react-native';
 import { useSettings } from '../context/settingsContext';
-import { DeceasedPerson, DeceasedSettings } from '../utils/defs';
+import { DeceasedPerson, Settings } from '../utils/defs';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import MemorialCandle from './MemorialCandle';
@@ -13,8 +13,8 @@ import { useFontScale, useHeightScale } from 'utils/responsive';
 // Export function to calculate sub-pages for timing in index.tsx
 export async function getSubPages(): Promise<number> {
   const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
-  if (!localSettings?.deceasedSettings) return 0;
+  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
+  if (!localSettings?.deceasedSettings?.deceased) return 0;
 
   return Math.max(0, calculateDeceasedPages(localSettings.deceasedSettings).totalPages);
 }

@@ -31,13 +31,13 @@ const Messages: React.FC = () => {
   const heightScale = useHeightScale();
 
   // Responsive sizes with height adjustment
-  const titleSize = Math.round(useResponsiveFontSize('displayLarge') * heightScale);
-  const messageSize = Math.round(useResponsiveFontSize('headingLarge') * heightScale);
+  const titleSize = Math.round(useResponsiveFontSize('displayLarge') * heightScale) * 0.6;
+  const messageSize = Math.round(useResponsiveFontSize('headingLarge') * heightScale) * 0.9;
   const emptyTitleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
   const emptyDescSize = Math.round(useResponsiveFontSize('bodyLarge') * heightScale);
   const buttonTextSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const iconSize = Math.round(useResponsiveIconSize('large') * heightScale);
-  const iconLargeSize = Math.round(useResponsiveIconSize('xxlarge') * heightScale);
+  const iconSize = Math.round(useResponsiveIconSize('large') * heightScale) * 0.6;
+  const iconLargeSize = Math.round(useResponsiveIconSize('xxlarge') * heightScale) * 0.8;
   const padding = Math.round(useResponsiveSpacing(24) * heightScale);
   const margin = Math.round(useResponsiveSpacing(24) * heightScale);
 

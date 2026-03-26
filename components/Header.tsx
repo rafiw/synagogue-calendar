@@ -44,6 +44,10 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const timeSize = Math.round(useResponsiveFontSize(isMobileOrTablet ? 'headingMedium' : 'headingLarge') * heightScale);
   const iconSize = Math.round((useResponsiveIconSize('small') * heightScale) / 2.0);
   const padding = Math.round(useResponsiveSpacing(6) * heightScale);
+  // Reduced padding for mobile to save vertical space, with height scaling
+  const containerPaddingX = Math.round((isMobileOrTablet ? 12 : 24) * heightScale) * 0.5;
+  const containerPaddingY = Math.round((isMobileOrTablet ? 8 : 20) * heightScale) * 0.5;
+  const borderRadiusSize = Math.round((isMobileOrTablet ? 16 : 24) * heightScale) * 0.5;
 
   const zmanim = new ZmanimWrapper(
     settings.synagogueSettings.nusach,
@@ -92,11 +96,6 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   const displayElements = isRTL ? [...elements].reverse() : elements;
   const style1 = isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left';
-
-  // Reduced padding for mobile to save vertical space, with height scaling
-  const containerPaddingX = Math.round((isMobileOrTablet ? 12 : 24) * heightScale);
-  const containerPaddingY = Math.round((isMobileOrTablet ? 8 : 20) * heightScale);
-  const borderRadiusSize = Math.round((isMobileOrTablet ? 16 : 24) * heightScale);
 
   return (
     <View

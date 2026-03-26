@@ -15,7 +15,8 @@ const Schedule: React.FC = () => {
   const isSmallHeight = width < 500;
 
   // Responsive sizes
-  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
+  const mainTitleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale) * 0.9;
+  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale) * 0.8;
   const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
   const padding = Math.round(useResponsiveSpacing(12) * heightScale);
   const margin = Math.round(useResponsiveSpacing(4) * heightScale);
@@ -51,16 +52,15 @@ const Schedule: React.FC = () => {
           {items.map((item, index) => (
             <View
               key={index}
-              className="bg-white/60 rounded-xl shadow-sm border border-gray-200"
+              className="bg-white/60 rounded-xl shadow-sm border border-gray-500"
               style={{ paddingHorizontal: itemPadding, paddingVertical: itemPadding, marginBottom: margin }}
             >
-              <View className={`flex-row justify-between gap-4 flex-row ${rtl ? 'space-x-reverse' : ''}`}>
-                <Text className={`${textColor} font-semibold flex-1`} style={{ fontSize: textSize }}>
+              <View className={`flex-row justify-center gap-4 ${rtl ? 'space-x-reverse' : ''}`}>
+                <Text className={`${textColor} font-semibold`} style={{ fontSize: textSize }}>
                   {item.name}
                 </Text>
                 <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
-                  {' '}
-                  -{' '}
+                  -
                 </Text>
                 <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
                   {item.time}
@@ -97,7 +97,7 @@ const Schedule: React.FC = () => {
       {/* Headline */}
       {columnsWithPrayers.length > 0 && (
         <View style={{ marginBottom: padding }}>
-          <Text className={`${headLineColor} font-bold text-center`} style={{ fontSize: titleSize }}>
+          <Text className={`${headLineColor} font-bold text-center`} style={{ fontSize: mainTitleSize }}>
             {t('schedule_title')}
           </Text>
         </View>
@@ -115,7 +115,7 @@ const Schedule: React.FC = () => {
       </View>
       {columnsWithPrayers.length === 0 && (
         <View className="flex-1 justify-center items-center">
-          <Text className="text-gray-500 text-center" style={{ fontSize: titleSize }}>
+          <Text className="text-gray-500 text-center" style={{ fontSize: mainTitleSize }}>
             {t('schedule_no_prayers')}
           </Text>
         </View>

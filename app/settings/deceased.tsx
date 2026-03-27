@@ -74,14 +74,15 @@ interface UploadResult {
   deleteUrl: string;
 }
 
-const uploadImageToImgbb = async (imageUri: string, apiKey: string): Promise<UploadResult | null> => {
+const uploadImageToImgbb = async (
+  imageUri: string,
+  apiKey: string,
+  t: (key: string) => string,
+): Promise<UploadResult | null> => {
   const effectiveApiKey = apiKey || DEFAULT_IMGBB_API_KEY;
 
   if (!effectiveApiKey) {
-    showAlert(
-      'Configuration Required',
-      'Please add your imgbb API key in settings to enable image uploads. Get a free key at https://api.imgbb.com/',
-    );
+    showAlert(t('imgbb_config_required'), t('imgbb_config_required_msg'));
     return null;
   }
 
@@ -210,7 +211,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
 
       if (!result.canceled && result.assets[0]) {
         setIsUploading(true);
-        const uploadResult = await uploadImageToImgbb(result.assets[0].uri, imgbbApiKey);
+        const uploadResult = await uploadImageToImgbb(result.assets[0].uri, imgbbApiKey, t);
         setIsUploading(false);
 
         if (uploadResult) {
@@ -792,17 +793,17 @@ const DeceasedSettingsTab = () => {
       const parsedPeople = parseCSV(csvText);
 
       if (parsedPeople.length === 0) {
-        showAlert(t('error'), 'No valid data found in CSV file');
+        showAlert(t('error'), t('csv_no_valid_data'));
         return;
       }
 
       const updatedDeceased = [...settings.deceasedSettings.deceased, ...(parsedPeople as DeceasedPerson[])];
       updateDeceasedSettings({ deceased: updatedDeceased });
 
-      showAlert('Success', `Imported ${parsedPeople.length} people from CSV`);
+      showAlert(t('success'), t('csv_imported_count', { count: parsedPeople.length }));
     } catch (error) {
       console.error('Error importing CSV:', error);
-      showAlert(t('error'), 'Failed to import CSV file');
+      showAlert(t('error'), t('csv_import_failed'));
     }
   };
 

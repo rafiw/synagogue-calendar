@@ -167,7 +167,17 @@ export default function SettingsLayout() {
       </View>
       <View className="flex-1 items-center">
         <View className="w-full max-w-3xl flex-1">
-          <Tab.Navigator>
+          <Tab.Navigator
+            initialRouteName={activeTab}
+            screenListeners={{
+              state: (e: any) => {
+                const route = e.data?.state?.routes?.[e.data?.state?.index];
+                if (route?.name && route.name !== activeTab) {
+                  setActiveTab(route.name as TabKey);
+                }
+              },
+            }}
+          >
             <Tab.Screen name="general" component={GeneralSettingsTab} options={{ title: t('general_title') }} />
             <Tab.Screen name="zmanim" component={ZmanimSettingsTab} options={{ title: t('zmanim_title') }} />
             <Tab.Screen name="messages" component={MessagesSettingsTab} options={{ title: t('messages_title') }} />

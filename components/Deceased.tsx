@@ -8,7 +8,7 @@ import MemorialCandle from './MemorialCandle';
 import { isRTL2 } from 'utils/utils';
 import { calculateDeceasedPages } from 'utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFontScale, useHeightScale } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useFontScale } from 'utils/responsive';
 
 // Export function to calculate sub-pages for timing in index.tsx
 export async function getSubPages(): Promise<number> {
@@ -47,12 +47,7 @@ interface DeceasedCellProps {
 
 const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSize }) => {
   const { settings } = useSettings();
-  const { t } = useTranslation();
   const isRightToLeft = isRTL2(settings.synagogueSettings.language);
-
-  // Gender-appropriate labels (default to male if not specified)
-  const bornLabel = person.isMale !== false ? t('deceased_born_male') : t('deceased_born_female');
-  const diedLabel = person.isMale !== false ? t('deceased_died_male') : t('deceased_died_female');
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -65,36 +60,36 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
 
   const renderSimpleTemplate = (isRightToLeft: boolean) => (
     <View className="flex-1 rounded-xl overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900 shadow-lg border border-amber-600/30">
-      {/* Decorative top border */}
-      <View className="h-1 bg-amber-600" />
-
-      {/* Content */}
-      <View className="flex-1 justify-center items-center p-3">
-        <MemorialCandle size={candleSize.simple} />
-        <Text className="text-amber-100 font-bold text-center tracking-wide mt-3" style={{ fontSize: fontSize.name }}>
-          {person.name}
-        </Text>
-        <View className="w-10 h-0.5 bg-amber-600/50 my-2" />
-        {(person.dateOfBirth || person.dateOfDeath) && (
-          <Text className="text-slate-300 text-center" style={{ fontSize: fontSize.date }}>
-            {person.dateOfBirth ? formatDate(person.dateOfBirth) : '-'} -{' '}
-            {person.dateOfDeath ? formatDate(person.dateOfDeath) : '-'}
+      <View className="flex-1 flex-row">
+        <View className="justify-center items-center px-2">
+          <MemorialCandle size={candleSize.simple} />
+        </View>
+        <View className="flex-1 justify-center items-center p-3">
+          <Text className="text-amber-100 font-bold text-center tracking-wide" style={{ fontSize: fontSize.name }}>
+            {person.name}
           </Text>
-        )}
-        {(person.hebrewDateOfBirth || person.hebrewDateOfDeath) && (
-          <Text className="text-amber-200/80 text-center mt-1 font-medium" style={{ fontSize: fontSize.hebrew }}>
-            {person.hebrewDateOfBirth || '-'} - {person.hebrewDateOfDeath || '-'}
+          <View className="w-10 h-0.5 bg-amber-600/50 my-2" />
+          {(person.dateOfBirth || person.dateOfDeath) && (
+            <Text className="text-slate-300 text-center" style={{ fontSize: fontSize.date }}>
+              {person.dateOfBirth ? formatDate(person.dateOfBirth) : '-'} -{' '}
+              {person.dateOfDeath ? formatDate(person.dateOfDeath) : '-'}
+            </Text>
+          )}
+          {(person.hebrewDateOfBirth || person.hebrewDateOfDeath) && (
+            <Text className="text-amber-200/80 text-center mt-1 font-medium" style={{ fontSize: fontSize.hebrew }}>
+              {person.hebrewDateOfBirth || '-'} - {person.hebrewDateOfDeath || '-'}
+            </Text>
+          )}
+          {person.tribute && (
+            <Text className="text-slate-300 text-center mt-2 italic px-2" style={{ fontSize: fontSize.tribute }}>
+              "{person.tribute}"
+            </Text>
+          )}
+          <View className="w-6 h-0.5 bg-amber-600/30 my-2" />
+          <Text className="text-amber-500 italic" style={{ fontSize: fontSize.footer }}>
+            ת.נ.צ.ב.ה
           </Text>
-        )}
-        {person.tribute && (
-          <Text className="text-slate-300 text-center mt-2 italic px-2" style={{ fontSize: fontSize.tribute }}>
-            "{person.tribute}"
-          </Text>
-        )}
-        <View className="w-6 h-0.5 bg-amber-600/30 my-2" />
-        <Text className="text-amber-500 italic" style={{ fontSize: fontSize.footer }}>
-          ת.נ.צ.ב.ה
-        </Text>
+        </View>
       </View>
     </View>
   );
@@ -121,13 +116,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
             {(person.dateOfBirth || person.hebrewDateOfBirth) && (
               <View className={`flex-row ${isRightToLeft ? 'flex-row-reverse' : 'flex-row'} items-center`}>
                 <Text
-                  className={`text-amber-400 ${isRightToLeft ? 'mr-1' : 'ml-1'}`}
-                  style={{ fontSize: fontSize.label }}
-                >
-                  {bornLabel}:
-                </Text>
-                <Text
-                  className={`text-slate-300 ${isRightToLeft ? 'mr-1' : 'ml-1'}`}
+                  className={`text-slate-300 ${isRightToLeft ? 'm-1' : 'ml-1'}`}
                   style={{ fontSize: fontSize.dateSmall }}
                 >
                   {person.dateOfBirth ? formatDate(person.dateOfBirth) : '-'}
@@ -137,12 +126,6 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
             )}
             {(person.dateOfDeath || person.hebrewDateOfDeath) && (
               <View className={`flex-row ${isRightToLeft ? 'flex-row-reverse' : 'flex-row'} items-center mt-1`}>
-                <Text
-                  className={`text-amber-400 ${isRightToLeft ? 'ml-1' : 'mr-1'}`}
-                  style={{ fontSize: fontSize.label }}
-                >
-                  {diedLabel}:
-                </Text>
                 <Text
                   className={`text-slate-300 ${isRightToLeft ? 'ml-1' : 'mr-1'}`}
                   style={{ fontSize: fontSize.dateSmall }}
@@ -174,53 +157,62 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
   );
 
   const renderPhotoTemplate = (isRightToLeft: boolean) => (
-    <View className="flex-1 flex-row rounded-xl overflow-hidden bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg border border-amber-600/30">
-      {/* Photo section - left side */}
-      <View className="w-2/5 p-2">
-        <View className="flex-1 rounded-lg overflow-hidden border-2 border-amber-600/50 shadow-md">
-          {person.photo ? (
-            <Image source={{ uri: person.photo }} className="w-full h-full" resizeMode="cover" />
-          ) : (
-            <View className="flex-1 bg-slate-700 justify-center items-center">
-              <MemorialCandle size={candleSize.photoPlaceholder} />
-            </View>
-          )}
+    <View className="flex-1 rounded-xl overflow-hidden bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg border border-amber-600/30">
+      <View className="flex-1 flex-row">
+        {/* Photo section */}
+        <View className="w-1/3 p-2">
+          <View className="flex-1 rounded-lg overflow-hidden border-2 border-amber-600/50 shadow-md">
+            {person.photo ? (
+              <Image source={{ uri: person.photo }} className="w-full h-full" resizeMode="cover" />
+            ) : (
+              <View className="flex-1 bg-slate-700 justify-center items-center">
+                <MemorialCandle size={candleSize.photoPlaceholder} />
+              </View>
+            )}
+          </View>
         </View>
-      </View>
 
-      {/* Memorial info section - right side */}
-      <View className="flex-1 justify-center items-center p-3 border-l border-amber-600/20">
-        <Text className="text-amber-100 font-bold text-center tracking-wide" style={{ fontSize: fontSize.namePhoto }}>
-          {person.name}
-        </Text>
-        <View className="w-12 h-0.5 bg-amber-600/50 my-3" />
-        <View className="items-center">
-          {(person.dateOfBirth || person.dateOfDeath) && (
-            <Text className="text-slate-300 text-center" style={{ fontSize: fontSize.date }}>
-              {person.dateOfBirth || '-'} - {person.dateOfDeath || '-'}
+        {/* Memorial info + candle section */}
+        <View className="flex-1 p-2">
+          <View className="flex-1 justify-center items-center">
+            <Text
+              className="text-amber-100 font-bold text-center tracking-wide"
+              style={{ fontSize: fontSize.namePhoto }}
+            >
+              {person.name}
             </Text>
-          )}
-          {(person.hebrewDateOfBirth || person.hebrewDateOfDeath) && (
-            <Text className="text-amber-200/80 text-center mt-2 font-medium" style={{ fontSize: fontSize.hebrew }}>
-              {person.hebrewDateOfBirth || '-'} - {person.hebrewDateOfDeath || '-'}
-            </Text>
-          )}
-        </View>
-        {person.tribute && (
-          <>
-            <View className="w-8 h-0.5 bg-amber-600/30 my-2" />
-            <Text className="text-slate-300 text-center italic px-2" style={{ fontSize: fontSize.tribute }}>
-              "{person.tribute}"
-            </Text>
-          </>
-        )}
-        <View className="w-8 h-0.5 bg-amber-600/30 my-2" />
-        <View className="flex-row items-center">
-          <MemorialCandle size={candleSize.photoFooter} />
-          <Text className="text-amber-500 italic mx-2" style={{ fontSize: fontSize.footer }}>
-            ת.נ.צ.ב.ה
-          </Text>
-          <MemorialCandle size={candleSize.photoFooter} />
+            <View className="w-12 h-0.5 bg-amber-600/50 my-2" />
+            <View className="items-center">
+              {(person.dateOfBirth || person.dateOfDeath) && (
+                <Text className="text-slate-300 text-center" style={{ fontSize: fontSize.date }}>
+                  {person.dateOfBirth || '-'} - {person.dateOfDeath || '-'}
+                </Text>
+              )}
+              {(person.hebrewDateOfBirth || person.hebrewDateOfDeath) && (
+                <Text className="text-amber-200/80 text-center mt-1 font-medium" style={{ fontSize: fontSize.hebrew }}>
+                  {person.hebrewDateOfBirth || '-'} - {person.hebrewDateOfDeath || '-'}
+                </Text>
+              )}
+            </View>
+            {person.tribute && (
+              <>
+                <View className="w-8 h-0.5 bg-amber-600/30 my-1" />
+                <Text className="text-slate-300 text-center italic px-2" style={{ fontSize: fontSize.tribute }}>
+                  "{person.tribute}"
+                </Text>
+              </>
+            )}
+          </View>
+          {/* Footer */}
+          <View className="flex-row items-center">
+            <View style={{ width: candleSize.photoFooter }} />
+            <View className="flex-1 items-center">
+              <Text className="text-amber-500 italic" style={{ fontSize: fontSize.footer }}>
+                ת.נ.צ.ב.ה
+              </Text>
+            </View>
+            <MemorialCandle size={candleSize.photoFooter} />
+          </View>
         </View>
       </View>
     </View>
@@ -239,57 +231,20 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
   }
 };
 
-// Helper function to calculate sizes based on grid and device type
-const calculateSizes = (gridRows: number, gridCols: number, deviceScale: number) => {
-  const totalCells = gridRows * gridCols;
-  const gridScaleFactor =
-    totalCells === 1
-      ? 2.5
-      : totalCells <= 2
-        ? 2
-        : totalCells <= 4
-          ? 1.8
-          : totalCells <= 6
-            ? 1.6
-            : totalCells <= 8
-              ? 1.5
-              : totalCells <= 10
-                ? 1.4
-                : totalCells <= 12
-                  ? 1.3
-                  : totalCells <= 14
-                    ? 1.2
-                    : totalCells <= 16
-                      ? 1.1
-                      : totalCells <= 18
-                        ? 1.0
-                        : totalCells <= 20
-                          ? 0.9
-                          : 0.8;
-
-  // Combine grid scaling with device scaling
-  const combinedScale = gridScaleFactor * deviceScale;
-
-  const fontSize: FontSizes = {
-    name: 18 * combinedScale,
-    nameCard: 16 * combinedScale,
-    namePhoto: 20 * combinedScale,
-    date: 12 * combinedScale,
-    dateSmall: 11 * combinedScale,
-    hebrew: 12 * combinedScale,
-    tribute: 11 * combinedScale,
-    footer: 12 * combinedScale,
-    label: 11 * combinedScale,
-  };
-
-  const candleSize: CandleSizes = {
-    simple: Math.round(40 * combinedScale),
-    card: Math.round(35 * combinedScale),
-    photoPlaceholder: Math.round(60 * combinedScale),
-    photoFooter: Math.round(30 * combinedScale),
-  };
-
-  return { fontSize, candleSize };
+const getGridScaleFactor = (totalCells: number): number => {
+  console.log('totalCells', totalCells);
+  if (totalCells === 1) return 2.5;
+  if (totalCells <= 2) return 2;
+  if (totalCells <= 4) return 1.8;
+  if (totalCells <= 6) return 1.6;
+  if (totalCells <= 8) return 1.5;
+  if (totalCells <= 10) return 1.4;
+  if (totalCells <= 12) return 1.3;
+  if (totalCells <= 14) return 1.2;
+  if (totalCells <= 16) return 1.1;
+  if (totalCells <= 18) return 1.0;
+  if (totalCells <= 20) return 0.9;
+  return 0.8;
 };
 
 const Deceased: React.FC = () => {
@@ -298,17 +253,57 @@ const Deceased: React.FC = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  // Get device-specific font scale
-  const deviceScale = useFontScale();
   const heightScale = useHeightScale();
+  const fontScale = useFontScale();
 
-  // Calculate sizes once based on grid configuration and device type
+  // Responsive font sizes (device-aware)
+  const responsiveName = useResponsiveFontSize('headingSmall');
+  const responsiveNameCard = useResponsiveFontSize('bodyLarge');
+  const responsiveNamePhoto = useResponsiveFontSize('headingMedium');
+  const responsiveDate = useResponsiveFontSize('bodySmall');
+  const responsiveSmallText = useResponsiveFontSize('labelMedium');
+  const responsiveContainerPadding = useResponsiveSpacing(10);
+  const responsiveEmptyPadding = useResponsiveSpacing(12);
+
   const tableRowsCount = settings.deceasedSettings?.displaySettings?.tableRows || 1;
   const tableColumnsCount = settings.deceasedSettings?.displaySettings?.tableColumns || 1;
-  const { fontSize, candleSize } = useMemo(
-    () => calculateSizes(tableRowsCount, tableColumnsCount, deviceScale * heightScale),
-    [tableRowsCount, tableColumnsCount, deviceScale, heightScale],
-  );
+
+  const { fontSize, candleSize } = useMemo(() => {
+    const gridScale = getGridScaleFactor(tableRowsCount * tableColumnsCount);
+    const tableScale = gridScale * heightScale;
+
+    const fontSize: FontSizes = {
+      name: Math.round(responsiveName * tableScale),
+      nameCard: Math.round(responsiveNameCard * tableScale),
+      namePhoto: Math.round(responsiveNamePhoto * tableScale),
+      date: Math.round(responsiveDate * tableScale),
+      dateSmall: Math.round(responsiveSmallText * tableScale),
+      hebrew: Math.round(responsiveDate * tableScale),
+      tribute: Math.round(responsiveSmallText * tableScale),
+      footer: Math.round(responsiveDate * tableScale),
+      label: Math.round(responsiveSmallText * tableScale),
+    };
+
+    const candleScale = gridScale * fontScale * heightScale;
+    const candleSize: CandleSizes = {
+      simple: Math.round(40 * candleScale),
+      card: Math.round(35 * candleScale),
+      photoPlaceholder: Math.round(60 * candleScale),
+      photoFooter: Math.round(30 * candleScale),
+    };
+
+    return { fontSize, candleSize };
+  }, [
+    tableRowsCount,
+    tableColumnsCount,
+    heightScale,
+    fontScale,
+    responsiveName,
+    responsiveNameCard,
+    responsiveNamePhoto,
+    responsiveDate,
+    responsiveSmallText,
+  ]);
 
   // Filter deceased based on display mode (using Hebrew calendar)
   const { filteredDeceased, totalPages } = useMemo(() => {
@@ -331,12 +326,10 @@ const Deceased: React.FC = () => {
     return () => clearInterval(interval);
   }, [totalPages]);
 
-  const combinedScale = deviceScale * heightScale;
-
   if (settings.deceasedSettings.deceased.length === 0) {
-    const emptyTextSize = 18 * combinedScale;
-    const emptyButtonSize = 16 * combinedScale;
-    const emptyPadding = 12 * combinedScale;
+    const emptyTextSize = Math.round(responsiveName * heightScale);
+    const emptyButtonSize = Math.round(responsiveNameCard * heightScale);
+    const emptyPadding = Math.round(responsiveEmptyPadding * heightScale);
 
     return (
       <View className="flex-1 justify-center items-center bg-white/90 rounded-xl" style={{ margin: emptyPadding }}>
@@ -388,8 +381,8 @@ const Deceased: React.FC = () => {
     );
   }
 
-  const paginationSize = 16 * combinedScale;
-  const containerPadding = 10 * combinedScale;
+  const paginationSize = Math.round(responsiveNameCard * heightScale);
+  const containerPadding = Math.round(responsiveContainerPadding * heightScale);
 
   return (
     <View className="flex-1 bg-transparent" style={{ padding: containerPadding }}>

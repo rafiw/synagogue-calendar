@@ -7,17 +7,12 @@ import { cities } from 'assets/data';
 import { Settings } from 'utils/defs';
 const defaultName = 'בית כנסת לדוגמא';
 
-const envGithubKey = process.env.EXPO_PUBLIC_GITHUB_KEY || '';
-const envGistId = process.env.EXPO_PUBLIC_GITHUB_GIST_ID || '';
-const envGistFileName = process.env.EXPO_PUBLIC_GITHUB_GIST_FILE_NAME || 'synagogue-settings.json';
-const envImgbbApiKey = process.env.EXPO_PUBLIC_IMGBB_API_KEY || '';
-
 const defaultSettings: Settings = {
   lastUpdateTime: new Date(),
   githubSettings: {
-    gistId: envGistId,
-    gistFileName: envGistFileName,
-    githubKey: envGithubKey,
+    gistId: '',
+    gistFileName: 'synagogue-settings.json',
+    githubKey: '',
   },
   synagogueSettings: {
     name: defaultName,
@@ -101,7 +96,7 @@ const defaultSettings: Settings = {
     enable: true,
     screenDisplayTime: 10,
     deceased: [],
-    imgbbApiKey: envImgbbApiKey,
+    imgbbApiKey: '',
     displaySettings: {
       tableRows: 2,
       tableColumns: 3,
@@ -193,13 +188,13 @@ const getSecureGithubKey = async (): Promise<string> => {
   try {
     if (Platform.OS === 'web') {
       const key = await AsyncStorage.getItem(GITHUB_KEY_STORAGE_KEY);
-      return key || envGithubKey;
+      return key || '';
     }
     const key = await SecureStore.getItemAsync(GITHUB_KEY_STORAGE_KEY);
-    return key || envGithubKey;
+    return key || '';
   } catch (error) {
     console.error('Error retrieving GitHub key:', error);
-    return envGithubKey;
+    return '';
   }
 };
 

@@ -19,6 +19,7 @@ import {
   flags,
   ChanukahEvent,
   RoshChodeshEvent,
+  gematriya,
 } from '@hebcal/core';
 import { Nusach, PurimSettings } from './defs';
 import { getLeyningOnDate, Leyning } from '@hebcal/leyning';
@@ -486,6 +487,30 @@ export class ZmanimWrapper {
         // return String(ev.getWeeks() * 7 + ev.getDaysWithinWeeks());
         return ev.getTodayIs(this.language);
       }
+    }
+    return '';
+  }
+
+  getAvotChapter(): string {
+    // between passover and shavuot there is a minhag to say every shabbos a chapter of Avot
+    const month = this.hdate.getMonth();
+    if (!(month === months.NISAN || month === months.IYYAR || month === months.SIVAN)) {
+      return '';
+    }
+    const avot = this.language === 'he' ? 'אבות' : 'Avot';
+    // get first shabbos after passover
+    const firstShabbosAfterPassover = new HDate(21, months.NISAN, this.hdate.getFullYear()).after(6);
+    let iter = firstShabbosAfterPassover;
+    const hebRata = this.hdate.abs();
+    for (let i = 1; i < 7; i++) {
+      const iterRata = iter.abs();
+      if (hebRata <= iterRata && iterRata - hebRata <= 7) {
+        if (this.language === 'he') {
+          return `${avot} ${gematriya(i)}`;
+        }
+        return `${avot} ${i}`;
+      }
+      iter = iter.after(6);
     }
     return '';
   }

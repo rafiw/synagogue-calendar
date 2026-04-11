@@ -99,6 +99,7 @@ const Zmanim: React.FC = () => {
     ...(zmanim.haveYaaleVeyavo() ? [{ text: t('yaale_veyavo') }] : []),
     ...(zmanim.getMolad() ? [{ text: t('molad', { date: zmanim.getMolad() }) }] : []),
     ...(zmanim.getOmer() ? [{ text: t('omer', { date: zmanim.getOmer() }) }] : []),
+    ...(zmanim.getDOW() >= 5 && zmanim.getAvotChapter() ? [{ text: zmanim.getAvotChapter() }] : []),
     ...(zmanim.isMoridHatal() ? [{ text: t('morid_hatal') }] : [{ text: t('mashiv_haruach') }]),
     ...(zmanim.isVetenBracha() ? [{ text: t('veten_bracha') }] : [{ text: t('tal_umatar') }]),
     ...(hallelType === HallelType.WHOLE_HALLEL ? [{ text: t('whole_hallel') }] : []),

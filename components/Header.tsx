@@ -58,7 +58,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     settings.zmanimSettings.purimSettings,
     settings.zmanimSettings.elevation,
   );
-  const [dayOfWeek] = useState(t(zmanim.greg().toLocaleString('en-US', { weekday: 'long' }).toLowerCase()));
+  const dayOfWeek = t(zmanim.greg().toLocaleString('en-US', { weekday: 'long' }).toLowerCase());
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(getCurrentTime(locale));

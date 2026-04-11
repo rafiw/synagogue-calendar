@@ -57,8 +57,8 @@ const Zmanim: React.FC = () => {
     settings.zmanimSettings.elevation,
   );
   const hallelType = zmanim.getHallel();
-  const isShabbat = zmanim.getDOE() === 6;
-  const isFriday = zmanim.getDOE() === 5;
+  const isShabbat = zmanim.getDOW() === 6;
+  const isFriday = zmanim.getDOW() === 5;
   const tachanun = zmanim.getTachanun();
   // if hallelType is not NO_HALLEL, don't show tachanun
   const haveTachanun =

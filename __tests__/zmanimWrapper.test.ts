@@ -217,7 +217,7 @@ describe('ZmanimWrapper', () => {
     });
 
     it('should return day of week', () => {
-      const dow = wrapper.getDOE();
+      const dow = wrapper.getDOW();
       expect(dow).toBeGreaterThanOrEqual(0);
       expect(dow).toBeLessThanOrEqual(6);
     });

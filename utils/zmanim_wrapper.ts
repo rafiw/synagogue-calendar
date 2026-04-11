@@ -522,7 +522,7 @@ export class ZmanimWrapper {
     return month === months.ELUL && day >= 2;
   }
 
-  getDOE(): number {
+  getDOW(): number {
     return this.hdate.getDay();
   }
 

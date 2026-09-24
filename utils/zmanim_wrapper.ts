@@ -188,8 +188,12 @@ export class ZmanimWrapper {
   }
 
   getParsha(): string {
+    const ignoreParasha = ['Sukkot', 'Pesach', 'Shavuot'];
     const sedra = HebrewCalendar.getSedra(this.hdate.getFullYear(), this.il);
     const sedraResult = sedra.lookup(this.hdate);
+    // we return Parash Sukkot which makes sense in a way but we don't want to show it
+    if (ignoreParasha.includes(sedraResult.parsha[0] || '')) return '';
+
     // create event so we can render it
     const event = new ParshaEvent(sedraResult);
     const ChoolHamoed = event.desc.includes('Chol ha-Moed');

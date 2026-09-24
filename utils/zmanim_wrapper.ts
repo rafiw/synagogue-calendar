@@ -528,20 +528,10 @@ export class ZmanimWrapper {
       return false;
     }
     if (month === months.TISHREI) {
-      if (day <= 8 && day >= 2) {
-        return true;
-      }
-      // return hour before 9:00
-      if (hour < 9) {
-        return true;
-      }
-      return false;
+      return (day >= 2 && day <= 8)
     }
     if (month === months.ELUL && day === 29) {
-      if (hour < 9) {
-        return true;
-      }
-      return false;
+      return (hour < 9)
     }
     if (this.nusach === 'ashkenaz') {
       const year = this.hdate.getFullYear() + 1;

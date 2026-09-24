@@ -3,14 +3,8 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import { useSettings } from '../context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
-import dailyHalakhaData from '../assets/data/daily_halakha.json';
 import { HDate, months, getHolidaysOnDate } from '@hebcal/core';
-
-interface HalakhaItem {
-  book_title: string;
-  holiday: string;
-  sections: string[];
-}
+import { DailyHalakhaItem, loadDailyHalakhaData } from '../utils/dailyHalakhaDataLoader';
 
 const START_DATE = new HDate(1, months.TISHREI, 5786);
 
@@ -83,8 +77,15 @@ const DailyHalakha: React.FC = () => {
   const holidayType = holidayInfo.type;
 
   useEffect(() => {
-    const loadItems = () => {
+    let isMounted = true;
+
+    const loadItems = async () => {
+      setLoading(true);
       try {
+        const dailyHalakhaData = await loadDailyHalakhaData();
+        if (!isMounted) {
+          return;
+        }
         const selectedBooks = settings.dailyHalakhaSettings?.selectedBooks || [];
 
         // Filter items by selected books and merge sections
@@ -94,7 +95,7 @@ const DailyHalakha: React.FC = () => {
         const sectionRanges: [number, number, string][] = [];
         let sectionIdx = 0;
         if (holidayType !== null) {
-          (dailyHalakhaData as HalakhaItem[]).forEach((item) => {
+          dailyHalakhaData.forEach((item: DailyHalakhaItem) => {
             if (item.holiday === holidayType) {
               const filtered = item.sections.filter((s) => s.trim());
               allSections = allSections.concat(filtered);
@@ -104,12 +105,14 @@ const DailyHalakha: React.FC = () => {
           });
         } else {
           if (selectedBooks.length === 0) {
-            setItems([]);
-            setIdxPairsName([]);
-            setLoading(false);
+            if (isMounted) {
+              setItems([]);
+              setIdxPairsName([]);
+              setLoading(false);
+            }
             return;
           }
-          (dailyHalakhaData as HalakhaItem[]).forEach((item) => {
+          dailyHalakhaData.forEach((item: DailyHalakhaItem) => {
             if (selectedBooks.includes(item.book_title)) {
               const filtered = item.sections.filter((s) => s.trim());
               allSections = allSections.concat(filtered);
@@ -118,18 +121,28 @@ const DailyHalakha: React.FC = () => {
             }
           });
         }
-        setIdxPairsName(sectionRanges);
-        setItems(allSections);
+        if (isMounted) {
+          setIdxPairsName(sectionRanges);
+          setItems(allSections);
+        }
       } catch (error) {
         console.error('Error loading daily halakha:', error);
-        setItems([]);
-        setIdxPairsName([]);
+        if (isMounted) {
+          setItems([]);
+          setIdxPairsName([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
-    loadItems();
+    void loadItems();
+
+    return () => {
+      isMounted = false;
+    };
   }, [settings.dailyHalakhaSettings?.selectedBooks, showHolidayHalachot, holidayType, isIsrael]);
 
   if (!i18n.isInitialized || loading) {

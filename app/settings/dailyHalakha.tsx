@@ -5,18 +5,14 @@ import { useTranslation } from 'react-i18next';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
 import { NumberInput } from '../../components/NumberInput';
-import dailyHalakhaData from '../../assets/data/daily_halakha.json';
-
-interface HalakhaItem {
-  book_title: string;
-  sections: string[];
-}
+import { DailyHalakhaItem, loadDailyHalakhaData } from '../../utils/dailyHalakhaDataLoader';
 
 const DailyHalakhaSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
   const { height } = useWindowDimensions();
   const [bookTitles, setBookTitles] = useState<string[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
   const heightScale = useHeightScale() * 0.5;
   const isSmallHeight = height < 600;
 
@@ -29,12 +25,39 @@ const DailyHalakhaSettingsTab = () => {
   const checkboxSize = Math.round(25 * heightScale);
 
   useEffect(() => {
-    // Extract unique book titles from the JSON data
-    // keep books thet have book_title and sections
-    const titles = Array.from(
-      new Set((dailyHalakhaData as HalakhaItem[]).filter((item) => item.book_title).map((item) => item.book_title)),
-    );
-    setBookTitles(titles.sort());
+    let isMounted = true;
+
+    const loadBookTitles = async () => {
+      setIsDataLoading(true);
+      try {
+        const dailyHalakhaData = await loadDailyHalakhaData();
+        if (!isMounted) {
+          return;
+        }
+
+        // Extract unique book titles from the JSON data
+        // keep books that have book_title and sections
+        const titles = Array.from(
+          new Set(dailyHalakhaData.filter((item: DailyHalakhaItem) => item.book_title).map((item) => item.book_title)),
+        );
+        setBookTitles(titles.sort());
+      } catch (error) {
+        console.error('Failed to load daily halakha data', error);
+        if (isMounted) {
+          setBookTitles([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsDataLoading(false);
+        }
+      }
+    };
+
+    void loadBookTitles();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const saveChecked = (value: boolean) => {
@@ -65,7 +88,7 @@ const DailyHalakhaSettingsTab = () => {
     },
   };
 
-  if (isLoading || !i18n.isInitialized) {
+  if (isLoading || isDataLoading || !i18n.isInitialized) {
     return (
       <View className="flex-1 justify-center items-center">
         <ActivityIndicator size="large" color="#0000ff" />

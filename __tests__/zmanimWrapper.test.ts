@@ -628,17 +628,16 @@ describe('ZmanimWrapper', () => {
         }
       });
 
-      it('should consider hour for early Tishrei mornings', () => {
-        // In Tishrei, if hour < 9, return true (for early morning)
+      it('should consider days 2-8 for Tishrei', () => {
         const currentHDate = new HDate();
         const currentMonth = currentHDate.getMonth();
-        const currentHour = new Date().getHours();
+        const currentDay = currentHDate.getDate();
 
-        if (currentMonth === months.TISHREI && currentHour < 9) {
+        if (currentMonth === months.TISHREI && currentDay >= 2 && currentDay <= 8) {
           const result = wrapper.isSlichotTonight();
           expect(result).toBe(true);
         } else {
-          // Not in this time window
+          // Not in this day window
           expect(typeof wrapper.isSlichotTonight()).toBe('boolean');
         }
       });

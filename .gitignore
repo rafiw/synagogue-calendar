@@ -18,6 +18,10 @@ ios
 .DS_Store
 nativewind-env.d.ts
 
+# Environment variables
+.env
+.env*.local
+
 # Code quality tools
 .eslintcache
 .type-coverage/

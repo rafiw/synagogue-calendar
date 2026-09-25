@@ -1,13 +1,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useSettings } from 'context/settingsContext';
 import { useTranslation } from 'react-i18next';
-import { View, Text, ActivityIndicator, TouchableOpacity, TextInput, FlatList } from 'react-native';
+import { View, Text, ActivityIndicator, TouchableOpacity, TextInput, FlatList, Image } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { DatePicker } from '../../components/DatePicker';
 import { NumberInput } from '../../components/NumberInput';
-import { Message } from 'utils/defs';
+import { EventType, Message, MessageType } from 'utils/defs';
 import { isMessageExpired, isMessageScheduled } from 'utils/classesHelpers';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { EVENT_TYPES, getEventImage } from '../../utils/eventAssets';
 
 const generateId = () => `msg_${Date.now()}_${Math.random().toString(36).substring(2)}`;
 
@@ -42,14 +43,19 @@ const MessagesSettingsTab = () => {
     updateSettings({ messagesSettings: { ...settings.messagesSettings, messages: newMessages } });
   };
 
-  const addNewMessage = () => {
+  const addNewMessage = (type: MessageType = 'standard') => {
     const newMessage: Message = {
       id: generateId(),
+      type,
+      eventType: type === 'event' ? 'bar_mitzva' : undefined,
       text: '',
       enabled: true,
     };
     updateSettings({
-      messagesSettings: { ...settings.messagesSettings, messages: [newMessage, ...settings.messagesSettings.messages] },
+      messagesSettings: {
+        ...settings.messagesSettings,
+        messages: [newMessage, ...(settings.messagesSettings.messages || [])],
+      },
     });
   };
 
@@ -93,6 +99,7 @@ const MessagesSettingsTab = () => {
           onPress={(value) => void saveChecked(value)}
         />
       </View>
+
       {settings.messagesSettings.enable && (
         <View style={{ paddingHorizontal: padding, marginTop: margin, marginBottom: margin }}>
           <NumberInput
@@ -120,31 +127,45 @@ const MessagesSettingsTab = () => {
       {settings.messagesSettings.enable && (
         <View className="flex-1" style={{ paddingHorizontal: padding, marginTop: margin }}>
           <FlatList
-            data={settings.messagesSettings.messages}
+            data={settings.messagesSettings.messages || []}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => {
               const status = getMessageStatus(item);
+              const isEvent = item.type === 'event';
+              const currentEventType: EventType = item.eventType || 'bar_mitzva';
 
               return (
                 <View
                   className={`bg-white rounded-lg shadow-sm border ${getMessageBorderStyle(item)}`}
                   style={{ padding, marginBottom: smallPadding }}
                 >
-                  {/* Status Badge */}
+                  {/* Status Badge, Delete, and Toggle */}
                   <View className="flex-row justify-between items-center" style={{ marginBottom: smallPadding }}>
-                    <View
-                      className={`rounded ${status.color}`}
-                      style={{ paddingHorizontal: smallPadding, paddingVertical: smallPadding / 2 }}
-                    >
-                      <Text className="text-white font-medium" style={{ fontSize: labelSize }}>
-                        {status.label}
-                      </Text>
+                    <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                      <View
+                        className={`rounded ${status.color}`}
+                        style={{ paddingHorizontal: smallPadding, paddingVertical: smallPadding / 2 }}
+                      >
+                        <Text className="text-white font-medium" style={{ fontSize: labelSize }}>
+                          {status.label}
+                        </Text>
+                      </View>
+                      {isEvent && (
+                        <View
+                          className="rounded bg-amber-500"
+                          style={{ paddingHorizontal: smallPadding, paddingVertical: smallPadding / 2 }}
+                        >
+                          <Text className="text-white font-medium" style={{ fontSize: labelSize }}>
+                            {t('msg_type_event')}
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                    <TouchableOpacity onPress={() => deleteMessage(item.id)}>
-                      <Feather name="trash-2" size={iconSize} color="red" />
-                    </TouchableOpacity>
-                    {/* Enable/Disable Toggle */}
-                    <View className="flex-row items-center justify-end">
+
+                    <View className="flex-row items-center" style={{ gap: padding }}>
+                      <TouchableOpacity onPress={() => deleteMessage(item.id)}>
+                        <Feather name="trash-2" size={iconSize} color="red" />
+                      </TouchableOpacity>
                       <BouncyCheckbox
                         isChecked={item.enabled}
                         fillColor="green"
@@ -162,15 +183,117 @@ const MessagesSettingsTab = () => {
                     </View>
                   </View>
 
-                  {/* Message Text */}
-                  <TextInput
-                    value={item.text}
-                    onChangeText={(newText) => updateMessage(item.id, { text: newText })}
-                    className="border border-gray-300 rounded-lg bg-white"
-                    style={{ fontSize: textSize, padding: smallPadding * 1.5, marginBottom: smallPadding * 1.5 }}
-                    placeholder={t('enter_message')}
-                    multiline
-                  />
+                  {/* Message Type Toggle (Standard vs Event Full Page) */}
+                  <View className="flex-row rounded-lg bg-gray-100 p-1" style={{ marginBottom: smallPadding * 1.5 }}>
+                    <TouchableOpacity
+                      onPress={() => updateMessage(item.id, { type: 'standard' })}
+                      className={`flex-1 py-1 rounded-md items-center ${!isEvent ? 'bg-white shadow-sm' : ''}`}
+                    >
+                      <Text
+                        className={`font-semibold ${!isEvent ? 'text-blue-600' : 'text-gray-600'}`}
+                        style={{ fontSize: labelSize }}
+                      >
+                        {t('msg_type_standard')}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() =>
+                        updateMessage(item.id, {
+                          type: 'event',
+                          eventType: item.eventType || 'bar_mitzva',
+                        })
+                      }
+                      className={`flex-1 py-1 rounded-md items-center ${isEvent ? 'bg-white shadow-sm' : ''}`}
+                    >
+                      <Text
+                        className={`font-semibold ${isEvent ? 'text-amber-600' : 'text-gray-600'}`}
+                        style={{ fontSize: labelSize }}
+                      >
+                        {t('msg_type_event')}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* If Event: Event Type Selector & Preview */}
+                  {isEvent ? (
+                    <View style={{ marginBottom: smallPadding }}>
+                      <Text className="text-gray-700 font-semibold mb-1" style={{ fontSize: labelSize }}>
+                        {t('event_type')}:
+                      </Text>
+
+                      {/* Event Type Chips */}
+                      <View
+                        className="flex-row flex-wrap"
+                        style={{ gap: smallPadding / 2, marginBottom: smallPadding }}
+                      >
+                        {EVENT_TYPES.map((ev) => {
+                          const isSelected = currentEventType === ev;
+                          return (
+                            <TouchableOpacity
+                              key={ev}
+                              onPress={() => updateMessage(item.id, { eventType: ev })}
+                              className={`px-3 py-1.5 rounded-full border ${
+                                isSelected ? 'bg-amber-500 border-amber-600' : 'bg-gray-50 border-gray-300'
+                              }`}
+                            >
+                              <Text
+                                className={`font-medium ${isSelected ? 'text-white' : 'text-gray-800'}`}
+                                style={{ fontSize: labelSize }}
+                              >
+                                {t(`event_${ev}`)}
+                              </Text>
+                            </TouchableOpacity>
+                          );
+                        })}
+                      </View>
+
+                      {/* Event Image Thumbnail Preview */}
+                      <View
+                        className="rounded-lg overflow-hidden border border-gray-200 relative justify-center items-center bg-gray-100"
+                        style={{ height: 110, marginBottom: smallPadding }}
+                      >
+                        <Image
+                          source={getEventImage(currentEventType)}
+                          style={{ width: '100%', height: '100%' }}
+                          resizeMode="cover"
+                        />
+                        <View className="absolute px-3 py-1 items-center" style={{ maxWidth: '90%' }}>
+                          <Text
+                            className="font-extrabold text-center text-gray-900"
+                            numberOfLines={2}
+                            style={{
+                              fontSize: textSize,
+                              textShadowColor: 'rgba(255, 255, 255, 0.95)',
+                              textShadowOffset: { width: 0, height: 1 },
+                              textShadowRadius: 6,
+                            }}
+                          >
+                            {item.text || t(`event_${currentEventType}`)}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Embedded Text */}
+                      <TextInput
+                        value={item.text}
+                        onChangeText={(newText) => updateMessage(item.id, { text: newText })}
+                        className="border border-gray-300 rounded-lg bg-white"
+                        style={{ fontSize: textSize, padding: smallPadding * 1.2, marginBottom: smallPadding }}
+                        placeholder={t('event_text_placeholder')}
+                        multiline
+                      />
+                    </View>
+                  ) : (
+                    /* Standard Message Text */
+                    <TextInput
+                      value={item.text}
+                      onChangeText={(newText) => updateMessage(item.id, { text: newText })}
+                      className="border border-gray-300 rounded-lg bg-white"
+                      style={{ fontSize: textSize, padding: smallPadding * 1.5, marginBottom: smallPadding * 1.5 }}
+                      placeholder={t('enter_message')}
+                      multiline
+                    />
+                  )}
 
                   {/* Date Range - Start and End on same line */}
                   <View className="flex-row items-center" style={{ gap: smallPadding }}>
@@ -218,16 +341,35 @@ const MessagesSettingsTab = () => {
               );
             }}
             ListHeaderComponent={
-              <TouchableOpacity
-                onPress={addNewMessage}
-                className="flex-row items-center justify-center bg-blue-500 rounded-lg"
-                style={{ padding: smallPadding * 1.5, marginBottom: margin }}
-              >
-                <Feather name="plus" size={iconSize} color="white" />
-                <Text className="text-white font-medium" style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}>
-                  {t('add_message')}
-                </Text>
-              </TouchableOpacity>
+              <View className="flex-row" style={{ gap: smallPadding, marginBottom: margin }}>
+                <TouchableOpacity
+                  onPress={() => addNewMessage('standard')}
+                  className="flex-1 flex-row items-center justify-center bg-blue-500 rounded-lg"
+                  style={{ padding: smallPadding * 1.4 }}
+                >
+                  <Feather name="plus" size={iconSize} color="white" />
+                  <Text
+                    className="text-white font-medium"
+                    style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}
+                  >
+                    {t('add_message')}
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => addNewMessage('event')}
+                  className="flex-1 flex-row items-center justify-center bg-amber-600 rounded-lg"
+                  style={{ padding: smallPadding * 1.4 }}
+                >
+                  <Feather name="star" size={iconSize} color="white" />
+                  <Text
+                    className="text-white font-medium"
+                    style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}
+                  >
+                    {t('add_event_message')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
             }
           />
         </View>

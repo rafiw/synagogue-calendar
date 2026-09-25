@@ -225,5 +225,16 @@
   "daily_halakha_no_items_today": "אין פריטים זמינים להיום.",
   "show_holiday_halachot_before_holidays": "הצג הלכות חגים לפני החגים",
   "halakha_items_per_day": "הלכות ליום",
-  "daily_halakha_llm_disclaimer": "הערה: ההלכות המוצגות בתכונה זו מבוססות על סיכום של בינה מלאכותית מטקסט גולמי. עלולות להיות שגיאות או טעויות כתיב בתוכן. על המשתמשים לאמת מידע הלכתי חשוב ממקורות מהימנים."
+  "daily_halakha_llm_disclaimer": "הערה: ההלכות המוצגות בתכונה זו מבוססות על סיכום של בינה מלאכותית מטקסט גולמי. עלולות להיות שגיאות או טעויות כתיב בתוכן. על המשתמשים לאמת מידע הלכתי חשוב ממקורות מהימנים.",
+  "add_event_message": "הוסף אירוע (דף מלא)",
+  "msg_type_standard": "הודעה רגילה",
+  "msg_type_event": "אירוע (דף מלא)",
+  "event_type": "סוג האירוע",
+  "event_bar_mitzva": "בר מצווה",
+  "event_bat_mitzva": "בת מצווה",
+  "event_brit": "ברית מילה",
+  "event_brita": "בריתה / הולדת הבת",
+  "event_wedding": "חתונה",
+  "event_text_placeholder": "נוסח ההודעה והברכה...",
+  "mazal_tov": "מזל טוב!"
 }

@@ -82,8 +82,13 @@ export interface Screen {
   presentTime: number;
 }
 
+export type MessageType = 'standard' | 'event';
+export type EventType = 'bar_mitzva' | 'bat_mitzva' | 'brit' | 'brita' | 'wedding';
+
 export interface Message {
   id: string;
+  type?: MessageType;
+  eventType?: EventType;
   text: string;
   startDate?: string; // Optional ISO date string (YYYY-MM-DD)
   endDate?: string; // Optional ISO date string (YYYY-MM-DD)

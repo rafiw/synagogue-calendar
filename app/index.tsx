@@ -21,10 +21,9 @@ import { Message, Screen, Settings } from '../utils/defs';
 import { useResponsiveSpacing, useDeviceType } from '../utils/responsive';
 import BackgroundWrapper from '../components/BackgroundWrapper';
 import { calculateDeceasedPages } from '../utils/deceasedHelpers';
-import { isMessageActive } from '../utils/classesHelpers';
+import { isMessageActive, calculateMessagesSubPages } from '../utils/classesHelpers';
 
 const classesPerPage = 3.0;
-const messagesPerPage = 3.0;
 
 const Zmanim = lazy(() => import('../components/Zmanim'));
 const Classes = lazy(() => import('../components/Classes'));
@@ -52,7 +51,7 @@ const getMessagesSubPages = async (): Promise<number> => {
   if (!localSettings?.messagesSettings?.enable || !localSettings?.messagesSettings?.messages) return 0;
 
   const activeMessages = localSettings.messagesSettings.messages.filter((msg: Message) => isMessageActive(msg));
-  return Math.ceil(activeMessages.length / messagesPerPage);
+  return calculateMessagesSubPages(activeMessages);
 };
 
 const getDeceasedSubPages = async (): Promise<number> => {

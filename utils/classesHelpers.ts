@@ -188,3 +188,46 @@ export function isMessageScheduled(message: Message, referenceDate?: Date): bool
 export function filterActiveMessages(messages: Message[], referenceDate?: Date): Message[] {
   return messages.filter((msg) => isMessageActive(msg, referenceDate));
 }
+
+export type MessagePage = { type: 'standard'; messages: Message[] } | { type: 'event'; message: Message };
+
+export const STANDARD_MESSAGES_PER_PAGE = 3;
+
+/**
+ * Builds pages for rotating messages display.
+ * Event messages are displayed on their own full page.
+ * Standard messages are grouped up to STANDARD_MESSAGES_PER_PAGE per page.
+ */
+export function buildMessagePages(activeMessages: Message[]): MessagePage[] {
+  const pages: MessagePage[] = [];
+  let standardChunk: Message[] = [];
+
+  for (const msg of activeMessages) {
+    if (msg.type === 'event') {
+      if (standardChunk.length > 0) {
+        pages.push({ type: 'standard', messages: standardChunk });
+        standardChunk = [];
+      }
+      pages.push({ type: 'event', message: msg });
+    } else {
+      standardChunk.push(msg);
+      if (standardChunk.length === STANDARD_MESSAGES_PER_PAGE) {
+        pages.push({ type: 'standard', messages: standardChunk });
+        standardChunk = [];
+      }
+    }
+  }
+
+  if (standardChunk.length > 0) {
+    pages.push({ type: 'standard', messages: standardChunk });
+  }
+
+  return pages;
+}
+
+/**
+ * Calculates total number of subpages for active messages.
+ */
+export function calculateMessagesSubPages(activeMessages: Message[]): number {
+  return buildMessagePages(activeMessages).length;
+}

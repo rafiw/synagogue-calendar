@@ -225,5 +225,16 @@
   "daily_halakha_no_items_today": "No items available for today.",
   "show_holiday_halachot_before_holidays": "Show holiday halachot before holidays",
   "halakha_items_per_day": "Halakha per day",
-  "daily_halakha_llm_disclaimer": "Note: The halachot displayed in this feature are based on an LLM summary of raw text. There may be mistakes or typos in the content. Users should verify important halachic information from authoritative sources."
+  "daily_halakha_llm_disclaimer": "Note: The halachot displayed in this feature are based on an LLM summary of raw text. There may be mistakes or typos in the content. Users should verify important halachic information from authoritative sources.",
+  "add_event_message": "Add Event (Full Page)",
+  "msg_type_standard": "Standard Message",
+  "msg_type_event": "Event (Full Page)",
+  "event_type": "Event Type",
+  "event_bar_mitzva": "Bar Mitzvah",
+  "event_bat_mitzva": "Bat Mitzvah",
+  "event_brit": "Brit Milah",
+  "event_brita": "Brita / Birth of Daughter",
+  "event_wedding": "Wedding",
+  "event_text_placeholder": "Blessing and announcement text...",
+  "mazal_tov": "Mazal Tov!"
 }

@@ -13,6 +13,8 @@ import {
   isMessageExpired,
   isMessageScheduled,
   filterActiveMessages,
+  buildMessagePages,
+  calculateMessagesSubPages,
 } from '../utils/classesHelpers';
 import { Class, Message } from '../utils/defs';
 
@@ -468,6 +470,104 @@ describe('classesHelpers', () => {
 
       const active = filterActiveMessages(messages);
       expect(active).toHaveLength(2);
+    });
+  });
+
+  describe('buildMessagePages', () => {
+    it('should return an empty array if there are no messages', () => {
+      expect(buildMessagePages([])).toEqual([]);
+    });
+
+    it('should group standard messages up to 3 per page', () => {
+      const messages: Message[] = [
+        { id: '1', text: 'Msg 1', enabled: true },
+        { id: '2', text: 'Msg 2', enabled: true },
+        { id: '3', text: 'Msg 3', enabled: true },
+        { id: '4', text: 'Msg 4', enabled: true },
+      ];
+
+      const pages = buildMessagePages(messages);
+      expect(pages).toHaveLength(2);
+      expect(pages[0]?.type).toBe('standard');
+      if (pages[0]?.type === 'standard') {
+        expect(pages[0].messages).toHaveLength(3);
+      }
+      expect(pages[1]?.type).toBe('standard');
+      if (pages[1]?.type === 'standard') {
+        expect(pages[1].messages).toHaveLength(1);
+      }
+    });
+
+    it('should give each event message its own full page', () => {
+      const messages: Message[] = [
+        { id: '1', text: 'Bar Mitzvah', type: 'event', eventType: 'bar_mitzva', enabled: true },
+        { id: '2', text: 'Wedding', type: 'event', eventType: 'wedding', enabled: true },
+      ];
+
+      const pages = buildMessagePages(messages);
+      expect(pages).toHaveLength(2);
+      expect(pages[0]?.type).toBe('event');
+      if (pages[0]?.type === 'event') {
+        expect(pages[0].message.eventType).toBe('bar_mitzva');
+      }
+      expect(pages[1]?.type).toBe('event');
+      if (pages[1]?.type === 'event') {
+        expect(pages[1].message.eventType).toBe('wedding');
+      }
+    });
+
+    it('should handle mixed standard and event messages preserving sequence', () => {
+      const messages: Message[] = [
+        { id: '1', text: 'Standard 1', enabled: true },
+        { id: '2', text: 'Standard 2', enabled: true },
+        { id: '3', text: 'Brit Milah', type: 'event', eventType: 'brit', enabled: true },
+        { id: '4', text: 'Standard 3', enabled: true },
+        { id: '5', text: 'Bat Mitzvah', type: 'event', eventType: 'bat_mitzva', enabled: true },
+      ];
+
+      const pages = buildMessagePages(messages);
+      expect(pages).toHaveLength(4);
+      expect(pages[0]).toEqual({
+        type: 'standard',
+        messages: [messages[0], messages[1]],
+      });
+      expect(pages[1]).toEqual({
+        type: 'event',
+        message: messages[2],
+      });
+      expect(pages[2]).toEqual({
+        type: 'standard',
+        messages: [messages[3]],
+      });
+      expect(pages[3]).toEqual({
+        type: 'event',
+        message: messages[4],
+      });
+    });
+  });
+
+  describe('calculateMessagesSubPages', () => {
+    it('should return 0 for empty array', () => {
+      expect(calculateMessagesSubPages([])).toBe(0);
+    });
+
+    it('should calculate correct pages for standard messages', () => {
+      const messages: Message[] = [
+        { id: '1', text: 'Msg 1', enabled: true },
+        { id: '2', text: 'Msg 2', enabled: true },
+        { id: '3', text: 'Msg 3', enabled: true },
+        { id: '4', text: 'Msg 4', enabled: true },
+      ];
+      expect(calculateMessagesSubPages(messages)).toBe(2);
+    });
+
+    it('should calculate correct pages for event messages and mixed messages', () => {
+      const messages: Message[] = [
+        { id: '1', text: 'Msg 1', enabled: true },
+        { id: '2', text: 'Brita', type: 'event', eventType: 'brita', enabled: true },
+        { id: '3', text: 'Msg 2', enabled: true },
+      ];
+      expect(calculateMessagesSubPages(messages)).toBe(3);
     });
   });
 });

@@ -26,6 +26,10 @@ const defaultSettings: Settings = {
       gradientStart: { x: 1, y: 1 },
       gradientEnd: { x: 0, y: 0 },
     },
+    footerSettings: {
+      enable: false,
+      text: '',
+    },
   },
   zmanimSettings: {
     enable: true,
@@ -337,6 +341,10 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
                 backgroundSettings: {
                   ...defaults.synagogueSettings.backgroundSettings,
                   ...loaded.synagogueSettings?.backgroundSettings,
+                },
+                footerSettings: {
+                  ...defaults.synagogueSettings.footerSettings,
+                  ...loaded.synagogueSettings?.footerSettings,
                 },
               };
             } else if (key === 'zmanimSettings' && loaded.zmanimSettings) {

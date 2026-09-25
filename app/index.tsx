@@ -13,7 +13,7 @@ import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '../components/Header';
-// import Footer from '../components/Footer';
+import Footer from '../components/Footer';
 import { useSettings } from '../context/settingsContext';
 import { defaultPageDisplayTime, getNoScreenText } from '../utils/utils';
 import { useScreenRotation } from '../utils/useScreenRotation';
@@ -258,10 +258,12 @@ export default function App() {
           </View>
         </View>
 
-        {/* Optional Footer Space */}
-        {/* <View style={{ marginTop: headerMargin }}>
-          <Footer />
-        </View> */}
+        {/* Thin Footer Section */}
+        {settings.synagogueSettings.footerSettings?.enable && settings.synagogueSettings.footerSettings?.text ? (
+          <View style={{ marginTop: headerMargin * 0.5 }}>
+            <Footer footerText={settings.synagogueSettings.footerSettings.text} />
+          </View>
+        ) : null}
       </View>
     </BackgroundWrapper>
   );

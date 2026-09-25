@@ -20,6 +20,14 @@ import ColorPickerModal from '../../components/ColorPickerModal';
 import { showAlert } from '../../utils/alert';
 import { isRTL } from 'utils/utils';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
+
+const checkboxStyles = {
+  green: {
+    iconStyle: { borderColor: 'green' },
+    innerIconStyle: { borderWidth: 2 },
+  },
+};
 
 const HelpSection = () => {
   const { t } = useTranslation();
@@ -176,6 +184,7 @@ const GeneralSettingsTab = () => {
   const margin = Math.round(useResponsiveSpacing(16) * heightScale);
   const pickerHeight = Math.round(48 * heightScale);
   const imageHeight = Math.round(160 * heightScale);
+  const checkboxSize = Math.round(25 * heightScale);
 
   useEffect(() => {
     const checkRTL = async () => {
@@ -403,6 +412,36 @@ const GeneralSettingsTab = () => {
     updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
 
+  const handleFooterEnableChange = (enable: boolean) => {
+    const currentFooter = settings.synagogueSettings.footerSettings;
+    const newFooterSettings = {
+      ...currentFooter,
+      enable,
+      text: currentFooter?.text || '',
+    };
+    updateSettings({
+      synagogueSettings: {
+        ...settings.synagogueSettings,
+        footerSettings: newFooterSettings,
+      },
+    });
+  };
+
+  const handleFooterTextChange = (text: string) => {
+    const currentFooter = settings.synagogueSettings.footerSettings;
+    const newFooterSettings = {
+      ...currentFooter,
+      enable: currentFooter?.enable ?? true,
+      text,
+    };
+    updateSettings({
+      synagogueSettings: {
+        ...settings.synagogueSettings,
+        footerSettings: newFooterSettings,
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <View className="flex-1 justify-center items-center">
@@ -464,6 +503,45 @@ const GeneralSettingsTab = () => {
               </View>
             </View>
           </View>
+
+          {/* Thin Footer Section - Single Line */}
+          <View
+            className="flex-row items-center border border-gray-300 rounded-lg bg-gray-50 p-2.5"
+            style={{ gap: smallPadding }}
+          >
+            <BouncyCheckbox
+              size={checkboxSize}
+              isChecked={settings.synagogueSettings.footerSettings?.enable ?? false}
+              fillColor="green"
+              iconStyle={checkboxStyles.green.iconStyle}
+              innerIconStyle={checkboxStyles.green.innerIconStyle}
+              text={t('enable_footer')}
+              textComponent={
+                <Text
+                  className="text-gray-700 font-medium"
+                  style={{ fontSize: textSize, marginHorizontal: smallPadding }}
+                >
+                  {t('enable_footer')}
+                </Text>
+              }
+              onPress={(value) => handleFooterEnableChange(value)}
+            />
+
+            <TextInput
+              className={`flex-1 border rounded-lg ${
+                settings.synagogueSettings.footerSettings?.enable
+                  ? 'border-gray-300 bg-white text-gray-800'
+                  : 'border-gray-200 bg-gray-100 text-gray-400'
+              }`}
+              style={{ padding: smallPadding * 1.2, fontSize: textSize }}
+              value={settings.synagogueSettings.footerSettings?.text || ''}
+              onChangeText={handleFooterTextChange}
+              editable={settings.synagogueSettings.footerSettings?.enable ?? false}
+              placeholder={t('footer_text_placeholder')}
+              placeholderTextColor="#9ca3af"
+            />
+          </View>
+
           <HelpSection />
           {/* gist sha512 */}
           <View style={{ gap: smallPadding }}>

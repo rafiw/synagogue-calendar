@@ -236,5 +236,9 @@
   "event_brita": "בריתה / הולדת הבת",
   "event_wedding": "חתונה",
   "event_text_placeholder": "נוסח ההודעה והברכה...",
-  "mazal_tov": "מזל טוב!"
+  "mazal_tov": "מזל טוב!",
+  "footer_settings_title": "כותרת תחתונה",
+  "enable_footer": "הצג כותרת תחתונה",
+  "footer_text": "טקסט כותרת תחתונה",
+  "footer_text_placeholder": "למשל: ברוכים הבאים לבית הכנסת / לתרומות והקדשות..."
 }

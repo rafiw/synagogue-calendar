@@ -140,11 +140,17 @@ export interface GitHubSettings {
   githubKey: string;
 }
 
+export interface FooterSettings {
+  enable?: boolean;
+  text?: string;
+}
+
 export interface SynagogueSettings {
   name: string;
   language: Language;
   nusach: Nusach;
   backgroundSettings: BackgroundSettings;
+  footerSettings?: FooterSettings;
 }
 
 export interface Settings {

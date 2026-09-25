@@ -236,5 +236,9 @@
   "event_brita": "Brita / Birth of Daughter",
   "event_wedding": "Wedding",
   "event_text_placeholder": "Blessing and announcement text...",
-  "mazal_tov": "Mazal Tov!"
+  "mazal_tov": "Mazal Tov!",
+  "footer_settings_title": "Footer Settings",
+  "enable_footer": "Show footer",
+  "footer_text": "Footer text",
+  "footer_text_placeholder": "E.g., Welcome to our synagogue / For donations call..."
 }

@@ -11,6 +11,8 @@ import {
   ScrollView,
   useWindowDimensions,
   Modal,
+  Platform,
+  Share,
 } from 'react-native';
 import { showAlert, showConfirm } from '../../utils/alert';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
@@ -150,6 +152,21 @@ const deleteImageFromImgbb = async (deleteUrl: string): Promise<boolean> => {
 // Date Input Component - Platform Specific (auto-resolved by React Native)
 const DateInputComponent = DatePicker;
 
+// Helper function to convert Gregorian date to Hebrew date string
+const convertToHebrewDate = (gregorianDateString?: string, language: string = 'he'): string | null => {
+  if (!gregorianDateString) return null;
+
+  try {
+    const gregorianDate = new Date(gregorianDateString);
+    if (isNaN(gregorianDate.getTime())) return null;
+    const hdate = new HDate(gregorianDate);
+    return language === 'he' ? hdate.renderGematriya() : hdate.render(language);
+  } catch (error) {
+    console.error('Error converting date to Hebrew:', error);
+    return null;
+  }
+};
+
 interface DeceasedPersonFormProps {
   person?: DeceasedPerson;
   onSave: (person: DeceasedPerson) => void;
@@ -245,25 +262,9 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
     setPhotoDeleteUrl('');
   };
 
-  // Helper function to convert Gregorian date to Hebrew date string
-  const convertToHebrewDate = (gregorianDateString: string): string | null => {
-    if (!gregorianDateString) return null;
-
-    try {
-      const gregorianDate = new Date(gregorianDateString);
-      const hdate = new HDate(gregorianDate);
-      const locale = i18n.language === 'he' ? 'he' : 'en';
-
-      return locale === 'he' ? hdate.renderGematriya() : hdate.render(locale);
-    } catch (error) {
-      console.error('Error converting date to Hebrew:', error);
-      return null;
-    }
-  };
-
   // Auto-populate Hebrew date of birth when Gregorian date changes
   useEffect(() => {
-    const hebrewDate = convertToHebrewDate(dateOfBirth);
+    const hebrewDate = convertToHebrewDate(dateOfBirth, i18n.language);
     if (hebrewDate) {
       setHebrewDateOfBirth(hebrewDate);
     }
@@ -271,7 +272,7 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
 
   // Auto-populate Hebrew date of death when Gregorian date changes
   useEffect(() => {
-    const hebrewDate = convertToHebrewDate(dateOfDeath);
+    const hebrewDate = convertToHebrewDate(dateOfDeath, i18n.language);
     if (hebrewDate) {
       setHebrewDateOfDeath(hebrewDate);
     }
@@ -613,56 +614,201 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
   );
 };
 
-const parseCSV = (csvText: string): Array<Partial<DeceasedPerson>> => {
-  const lines = csvText.trim().split('\n');
-  if (lines.length < 2) return [];
-
-  const headers = lines[0]?.split(',').map((h) => h.trim().toLowerCase()) || [];
-  const nameIndex = headers.findIndex((h) => h === 'name' || h === 'שם');
-  const genderIndex = headers.findIndex((h) => h === 'gender' || h === 'מין' || h === 'male' || h === 'ismale');
-  const dobIndex = headers.findIndex((h) => h === 'dateofbirth' || h === 'dob' || h === 'birth' || h === 'תאריך לידה');
-  const dodIndex = headers.findIndex((h) => h === 'dateofdeath' || h === 'dod' || h === 'death' || h === 'תאריך פטירה');
-  const hebrewDobIndex = headers.findIndex(
-    (h) => h === 'hebrewdateofbirth' || h === 'hebrewdob' || h === 'תאריך לידה עברי',
-  );
-  const hebrewDodIndex = headers.findIndex(
-    (h) => h === 'hebrewdateofdeath' || h === 'hebrewdod' || h === 'תאריך פטירה עברי',
-  );
-  const photoIndex = headers.findIndex((h) => h === 'photo' || h === 'photourl' || h === 'תמונה');
-  const tributeIndex = headers.findIndex((h) => h === 'tribute' || h === 'memorial' || h === 'זיכרון');
-
-  const people: Array<Partial<DeceasedPerson>> = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (!line?.trim()) continue;
-
-    const values = line.split(',').map((v) => v.trim());
-    if (nameIndex === -1 || !values[nameIndex]) continue;
-
-    const person: Partial<DeceasedPerson> = {
-      id: `csv_${Date.now()}_${i}_${Math.random().toString(36).substr(2, 9)}`,
-      name: values[nameIndex] || '',
-    };
-
-    if (genderIndex !== -1 && values[genderIndex]) {
-      const genderValue = values[genderIndex]?.toLowerCase();
-      person.isMale = genderValue === 'male' || genderValue === 'true' || genderValue === '1' || genderValue === 'זכר';
+const splitCsvLine = (line: string): string[] => {
+  const result: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      if (inQuotes && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
     }
+  }
+  result.push(current.trim());
+  return result;
+};
 
-    if (dobIndex !== -1 && values[dobIndex]) person.dateOfBirth = values[dobIndex];
-    if (dodIndex !== -1 && values[dodIndex]) person.dateOfDeath = values[dodIndex];
-    if (hebrewDobIndex !== -1 && values[hebrewDobIndex]) person.hebrewDateOfBirth = values[hebrewDobIndex];
-    if (hebrewDodIndex !== -1 && values[hebrewDodIndex]) person.hebrewDateOfDeath = values[hebrewDodIndex];
-    if (photoIndex !== -1 && values[photoIndex]) person.photo = values[photoIndex];
-    if (tributeIndex !== -1 && values[tributeIndex]) person.tribute = values[tributeIndex];
+interface CsvParseResult {
+  success: boolean;
+  errors: string[];
+  people: DeceasedPerson[];
+}
 
-    person.template = 'simple';
-
-    people.push(person);
+const parseAndValidateCSV = (
+  csvText: string,
+  language: string,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): CsvParseResult => {
+  const lines = csvText.trim().split(/\r?\n/);
+  if (lines.length < 2) {
+    return {
+      success: false,
+      errors: [t('csv_no_valid_data')],
+      people: [],
+    };
   }
 
-  return people;
+  // English-only headers
+  const headers = splitCsvLine(lines[0] || '').map((h) => h.toLowerCase().trim());
+  const nameIndex = headers.findIndex((h) => h === 'name');
+  if (nameIndex === -1) {
+    return {
+      success: false,
+      errors: [t('csv_missing_name_header')],
+      people: [],
+    };
+  }
+
+  const genderIndex = headers.findIndex((h) => h === 'gender' || h === 'ismale' || h === 'male');
+  const dodIndex = headers.findIndex((h) => h === 'dateofdeath' || h === 'dod' || h === 'death');
+  const dobIndex = headers.findIndex((h) => h === 'dateofbirth' || h === 'dob' || h === 'birth');
+  const hebrewDodIndex = headers.findIndex((h) => h === 'hebrewdateofdeath' || h === 'hebrewdod');
+  const hebrewDobIndex = headers.findIndex((h) => h === 'hebrewdateofbirth' || h === 'hebrewdob');
+  const photoIndex = headers.findIndex((h) => h === 'photo' || h === 'photourl');
+  const tributeIndex = headers.findIndex((h) => h === 'tribute' || h === 'memorial');
+
+  const errors: string[] = [];
+  const people: DeceasedPerson[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const rawLine = lines[i];
+    if (!rawLine?.trim()) continue; // Skip blank lines
+
+    const rowNum = i + 1; // 1-indexed row number in the CSV
+    const values = splitCsvLine(rawLine);
+
+    const name = values[nameIndex]?.trim();
+    if (!name) {
+      errors.push(t('csv_row_name_required', { row: rowNum }));
+    }
+
+    let isMale = true;
+    if (genderIndex !== -1 && values[genderIndex]?.trim()) {
+      const g = values[genderIndex].trim().toLowerCase();
+      if (['male', 'm', 'זכר', 'true', '1'].includes(g)) {
+        isMale = true;
+      } else if (['female', 'f', 'נקבה', 'false', '0'].includes(g)) {
+        isMale = false;
+      } else {
+        errors.push(t('csv_row_invalid_gender', { row: rowNum, val: values[genderIndex].trim() }));
+      }
+    }
+
+    const dod = dodIndex !== -1 ? values[dodIndex]?.trim() : '';
+    if (dod && isNaN(new Date(dod).getTime())) {
+      errors.push(t('csv_row_invalid_dod', { row: rowNum, val: dod }));
+    }
+
+    const dob = dobIndex !== -1 ? values[dobIndex]?.trim() : '';
+    if (dob && isNaN(new Date(dob).getTime())) {
+      errors.push(t('csv_row_invalid_dob', { row: rowNum, val: dob }));
+    }
+
+    const hebrewDod = hebrewDodIndex !== -1 ? values[hebrewDodIndex]?.trim() : '';
+    const hebrewDob = hebrewDobIndex !== -1 ? values[hebrewDobIndex]?.trim() : '';
+    const photo = photoIndex !== -1 ? values[photoIndex]?.trim() : '';
+    const tribute = tributeIndex !== -1 ? values[tributeIndex]?.trim() : '';
+
+    if (name) {
+      const person: DeceasedPerson = {
+        id: `csv_${Date.now()}_${i}_${Math.random().toString(36).substring(2, 9)}`,
+        name,
+        isMale,
+        template: 'simple',
+      };
+
+      if (dod) person.dateOfDeath = dod;
+      if (dob) person.dateOfBirth = dob;
+
+      if (hebrewDod) {
+        person.hebrewDateOfDeath = hebrewDod;
+      } else if (dod) {
+        const autoHebrew = convertToHebrewDate(dod, language);
+        if (autoHebrew) person.hebrewDateOfDeath = autoHebrew;
+      }
+
+      if (hebrewDob) {
+        person.hebrewDateOfBirth = hebrewDob;
+      } else if (dob) {
+        const autoHebrew = convertToHebrewDate(dob, language);
+        if (autoHebrew) person.hebrewDateOfBirth = autoHebrew;
+      }
+
+      if (photo) person.photo = photo;
+      if (tribute) person.tribute = tribute;
+
+      people.push(person);
+    }
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      errors,
+      people: [],
+    };
+  }
+
+  if (people.length === 0) {
+    return {
+      success: false,
+      errors: [t('csv_no_valid_data')],
+      people: [],
+    };
+  }
+
+  return {
+    success: true,
+    errors: [],
+    people,
+  };
+};
+
+const escapeCsvValue = (val?: string | boolean): string => {
+  if (val === undefined || val === null) return '';
+  const str = String(val);
+  if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+};
+
+const generateCSV = (people: DeceasedPerson[]): string => {
+  const headers = [
+    'name',
+    'gender',
+    'dateOfDeath',
+    'dateOfBirth',
+    'hebrewDateOfDeath',
+    'hebrewDateOfBirth',
+    'photo',
+    'tribute',
+  ];
+
+  const rows = people.map((person) => {
+    return [
+      escapeCsvValue(person.name),
+      escapeCsvValue(person.isMale ? 'male' : 'female'),
+      escapeCsvValue(person.dateOfDeath || ''),
+      escapeCsvValue(person.dateOfBirth || ''),
+      escapeCsvValue(person.hebrewDateOfDeath || ''),
+      escapeCsvValue(person.hebrewDateOfBirth || ''),
+      escapeCsvValue(person.photo || ''),
+      escapeCsvValue(person.tribute || ''),
+    ].join(',');
+  });
+
+  return [headers.join(','), ...rows].join('\n');
 };
 
 const DeceasedSettingsTab = () => {
@@ -670,6 +816,7 @@ const DeceasedSettingsTab = () => {
   const { t, i18n } = useTranslation();
   const { height, width } = useWindowDimensions();
   const [showForm, setShowForm] = useState(false);
+  const [showCsvHelp, setShowCsvHelp] = useState(false);
   const [editingPerson, setEditingPerson] = useState<DeceasedPerson | undefined>();
   const isSmallHeight = height < 600;
   const heightScale = useHeightScale() / 1.5;
@@ -791,20 +938,94 @@ const DeceasedSettingsTab = () => {
       const response = await fetch(file.uri);
       const csvText = await response.text();
 
-      const parsedPeople = parseCSV(csvText);
+      const parseResult = parseAndValidateCSV(csvText, i18n.language, t);
 
-      if (parsedPeople.length === 0) {
-        showAlert(t('error'), t('csv_no_valid_data'));
+      if (!parseResult.success) {
+        const maxErrors = 5;
+        const displayed = parseResult.errors.slice(0, maxErrors);
+        let errorMsg = displayed.join('\n');
+        if (parseResult.errors.length > maxErrors) {
+          errorMsg += '\n' + t('csv_more_errors', { count: parseResult.errors.length - maxErrors });
+        }
+        showAlert(t('csv_validation_failed_title'), errorMsg);
         return;
       }
 
-      const updatedDeceased = [...settings.deceasedSettings.deceased, ...(parsedPeople as DeceasedPerson[])];
+      const currentList = settings.deceasedSettings.deceased || [];
+      const updatedDeceased = [...currentList, ...parseResult.people];
       updateDeceasedSettings({ deceased: updatedDeceased });
 
-      showAlert(t('success'), t('csv_imported_count', { count: parsedPeople.length }));
+      showAlert(t('success'), t('csv_imported_count', { count: parseResult.people.length }));
     } catch (error) {
       console.error('Error importing CSV:', error);
       showAlert(t('error'), t('csv_import_failed'));
+    }
+  };
+
+  const handleDeleteAll = () => {
+    const list = settings.deceasedSettings.deceased || [];
+    if (list.length === 0) {
+      showAlert(t('info'), t('no_deceased_to_delete'));
+      return;
+    }
+
+    showConfirm(
+      t('confirm_delete'),
+      t('confirm_delete_all_deceased', { count: list.length }),
+      () => {
+        // Clean up imgbb images if any
+        for (const person of list) {
+          getLocalDeleteUrl(person.id).then((deleteUrl) => {
+            if (deleteUrl) {
+              deleteImageFromImgbb(deleteUrl);
+              removeLocalDeleteUrl(person.id);
+            }
+          });
+        }
+
+        updateDeceasedSettings({ deceased: [] });
+        showAlert(t('success'), t('all_deceased_deleted'));
+      },
+      undefined,
+      {
+        confirmText: t('deceased_delete_all'),
+        cancelText: t('deceased_cancel'),
+        confirmStyle: 'destructive',
+      },
+    );
+  };
+
+  const handleExportCSV = async () => {
+    const deceasedList = settings.deceasedSettings.deceased || [];
+    if (deceasedList.length === 0) {
+      showAlert(t('info') || 'Info', t('csv_no_deceased_to_export'));
+      return;
+    }
+
+    try {
+      const csvContent = generateCSV(deceasedList);
+      const fileName = `deceased_${new Date().toISOString().split('T')[0]}.csv`;
+
+      if (Platform.OS === 'web' && typeof document !== 'undefined') {
+        const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        return;
+      }
+
+      await Share.share({
+        title: fileName,
+        message: csvContent,
+      });
+    } catch (error) {
+      console.error('Error exporting CSV:', error);
+      showAlert(t('error'), t('csv_export_failed'));
     }
   };
 
@@ -1005,7 +1226,33 @@ const DeceasedSettingsTab = () => {
               <Text className="font-bold" style={{ fontSize: titleSize }}>
                 {t('deceased_people')}
               </Text>
-              <View className="flex-row" style={{ gap: smallPadding }}>
+              <View className="flex-row items-center flex-wrap" style={{ gap: smallPadding }}>
+                <TouchableOpacity
+                  onPress={() => setShowCsvHelp((prev) => !prev)}
+                  className="bg-gray-100 border border-gray-300 rounded-lg flex-row items-center"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+                >
+                  <Feather name="help-circle" size={Math.round(12 * heightScale)} color="#4b5563" />
+                  <Text
+                    className="text-gray-700 font-medium"
+                    style={{ fontSize: buttonTextSize, marginLeft: smallPadding / 2 }}
+                  >
+                    {t('csv_help_button')}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => void handleExportCSV()}
+                  className="bg-indigo-600 rounded-lg flex-row items-center"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+                >
+                  <Feather name="download" size={Math.round(12 * heightScale)} color="white" />
+                  <Text
+                    className="text-white font-medium"
+                    style={{ fontSize: buttonTextSize, marginLeft: smallPadding / 2 }}
+                  >
+                    {t('export_csv')}
+                  </Text>
+                </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => void handleImportCSV()}
                   className="bg-blue-500 rounded-lg flex-row items-center"
@@ -1021,15 +1268,69 @@ const DeceasedSettingsTab = () => {
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setShowForm(true)}
-                  className="bg-green-500 rounded-lg"
+                  className="bg-green-500 rounded-lg flex-row items-center"
                   style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
                 >
-                  <Text className="text-white font-medium" style={{ fontSize: buttonTextSize }}>
+                  <Feather name="plus" size={Math.round(12 * heightScale)} color="white" />
+                  <Text
+                    className="text-white font-medium"
+                    style={{ fontSize: buttonTextSize, marginLeft: smallPadding / 2 }}
+                  >
                     {t('deceased_add_person')}
                   </Text>
                 </TouchableOpacity>
+                {settings.deceasedSettings.deceased?.length > 0 && (
+                  <TouchableOpacity
+                    onPress={handleDeleteAll}
+                    className="bg-red-500 rounded-lg flex-row items-center"
+                    style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+                  >
+                    <Feather name="trash-2" size={Math.round(12 * heightScale)} color="white" />
+                    <Text
+                      className="text-white font-medium"
+                      style={{ fontSize: buttonTextSize, marginLeft: smallPadding / 2 }}
+                    >
+                      {t('deceased_delete_all')}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
+
+            {showCsvHelp && (
+              <View className="bg-blue-50 border border-blue-200 rounded-lg" style={{ padding, marginBottom: margin }}>
+                <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding }}>
+                  <View className="flex-row items-center">
+                    <Feather name="info" size={Math.round(14 * heightScale)} color="#1d4ed8" />
+                    <Text className="font-bold text-blue-900" style={{ fontSize: textSize, marginLeft: smallPadding }}>
+                      {t('csv_help_title')}
+                    </Text>
+                  </View>
+                  <TouchableOpacity onPress={() => setShowCsvHelp(false)}>
+                    <Feather name="x" size={Math.round(14 * heightScale)} color="#1d4ed8" />
+                  </TouchableOpacity>
+                </View>
+                <Text
+                  className="text-blue-900 font-medium"
+                  style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
+                >
+                  • {t('csv_help_english_headers')}
+                </Text>
+                <Text className="text-blue-800" style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                  • {t('csv_help_template_tip')}
+                </Text>
+                <View className="bg-white rounded border border-blue-200" style={{ padding: smallPadding }}>
+                  <Text className="text-gray-600 font-medium mb-0.5" style={{ fontSize: labelSize * 0.9 }}>
+                    {t('csv_example')}
+                  </Text>
+                  <Text className="text-gray-800 font-mono select-all" style={{ fontSize: labelSize * 0.85 }}>
+                    {
+                      'name,gender,dateOfDeath,dateOfBirth,hebrewDateOfDeath,hebrewDateOfBirth,photo,tribute\n"ישראל ישראלי",male,2023-05-15,1950-01-01,"כ״ד באייר תשפ״ג",,,"ת.נ.צ.ב.ה"'
+                    }
+                  </Text>
+                </View>
+              </View>
+            )}
 
             <Modal
               visible={showForm}

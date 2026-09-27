@@ -20,6 +20,7 @@ import {
   ChanukahEvent,
   RoshChodeshEvent,
   gematriya,
+  TimedEvent,
 } from '@hebcal/core';
 import { Nusach, PurimSettings } from './defs';
 import { getLeyningOnDate, Leyning } from '@hebcal/leyning';
@@ -101,6 +102,7 @@ export class ZmanimWrapper {
       molad: true,
       locale: this.language,
       addHebrewDates: true,
+      hour12: false,
     };
     return HebrewCalendar.calendar(options);
   }
@@ -280,6 +282,17 @@ export class ZmanimWrapper {
       }
     }
     return '';
+  }
+
+  getSofChametzTimes(): string {
+    const events = this.getEvents(1);
+    const result = [];
+    for (const ev of events) {
+      if (ev instanceof TimedEvent) {
+        if (ev.desc.toLowerCase().includes('chametz')) result.push(ev.render(this.language));
+      }
+    }
+    return result.join(', ');
   }
 
   getHebrewDate(): string {

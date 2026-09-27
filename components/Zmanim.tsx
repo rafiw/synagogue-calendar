@@ -105,6 +105,7 @@ const Zmanim: React.FC = () => {
       haveAlHanisim: zmanim.haveAlHanisim(),
       haveYaaleVeyavo: zmanim.haveYaaleVeyavo(),
       molad: zmanim.getMolad(),
+      chametz: zmanim.getSofChametzTimes(),
       omer: zmanim.getOmer(),
       avotChapter: dow >= 5 ? zmanim.getAvotChapter() : '',
       isMoridHatal: zmanim.isMoridHatal(),
@@ -139,7 +140,6 @@ const Zmanim: React.FC = () => {
     if (!computedZmanim) {
       return [];
     }
-   
 
     return [
       ...(computedZmanim.parsha ? [{ text: t('parasha', { date: computedZmanim.parsha }) }] : []),
@@ -181,6 +181,7 @@ const Zmanim: React.FC = () => {
       ...(computedZmanim.hallelType === HallelType.HALF_HALLEL ? [{ text: t('half_hallel') }] : []),
       ...(computedZmanim.haveTachanun ? [{ text: t(computedZmanim.haveTachanun) }] : []),
       ...(computedZmanim.isSlichotTonight ? [{ text: t('slichot') }] : []),
+      ...(computedZmanim.chametz ? [{ text: t('chametz', { text: computedZmanim.chametz }) }] : []),
     ];
   }, [computedZmanim, t]);
   const dayTimeItems = useMemo(() => {

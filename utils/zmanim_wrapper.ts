@@ -546,11 +546,17 @@ export class ZmanimWrapper {
   isSlichotTonight(): boolean {
     const month = this.hdate.getMonth();
     const day = this.hdate.getDate();
+    const dow = this.hdate.getDay();
     const hour = this.now.getHours();
 
     if (month !== months.ELUL && month !== months.TISHREI) {
       return false;
     }
+    // no Slichot on firday night
+    if (dow === 5) {
+      return false;
+    }
+
     if (month === months.TISHREI) {
       return day >= 2 && day <= 8;
     }

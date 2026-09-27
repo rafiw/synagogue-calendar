@@ -214,10 +214,10 @@ export class ZmanimWrapper {
 
   getMegilla(): string {
     try {
-      //getHolidaysOnDate
+      // getHolidaysOnDate
       const reading = getLeyningOnDate(this.hdate, this.il, false, this.language) as Leyning | undefined;
       return reading?.megillah?.[1]?.k || '';
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       return '';
     }
@@ -257,7 +257,6 @@ export class ZmanimWrapper {
   getHavdala(): string {
     const events = this.getEvents();
     for (const ev of events) {
-      const hd = ev.getDate();
       if (ev instanceof HavdalahEvent) {
         return ev.eventTimeStr;
       }
@@ -308,6 +307,15 @@ export class ZmanimWrapper {
           continue;
         }
         holidays.push(ev.render(this.language));
+        if (ev.desc === "Shmini Atzeret") {
+          // in israel we celebrate shmini atzeret and simchat tora togethor
+          if (this.il) {
+            if (this.language === 'he')
+              holidays.push("שִׂמְחַת תּוֹרָה")
+            else 
+              holidays.push("Simchat Torah")
+          }
+        }
       }
     }
     // on friday display special shabbat

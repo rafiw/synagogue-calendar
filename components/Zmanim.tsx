@@ -139,11 +139,16 @@ const Zmanim: React.FC = () => {
     if (!computedZmanim) {
       return [];
     }
+   
 
     return [
       ...(computedZmanim.parsha ? [{ text: t('parasha', { date: computedZmanim.parsha }) }] : []),
-      ...(computedZmanim.holidays
-        ? computedZmanim.holidays.map((holiday) => ({ text: t('holiday', { date: holiday }) }))
+      ...(computedZmanim.holidays?.length
+        ? [
+            {
+              text: computedZmanim.holidays.map((holiday) => t('holiday', { date: holiday })).join(' - '),
+            },
+          ]
         : []),
       ...(computedZmanim.fastDay === FastDayType.MINOR_FAST
         ? [

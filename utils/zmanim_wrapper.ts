@@ -487,8 +487,8 @@ export class ZmanimWrapper {
       if (holiday.getFlags() & flags.MAJOR_FAST) {
         return FastDayType.MAJOR_FAST;
       }
-      // don't consider Yom Kippur Katan as a fast day
-      if (holiday.getFlags() & flags.MINOR_FAST && !(holiday.getFlags() & flags.YOM_KIPPUR_KATAN)) {
+      // don't consider Yom Kippur Katan | BHEB as a fast day
+      if (holiday.getFlags() & flags.MINOR_FAST && !(holiday.getFlags() & (flags.YOM_KIPPUR_KATAN | flags.BEHAB))) {
         return FastDayType.MINOR_FAST;
       }
     }

@@ -173,7 +173,7 @@ export default function App() {
           ) : null,
         presentTime: settings.dailyHalakhaSettings?.screenDisplayTime || defaultPageDisplayTime,
       },
-    ].filter((screen) => screen.content() !== null && screen.presentTime > 0) as Screen[];
+    ].filter((screen) => screen.content() !== null && screen.presentTime > 0);
   }, [settings]);
 
   useEffect(() => {

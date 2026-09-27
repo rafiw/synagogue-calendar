@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
-import { useSettings } from '../context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import { HDate, months, getHolidaysOnDate } from '@hebcal/core';
-import { DailyHalakhaItem, loadDailyHalakhaData } from '../utils/dailyHalakhaDataLoader';
+import { DailyHalakhaItem, loadDailyHalakhaData } from '@utils/dailyHalakhaDataLoader';
 
 const START_DATE = new HDate(1, months.TISHREI, 5786);
 

@@ -1,13 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import { useSettings } from 'context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
-import { daysOfWeek } from 'utils/classesHelpers';
-import { Class, Settings } from 'utils/defs';
-import { defaultPageDisplayTime, isRTL2 } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useResponsiveIconSize } from 'utils/responsive';
+import { daysOfWeek } from '@utils/classesHelpers';
+import { Class, Settings } from '@utils/defs';
+import { defaultPageDisplayTime, isRTL2 } from '@utils/utils';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useResponsiveIconSize } from '@utils/responsive';
 
 const classesPerPage = 3.0;
 export async function getSubPages(): Promise<number> {

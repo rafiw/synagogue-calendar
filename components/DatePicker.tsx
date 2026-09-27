@@ -18,8 +18,8 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
     if (format === 'YYYY-MM-DD') {
       return new Date(dateString);
     } else {
-      const [day, month, year] = dateString.split('/');
-      return new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      const [day = '1', month = '1', year = '1970'] = dateString.split('/');
+      return new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
     }
   };
 
@@ -50,7 +50,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
           value={parseDate(value, dateFormat)}
           mode="date"
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-          onChange={(event: DateTimePickerEvent, selectedDate?: Date) => {
+          onChange={(_event: DateTimePickerEvent, selectedDate?: Date) => {
             setShowPicker(Platform.OS === 'ios');
             if (selectedDate) {
               onChange(formatDate(selectedDate, dateFormat));

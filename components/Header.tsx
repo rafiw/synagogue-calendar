@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useSettings } from '../context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { isRTL2 } from 'utils/utils';
+import { isRTL2 } from '@utils/utils';
 import { useTranslation } from 'react-i18next';
-import { ZmanimWrapper } from 'utils/zmanim_wrapper';
+import { ZmanimWrapper } from '@utils/zmanim_wrapper';
 import {
   useResponsiveFontSize,
   useResponsiveIconSize,
   useResponsiveSpacing,
   useDeviceType,
   useHeightScale,
-} from 'utils/responsive';
+} from '@utils/responsive';
 
 const getCurrentTime = (locale: string) => {
   const now = new Date(); // cannot use zmanim.greg()

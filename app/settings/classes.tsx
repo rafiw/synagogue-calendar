@@ -1,14 +1,14 @@
 import { Feather } from '@expo/vector-icons';
-import { useSettings } from 'context/settingsContext';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ActivityIndicator, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import { daysOfWeek } from 'utils/classesHelpers';
-import { Class } from 'utils/defs';
-import { isRTL } from 'utils/utils';
-import { NumberInput } from '../../components/NumberInput';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { daysOfWeek } from '@utils/classesHelpers';
+import { Class } from '@utils/defs';
+import { isRTL } from '@utils/utils';
+import { NumberInput } from '@components/NumberInput';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { useSettings } from '@context/settingsContext';
 
 // Checkbox styles - extracted to avoid inline style warnings
 const checkboxStyles = {
@@ -121,7 +121,7 @@ const ClassesSettingsTab = () => {
       // Remove the day
       updatedClasses[classIndex] = {
         ...currentClass,
-        day: currentDays.filter((d) => d !== dayNumber),
+        day: currentDays.filter((d: number) => d !== dayNumber),
       };
     } else {
       // Add the day and sort
@@ -135,7 +135,7 @@ const ClassesSettingsTab = () => {
   };
 
   const handleDeleteClass = (index: number) => {
-    const updatedClasses = settings.classesSettings.classes.filter((_, i) => i !== index);
+    const updatedClasses = settings.classesSettings.classes.filter((_: any, i: number) => i !== index);
     updateSettings({ classesSettings: { ...settings.classesSettings, classes: updatedClasses } });
   };
 

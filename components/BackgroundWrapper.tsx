@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ImageBackground, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { BackgroundSettings } from '../utils/defs';
+import { BackgroundSettings } from '@utils/defs';
 
 interface BackgroundWrapperProps {
   settings: BackgroundSettings;

@@ -19,7 +19,6 @@ export default defineConfig({
         '**/responsive.ts',
         '**/PressableLink.tsx',
         '**/useScreenRotation.ts',
-        '**/config.ts',
       ],
       thresholds: {
         lines: 85,
@@ -32,6 +31,12 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      '@app': path.resolve(__dirname, './app'),
+      '@settings': path.resolve(__dirname, './app/settings'),
+      '@components': path.resolve(__dirname, './components'),
+      '@context': path.resolve(__dirname, './context'),
+      '@utils': path.resolve(__dirname, './utils'),
+      '@assets': path.resolve(__dirname, './assets'),
       utils: path.resolve(__dirname, './utils'),
       components: path.resolve(__dirname, './components'),
       context: path.resolve(__dirname, './context'),

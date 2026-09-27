@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useSettings } from 'context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import {
   View,
@@ -14,17 +14,17 @@ import {
   Platform,
   Share,
 } from 'react-native';
-import { showAlert, showConfirm } from '../../utils/alert';
+import { showAlert, showConfirm } from '@utils/alert';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useState, useEffect } from 'react';
-import { DeceasedPerson, DeceasedSettings } from '../../utils/defs';
-import { DatePicker } from '../../components/DatePicker';
-import { NumberInput } from '../../components/NumberInput';
+import { DeceasedPerson, DeceasedSettings } from '@utils/defs';
+import { DatePicker } from '@components/DatePicker';
+import { NumberInput } from '@components/NumberInput';
 import { HDate } from '@hebcal/core';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 
 // Local storage key for image delete URLs (not synced to GitHub for security)
 const DELETE_URLS_STORAGE_KEY = 'deceased_image_delete_urls';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 
 interface FooterProps {
   footerText?: string;

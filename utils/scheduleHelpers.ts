@@ -31,7 +31,7 @@ export function getPrayerDisplayTime(prayer: Prayer, settings: Settings): string
     const [hours, minutes] = timeStr.split(':').map(Number);
     const baseTime = new Date(2026, 1, 1, hours || 0, (minutes || 0) + (prayer.offsetMinutes || 0));
     return baseTime.toLocaleTimeString(locale, { hour: 'numeric', minute: 'numeric' });
-  } catch (error) {
+  } catch {
     return prayer.time || '';
   }
 }

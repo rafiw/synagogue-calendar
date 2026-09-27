@@ -46,7 +46,9 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
           className={`bg-white rounded-xl w-full max-w-[500px] max-h-[95%] ${isCompact ? 'p-3' : 'p-5 rounded-2xl'}`}
         >
           {/* Header with color display inline */}
-          <View className={`flex-row items-center justify-between ${isCompact ? 'mb-2' : 'mb-4'}`}></View>
+          <View className={`flex-row items-center justify-between ${isCompact ? 'mb-2' : 'mb-4'}`}>
+            {title ? <Text className="font-bold text-gray-800 text-base">{title}</Text> : null}
+          </View>
           {/* Color Picker */}
           <ColorPicker
             style={{ width: '100%', gap: isCompact ? 8 : 16 }}

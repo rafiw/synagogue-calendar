@@ -1,10 +1,10 @@
-import { useSettings } from 'context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View, useWindowDimensions } from 'react-native';
-import { isRTL } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
-import { getPrayerDisplayTime } from 'utils/scheduleHelpers';
+import { isRTL } from '@utils/utils';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { getPrayerDisplayTime } from '@utils/scheduleHelpers';
 
 const Schedule: React.FC = () => {
   const { settings } = useSettings();

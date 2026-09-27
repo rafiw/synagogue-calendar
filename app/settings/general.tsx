@@ -12,14 +12,14 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
-import { useSettings } from '../../context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
-import ExternalLink from '../../utils/PressableLink';
-import ColorPickerModal from '../../components/ColorPickerModal';
-import { showAlert } from '../../utils/alert';
-import { isRTL } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import ExternalLink from '@utils/PressableLink';
+import ColorPickerModal from '@components/ColorPickerModal';
+import { showAlert } from '@utils/alert';
+import { isRTL } from '@utils/utils';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 const checkboxStyles = {
@@ -169,7 +169,7 @@ const GeneralSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
   const { height } = useWindowDimensions();
-  const [background, setBackground] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
+  const [background] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
   const [rtl, setRtl] = useState(false);
   const heightScale = useHeightScale() * 0.5;
   const isSmallHeight = height < 600;
@@ -310,7 +310,7 @@ const GeneralSettingsTab = () => {
 
   const handleRemoveGradientColor = (index: number) => {
     if (gradientColors.length <= 2) return; // Need at least 2 colors for gradient
-    const newColors = gradientColors.filter((_, i) => i !== index);
+    const newColors = gradientColors.filter((_: any, i: number) => i !== index);
     setGradientColors(newColors);
     const newBackgroundSettings = {
       ...settings.synagogueSettings.backgroundSettings,
@@ -758,7 +758,7 @@ const GeneralSettingsTab = () => {
                   {t('background_gradient_colors')}
                 </Text>
                 <View className="flex-row" style={{ gap: padding }}>
-                  {gradientColors.map((color, index) => (
+                  {gradientColors.map((color: string, index: number) => (
                     <View
                       key={index}
                       className="flex-1 flex-row items-stretch rounded-lg overflow-hidden border border-gray-300"

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, ActivityIndicator, useWindowDimensions } from 'react-native';
-import { useSettings } from '../../context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
-import { NumberInput } from '../../components/NumberInput';
-import { DailyHalakhaItem, loadDailyHalakhaData } from '../../utils/dailyHalakhaDataLoader';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { NumberInput } from '@components/NumberInput';
+import { DailyHalakhaItem, loadDailyHalakhaData } from '@utils/dailyHalakhaDataLoader';
 
 const DailyHalakhaSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
@@ -67,7 +67,7 @@ const DailyHalakhaSettingsTab = () => {
   const toggleBook = (bookTitle: string) => {
     const selectedBooks = settings.dailyHalakhaSettings?.selectedBooks || [];
     const newSelectedBooks = selectedBooks.includes(bookTitle)
-      ? selectedBooks.filter((title) => title !== bookTitle)
+      ? selectedBooks.filter((title: string) => title !== bookTitle)
       : [...selectedBooks, bookTitle];
     updateSettings({
       dailyHalakhaSettings: {

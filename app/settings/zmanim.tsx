@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TextInput, ActivityIndicator, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useSettings } from '../../context/settingsContext';
-import { cities, olsons } from '../../assets/data';
+import { useSettings } from '@context/settingsContext';
+import { cities, olsons } from '@assets/data';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
-import { isRTL } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { isRTL } from '@utils/utils';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
 const ZmanimSettingsTab = () => {

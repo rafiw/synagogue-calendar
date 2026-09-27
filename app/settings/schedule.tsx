@@ -1,15 +1,15 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { useSettings } from 'context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ActivityIndicator, TouchableOpacity, TextInput, ScrollView, Modal } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useEffect, useState } from 'react';
-import { ScheduleColumn, Prayer, PrayerTimeType } from 'utils/defs';
-import { showConfirm, showAlert } from 'utils/alert';
-import { isRTL } from 'utils/utils';
-import { NumberInput } from '../../components/NumberInput';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
-import { getPrayerDisplayTime } from 'utils/scheduleHelpers';
+import { ScheduleColumn, Prayer, PrayerTimeType } from '@utils/defs';
+import { showConfirm, showAlert } from '@utils/alert';
+import { isRTL } from '@utils/utils';
+import { NumberInput } from '@components/NumberInput';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { getPrayerDisplayTime } from '@utils/scheduleHelpers';
 
 const ScheduleSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
@@ -116,7 +116,7 @@ const ScheduleSettingsTab = () => {
       t('sure_column_delete'),
       () => {
         if (!settings.scheduleSettings) return;
-        const columns = settings.scheduleSettings.columns.filter((c) => c.id !== columnId);
+        const columns = settings.scheduleSettings.columns.filter((c: { id: string }) => c.id !== columnId);
         updateSettings({
           scheduleSettings: {
             ...settings.scheduleSettings,
@@ -246,7 +246,7 @@ const ScheduleSettingsTab = () => {
         if (columnIndex !== -1) {
           const column = columns[columnIndex];
           if (!column) return;
-          const prayers = column.prayers.filter((p) => p.id !== prayerId);
+          const prayers = column.prayers.filter((p: { id: string }) => p.id !== prayerId);
           const updatedColumn: ScheduleColumn = {
             id: column.id,
             title: column.title,
@@ -334,7 +334,7 @@ const ScheduleSettingsTab = () => {
           </TouchableOpacity>
 
           {/* Columns List */}
-          {columns.map((column) => (
+          {columns.map((column: ScheduleColumn) => (
             <View
               key={column.id}
               className="bg-gray-100 rounded-lg border border-gray-400"

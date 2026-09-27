@@ -3,8 +3,8 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import * as SecureStore from 'expo-secure-store';
-import { cities } from 'assets/data';
-import { Settings } from 'utils/defs';
+import { cities } from '@assets/data';
+import { Settings } from '@utils/defs';
 const defaultName = 'בית כנסת לדוגמא';
 
 const defaultSettings: Settings = {

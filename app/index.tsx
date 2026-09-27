@@ -12,25 +12,25 @@ import { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import Header from '../components/Header';
-import Footer from '../components/Footer';
-import { useSettings } from '../context/settingsContext';
-import { defaultPageDisplayTime, getNoScreenText } from '../utils/utils';
-import { useScreenRotation } from '../utils/useScreenRotation';
-import { Message, Screen, Settings } from '../utils/defs';
-import { useResponsiveSpacing, useDeviceType } from '../utils/responsive';
-import BackgroundWrapper from '../components/BackgroundWrapper';
-import { calculateDeceasedPages } from '../utils/deceasedHelpers';
-import { isMessageActive, calculateMessagesSubPages } from '../utils/classesHelpers';
+import Header from '@components/Header';
+import Footer from '@components/Footer';
+import { useSettings } from '@context/settingsContext';
+import { defaultPageDisplayTime, getNoScreenText } from '@utils/utils';
+import { useScreenRotation } from '@utils/useScreenRotation';
+import { Message, Screen, Settings } from '@utils/defs';
+import { useResponsiveSpacing, useDeviceType } from '@utils/responsive';
+import BackgroundWrapper from '@components/BackgroundWrapper';
+import { calculateDeceasedPages } from '@utils/deceasedHelpers';
+import { isMessageActive, calculateMessagesSubPages } from '@utils/classesHelpers';
 
 const classesPerPage = 3.0;
 
-const Zmanim = lazy(() => import('../components/Zmanim'));
-const Classes = lazy(() => import('../components/Classes'));
-const Deceased = lazy(() => import('../components/Deceased'));
-const Messages = lazy(() => import('../components/Messages'));
-const Schedule = lazy(() => import('../components/Schedule'));
-const DailyHalakha = lazy(() => import('../components/DailyHalakha'));
+const Zmanim = lazy(() => import('@components/Zmanim'));
+const Classes = lazy(() => import('@components/Classes'));
+const Deceased = lazy(() => import('@components/Deceased'));
+const Messages = lazy(() => import('@components/Messages'));
+const Schedule = lazy(() => import('@components/Schedule'));
+const DailyHalakha = lazy(() => import('@components/DailyHalakha'));
 
 const lazyScreenFallback = (
   <View className="flex-1 justify-center items-center">

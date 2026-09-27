@@ -75,8 +75,10 @@ describe('ZmanimWrapper', () => {
       const sunrise = wrapper.getSunrise();
       const sunset = wrapper.getSunset();
 
-      const sunriseMinutes = parseInt(sunrise.split(':')[0]) * 60 + parseInt(sunrise.split(':')[1]);
-      const sunsetMinutes = parseInt(sunset.split(':')[0]) * 60 + parseInt(sunset.split(':')[1]);
+      const [sunriseH = '0', sunriseM = '0'] = sunrise.split(':');
+      const [sunsetH = '0', sunsetM = '0'] = sunset.split(':');
+      const sunriseMinutes = parseInt(sunriseH, 10) * 60 + parseInt(sunriseM, 10);
+      const sunsetMinutes = parseInt(sunsetH, 10) * 60 + parseInt(sunsetM, 10);
 
       expect(sunsetMinutes).toBeGreaterThan(sunriseMinutes);
     });
@@ -92,7 +94,7 @@ describe('ZmanimWrapper', () => {
       const sunset = wrapper.getSunset();
 
       const toMinutes = (time: string) => {
-        const [h, m] = time.split(':').map(Number);
+        const [h = 0, m = 0] = time.split(':').map(Number);
         return h * 60 + m;
       };
 
@@ -178,7 +180,7 @@ describe('ZmanimWrapper', () => {
       const majorEnd = wrapper.getMajorFastEnd();
 
       const toMinutes = (time: string) => {
-        const [h, m] = time.split(':').map(Number);
+        const [h = 0, m = 0] = time.split(':').map(Number);
         return h * 60 + m;
       };
 
@@ -456,7 +458,7 @@ describe('ZmanimWrapper', () => {
       const sunset = wrapper.getSunset();
 
       const toMinutes = (time: string) => {
-        const [h, m] = time.split(':').map(Number);
+        const [h = 0, m = 0] = time.split(':').map(Number);
         return h * 60 + m;
       };
 
@@ -598,9 +600,6 @@ describe('ZmanimWrapper', () => {
         // Ashkenaz calculation uses next year (this.hdate.getFullYear() + 1)
         const ashkenazWrapper = new ZmanimWrapper('ashkenaz', latitude, longitude, tzid, language, purimSettings);
 
-        const currentHDate = new HDate();
-        const nextYear = currentHDate.getFullYear() + 1;
-
         // Should not throw error
         expect(() => ashkenazWrapper.isSlichotTonight()).not.toThrow();
       });
@@ -687,9 +686,6 @@ describe('ZmanimWrapper', () => {
 
       it('should handle leap years correctly', () => {
         // The method should work in both leap and non-leap years
-        const currentHDate = new HDate();
-        const isLeapYear = currentHDate.isLeapYear();
-
         const result = wrapper.isSlichotTonight();
         expect(typeof result).toBe('boolean');
 

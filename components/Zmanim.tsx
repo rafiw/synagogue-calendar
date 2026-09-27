@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, ScrollView, Text, View, useWindowDimensions } from 'react-native';
-import { FastDayType, ZmanimWrapper } from '../utils/zmanim_wrapper';
-import { useSettings } from '../context/settingsContext';
+import { FastDayType, HallelType, ZmanimWrapper } from '@utils/zmanim_wrapper';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
-import { isRTL } from 'utils/utils';
-import { HallelType } from 'utils/zmanim_wrapper';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { isRTL } from '@utils/utils';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 
 const getTachanunLabel = (
   haveTachanunShacharit: boolean,

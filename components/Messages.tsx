@@ -1,21 +1,21 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSettings } from 'context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { router } from 'expo-router';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ImageBackground, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { defaultPageDisplayTime } from 'utils/utils';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
-import { Message, Settings } from 'utils/defs';
+import { defaultPageDisplayTime } from '@utils/utils';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { Message, Settings } from '@utils/defs';
 import {
   isMessageActive,
   filterActiveMessages,
   buildMessagePages,
   calculateMessagesSubPages,
   MessagePage,
-} from 'utils/classesHelpers';
-import { getEventImage } from 'utils/eventAssets';
+} from '@utils/classesHelpers';
+import { getEventImage } from '@utils/eventAssets';
 
 export async function getSubPages(): Promise<number> {
   const localSettingsString = await AsyncStorage.getItem('settings');
@@ -118,6 +118,10 @@ const Messages: React.FC = () => {
   }
 
   const currentPageData = messagePages[currentPage] || messagePages[0];
+
+  if (!currentPageData) {
+    return null;
+  }
 
   if (currentPageData.type === 'event') {
     const { message } = currentPageData;

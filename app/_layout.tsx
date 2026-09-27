@@ -1,11 +1,11 @@
 import { Stack } from 'expo-router';
-import { SettingsProvider, useSettings } from '../context/settingsContext';
+import { SettingsProvider, useSettings } from '@context/settingsContext';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { I18nextProvider } from 'react-i18next';
-import { useState, useEffect, StrictMode } from 'react';
+import { useState, useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { initializeI18n, i18n } from '../utils/i18n';
+import { initializeI18n, i18n } from '@utils/i18n';
 import '../global.css';
 
 function AppContent() {

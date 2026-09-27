@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Text, View, Image, TouchableOpacity } from 'react-native';
-import { useSettings } from '../context/settingsContext';
-import { DeceasedPerson, Settings } from '../utils/defs';
+import { useSettings } from '@context/settingsContext';
+import { DeceasedPerson, Settings } from '@utils/defs';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import MemorialCandle from './MemorialCandle';
-import { isRTL2 } from 'utils/utils';
-import { calculateDeceasedPages } from 'utils/deceasedHelpers';
+import { isRTL2 } from '@utils/utils';
+import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useFontScale } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useFontScale } from '@utils/responsive';
 
 // Export function to calculate sub-pages for timing in index.tsx
 export async function getSubPages(): Promise<number> {
@@ -58,7 +58,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
     });
   };
 
-  const renderSimpleTemplate = (isRightToLeft: boolean) => (
+  const renderSimpleTemplate = () => (
     <View className="flex-1 rounded-xl overflow-hidden bg-gradient-to-b from-slate-800 to-slate-900 shadow-lg border border-amber-600/30">
       <View className="flex-1 flex-row">
         <View className="justify-center items-center px-2">
@@ -156,7 +156,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
     </View>
   );
 
-  const renderPhotoTemplate = (isRightToLeft: boolean) => (
+  const renderPhotoTemplate = () => (
     <View className="flex-1 rounded-xl overflow-hidden bg-gradient-to-r from-slate-800 to-slate-900 shadow-lg border border-amber-600/30">
       <View className="flex-1 flex-row">
         {/* Photo section */}
@@ -225,9 +225,9 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
     case 'card':
       return renderCardTemplate(isRightToLeft);
     case 'photo':
-      return renderPhotoTemplate(isRightToLeft);
+      return renderPhotoTemplate();
     default:
-      return renderSimpleTemplate(isRightToLeft);
+      return renderSimpleTemplate();
   }
 };
 

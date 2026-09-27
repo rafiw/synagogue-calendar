@@ -1,14 +1,14 @@
 import { Feather } from '@expo/vector-icons';
-import { useSettings } from 'context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { View, Text, ActivityIndicator, TouchableOpacity, TextInput, FlatList, Image } from 'react-native';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import { DatePicker } from '../../components/DatePicker';
-import { NumberInput } from '../../components/NumberInput';
-import { EventType, Message, MessageType } from 'utils/defs';
-import { isMessageExpired, isMessageScheduled } from 'utils/classesHelpers';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
-import { EVENT_TYPES, getEventImage } from '../../utils/eventAssets';
+import { DatePicker } from '@components/DatePicker';
+import { NumberInput } from '@components/NumberInput';
+import { EventType, Message, MessageType } from '@utils/defs';
+import { isMessageExpired, isMessageScheduled } from '@utils/classesHelpers';
+import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { EVENT_TYPES, getEventImage } from '@utils/eventAssets';
 
 const generateId = () => `msg_${Date.now()}_${Math.random().toString(36).substring(2)}`;
 

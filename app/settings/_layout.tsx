@@ -2,7 +2,7 @@ import { useRef, useState, useCallback } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, useWindowDimensions, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 
-import { useSettings } from '../../context/settingsContext';
+import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import GeneralSettingsTab from './general';
@@ -12,7 +12,7 @@ import DeceasedSettingsTab from './deceased';
 import ScheduleSettingsTab from './schedule';
 import ZmanimSettingsTab from './zmanim';
 import DailyHalakhaSettingsTab from './dailyHalakha';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from 'utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 
 const Tab = createMaterialTopTabNavigator();
 

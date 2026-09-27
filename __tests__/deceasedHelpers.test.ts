@@ -201,12 +201,10 @@ describe('deceasedHelpers', () => {
     describe('monthly filtering in leap year', () => {
       // Mock HDate class that simulates a leap year
       class MockHDateLeapYear {
-        private date?: Date;
         private month: number;
         private _isLeapYear: boolean;
 
         constructor(date?: Date) {
-          this.date = date;
           // If date provided, calculate its Hebrew month, otherwise use current mock
           if (date) {
             const realHDate = new HDate(date);
@@ -284,12 +282,10 @@ describe('deceasedHelpers', () => {
     describe('monthly filtering in non-leap year', () => {
       // Mock HDate class for non-leap year
       class MockHDateNonLeapAdar {
-        private date?: Date;
         private month: number;
         private _isLeapYear: boolean;
 
         constructor(date?: Date) {
-          this.date = date;
           if (date) {
             const realHDate = new HDate(date);
             this.month = realHDate.getMonth();
@@ -437,9 +433,6 @@ describe('deceasedHelpers', () => {
 
     describe('real world integration', () => {
       it('should correctly filter with real HDate based on actual current month', () => {
-        const currentHDate = new HDate();
-        const currentMonth = currentHDate.getMonth();
-
         // Create deceased people in various months
         const deceased: DeceasedFilterable[] = [
           { hebrewDateOfDeath: new Date(2023, 8, 20) }, // Tishrei

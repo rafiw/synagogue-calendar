@@ -4,11 +4,7 @@
   "compilerOptions": {
     "allowJs": true,
     "esModuleInterop": true,
-    "lib": [
-      "DOM",
-      "ESNext"
-    ],
-    "moduleResolution": "node",
+    "lib": ["DOM", "ESNext"],
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -20,26 +16,18 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": "./",
     "jsx": "react-jsx",
     "paths": {
-      "@/*": [
-        "app/*",
-        "app/settings/*",
-        "components/*",
-        "utils/"
-      ]
+      "@app/*": ["./app/*"],
+      "@settings/*": ["./app/settings/*"],
+      "@components/*": ["./components/*"],
+      "@context/*": ["./context/*"],
+      "@utils/*": ["./utils/*"],
+      "@assets/*": ["./assets/*"]
     },
-    "types": [
-      "vitest/globals"
-    ]
+    "types": ["vitest/globals"]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "app.config.js",
-    "nativewind-env.d.ts"
-  ],
+  "include": ["**/*.ts", "**/*.tsx", "app.config.js", "nativewind-env.d.ts"],
   "exclude": [
     "node_modules",
     "babel.config.cjs",

@@ -188,14 +188,12 @@ export class ZmanimWrapper {
   }
 
   getParsha(): string {
-    const ignoreParasha = ['Sukkot', 'Pesach', 'Shavuot'];
     const sedra = HebrewCalendar.getSedra(this.hdate.getFullYear(), this.il);
     const sedraResult = sedra.lookup(this.hdate);
     // we return Parash Sukkot which makes sense in a way but we don't want to show it
-    if (ignoreParasha.includes(sedraResult.parsha[0] || '')) return '';
-
     // create event so we can render it
     const event = new ParshaEvent(sedraResult);
+    if (sedraResult.chag) return '';
     const ChoolHamoed = event.desc.includes('Chol ha-Moed');
     let desc = event.render(this.language);
     if (ChoolHamoed) {
@@ -536,10 +534,10 @@ export class ZmanimWrapper {
       return false;
     }
     if (month === months.TISHREI) {
-      return (day >= 2 && day <= 8)
+      return day >= 2 && day <= 8;
     }
     if (month === months.ELUL && day === 29) {
-      return (hour < 9)
+      return hour < 9;
     }
     if (this.nusach === 'ashkenaz') {
       const year = this.hdate.getFullYear() + 1;

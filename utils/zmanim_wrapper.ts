@@ -194,13 +194,9 @@ export class ZmanimWrapper {
     const sedraResult = sedra.lookup(this.hdate);
     // we return Parash Sukkot which makes sense in a way but we don't want to show it
     // create event so we can render it
-    const event = new ParshaEvent(sedraResult);
     if (sedraResult.chag) return '';
-    const ChoolHamoed = event.desc.includes('Chol ha-Moed');
-    let desc = event.render(this.language);
-    if (ChoolHamoed) {
-      desc = desc.split(' ').slice(1).join(' ');
-    }
+    const event = new ParshaEvent(sedraResult);
+    const desc = event.render(this.language);
     return desc;
   }
 

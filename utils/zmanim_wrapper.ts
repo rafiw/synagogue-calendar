@@ -239,6 +239,13 @@ export class ZmanimWrapper {
   }
 
   getTachanun(): TachanunResult {
+    if (this.hdate.getMonth() === months.TISHREI && this.hdate.getDate() > 20) {
+      return {
+        shacharit: false,
+        mincha: false,
+        allCongs: false,
+      };
+    }
     return HebrewCalendar.tachanun(this.hdate, this.il);
   }
 
@@ -305,13 +312,11 @@ export class ZmanimWrapper {
           continue;
         }
         holidays.push(ev.render(this.language));
-        if (ev.desc === "Shmini Atzeret") {
+        if (ev.desc === 'Shmini Atzeret') {
           // in israel we celebrate shmini atzeret and simchat tora togethor
           if (this.il) {
-            if (this.language === 'he')
-              holidays.push("שִׂמְחַת תּוֹרָה")
-            else 
-              holidays.push("Simchat Torah")
+            if (this.language === 'he') holidays.push('שִׂמְחַת תּוֹרָה');
+            else holidays.push('Simchat Torah');
           }
         }
       }

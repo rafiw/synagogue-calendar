@@ -2370,7 +2370,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hebcal/core@npm:^6.9.1, @hebcal/core@npm:^6.9.3":
+"@hebcal/core@npm:^6.10.0":
+  version: 6.10.0
+  resolution: "@hebcal/core@npm:6.10.0"
+  dependencies:
+    "@hebcal/hdate": "npm:^0.22.8"
+    "@hebcal/noaa": "npm:^0.12.3"
+    quick-lru: "npm:^7.3.0"
+    temporal-polyfill: "npm:^1.0.5"
+  checksum: 10c0/51da58c21eb93c508358fc57553615b2d77b46470ae89f769085bcf42f0d4d042b38783eaea5cdcc8c77860a89502fb89772f3f1770f00019aea57ad16868524
+  languageName: node
+  linkType: hard
+
+"@hebcal/core@npm:^6.9.3":
   version: 6.9.3
   resolution: "@hebcal/core@npm:6.9.3"
   dependencies:
@@ -2382,20 +2394,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@hebcal/hdate@npm:^0.22.7, @hebcal/hdate@npm:^0.22.8":
+"@hebcal/hdate@npm:^0.22.8":
   version: 0.22.8
   resolution: "@hebcal/hdate@npm:0.22.8"
   checksum: 10c0/cb6878019214efa5a9913d158062a022251ac1e90d7caa4f91c969e8cd8bf632763f81a36b558829edb3b561a40660c3c28f92bead9a244787ef66ce54d31257
   languageName: node
   linkType: hard
 
-"@hebcal/leyning@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "@hebcal/leyning@npm:10.0.0"
+"@hebcal/leyning@npm:^10.0.2":
+  version: 10.0.2
+  resolution: "@hebcal/leyning@npm:10.0.2"
   dependencies:
-    "@hebcal/core": "npm:^6.9.1"
-    "@hebcal/hdate": "npm:^0.22.7"
-  checksum: 10c0/e6d691b193fde3a3e3f71f81da380862f8ea7da14a4798ef78c7e432e827f8aa3a7ac7eee36589be2ee43c7966e706237da4f573b6587c5d343ded7b3a91af1b
+    "@hebcal/core": "npm:^6.10.0"
+    "@hebcal/hdate": "npm:^0.22.8"
+  checksum: 10c0/13a1f0f19fd4ff33ac8ee8befeff19b5d65d30c919d362648a5e2280a43b64c0cc1265a2a27cf841bdfd973811e89857b9ebde336a43ec801ded8222618763a9
   languageName: node
   linkType: hard
 
@@ -11851,7 +11863,7 @@ __metadata:
     "@eslint/js": "npm:^9.39.5"
     "@expo/vector-icons": "npm:^15.1.1"
     "@hebcal/core": "npm:^6.9.3"
-    "@hebcal/leyning": "npm:^10.0.0"
+    "@hebcal/leyning": "npm:^10.0.2"
     "@react-native-async-storage/async-storage": "npm:~2.2.0"
     "@react-native-community/datetimepicker": "npm:8.4.4"
     "@react-native-community/netinfo": "npm:11.4.1"
@@ -11966,7 +11978,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"temporal-polyfill@npm:^1.0.3":
+"temporal-polyfill@npm:^1.0.3, temporal-polyfill@npm:^1.0.5":
   version: 1.0.5
   resolution: "temporal-polyfill@npm:1.0.5"
   dependencies:

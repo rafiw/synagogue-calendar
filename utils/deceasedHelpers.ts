@@ -162,6 +162,8 @@ export function getCurrentHebrewMonth(HDateClass: { new (): { getMonth(): number
  * @param HDateClass - The HDate class from @hebcal/core
  * @returns Filtered array of deceased
  */
+import { isValidDateString } from './validation';
+
 export function filterDeceasedByDisplayMode<T extends DeceasedFilterable>(
   deceased: T[],
   displayMode: 'all' | 'monthly',
@@ -173,38 +175,52 @@ export function filterDeceasedByDisplayMode<T extends DeceasedFilterable>(
     return deceased;
   }
 
-  const currentHDate = new HDateClass();
-  const isCurrentYearLeapYear = currentHDate.isLeapYear();
-  const currentHebrewMonth = currentHDate.getMonth();
+  try {
+    const currentHDate = new HDateClass();
+    const isCurrentYearLeapYear = currentHDate.isLeapYear();
+    const currentHebrewMonth = currentHDate.getMonth();
 
-  if (isCurrentYearLeapYear) {
-    // In a leap year, only show those who died in the same month
-    return deceased.filter((person) => {
-      const deathHDate = new HDateClass(person.hebrewDateOfDeath);
-      return deathHDate.getMonth() === currentHebrewMonth;
-    });
-  } else {
-    // In a non-leap year, show those from the current month OR
-    // those who died in Adar II of a leap year (show them in Adar)
-    // Adar in non-leap year is month 12, Adar I is 12, Adar II is 13
-    return deceased.filter((person) => {
-      const deathHDate = new HDateClass(person.hebrewDateOfDeath);
-      const deathMonth = deathHDate.getMonth();
-      const wasLeapYear = deathHDate.isLeapYear();
+    if (isCurrentYearLeapYear) {
+      // In a leap year, only show those who died in the same month
+      return deceased.filter((person) => {
+        try {
+          if (!person?.hebrewDateOfDeath) return false;
+          const deathHDate = new HDateClass(person.hebrewDateOfDeath);
+          return deathHDate.getMonth() === currentHebrewMonth;
+        } catch {
+          return false;
+        }
+      });
+    } else {
+      // In a non-leap year, show those from the current month OR
+      // those who died in Adar II of a leap year (show them in Adar)
+      // Adar in non-leap year is month 12, Adar I is 12, Adar II is 13
+      return deceased.filter((person) => {
+        try {
+          if (!person?.hebrewDateOfDeath) return false;
+          const deathHDate = new HDateClass(person.hebrewDateOfDeath);
+          const deathMonth = deathHDate.getMonth();
+          const wasLeapYear = deathHDate.isLeapYear();
 
-      // Direct match
-      if (deathMonth === currentHebrewMonth) {
-        return true;
-      }
+          // Direct match
+          if (deathMonth === currentHebrewMonth) {
+            return true;
+          }
 
-      // If person died in Adar II (month 13) of a leap year,
-      // and we're currently in Adar (month 12) of a non-leap year
-      if (wasLeapYear && deathMonth === 13 && currentHebrewMonth === 12) {
-        return true;
-      }
+          // If person died in Adar II (month 13) of a leap year,
+          // and we're currently in Adar (month 12) of a non-leap year
+          if (wasLeapYear && deathMonth === 13 && currentHebrewMonth === 12) {
+            return true;
+          }
 
-      return false;
-    });
+          return false;
+        } catch {
+          return false;
+        }
+      });
+    }
+  } catch {
+    return deceased;
   }
 }
 
@@ -228,88 +244,101 @@ export function validateDeceasedDates(person: {
  * @param dateOfDeath - Death date
  * @returns Age in years
  */
-export function calculateAgeAtDeath(dateOfBirth: Date, dateOfDeath: Date): number {
-  const birthDate = new Date(dateOfBirth);
-  const deathDate = new Date(dateOfDeath);
+export function calculateAgeAtDeath(dateOfBirth: Date | string, dateOfDeath: Date | string): number {
+  try {
+    const birthDate = new Date(dateOfBirth);
+    const deathDate = new Date(dateOfDeath);
 
-  let age = deathDate.getFullYear() - birthDate.getFullYear();
-  const monthDiff = deathDate.getMonth() - birthDate.getMonth();
+    if (isNaN(birthDate.getTime()) || isNaN(deathDate.getTime())) return 0;
 
-  if (monthDiff < 0 || (monthDiff === 0 && deathDate.getDate() < birthDate.getDate())) {
-    age--;
+    let age = deathDate.getFullYear() - birthDate.getFullYear();
+    const monthDiff = deathDate.getMonth() - birthDate.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && deathDate.getDate() < birthDate.getDate())) {
+      age--;
+    }
+
+    return Math.max(0, age);
+  } catch {
+    return 0;
   }
-
-  return age;
 }
 
 /**
  * Filter deceased people based on display mode and calculate total pages
  * This is used for both display and timing calculations
- * @param deceased - Array of deceased persons
- * @param displayMode - Display mode ('all' or 'monthly')
- * @param tableRows - Number of rows in the display grid
- * @param tableColumns - Number of columns in the display grid
+ * @param settings - DeceasedSettings
  * @returns Object with filteredDeceased array and totalPages count
  */
 export function calculateDeceasedPages(settings: DeceasedSettings): {
   filteredDeceased: DeceasedPerson[];
   totalPages: number;
 } {
-  if (!settings.deceased || settings.deceased.length === 0) {
+  if (!settings || !Array.isArray(settings.deceased) || settings.deceased.length === 0) {
     return { filteredDeceased: [], totalPages: 0 };
   }
 
   let filteredDeceased: DeceasedPerson[];
 
-  if (settings.displaySettings.displayMode === 'all') {
+  if (settings.displaySettings?.displayMode === 'all') {
     filteredDeceased = settings.deceased;
   } else {
-    // Monthly mode: Show only deceased whose yahrzeit is this Hebrew month
-    const today = new HDate();
-    const currentMonth = today.getMonth();
-    const isCurrentYearLeap = today.isLeapYear();
+    try {
+      // Monthly mode: Show only deceased whose yahrzeit is this Hebrew month
+      const today = new HDate();
+      const currentMonth = today.getMonth();
+      const isCurrentYearLeap = today.isLeapYear();
 
-    filteredDeceased = settings.deceased.filter((person) => {
-      if (!person.dateOfDeath) return false;
+      filteredDeceased = settings.deceased.filter((person) => {
+        if (!person?.dateOfDeath || !isValidDateString(person.dateOfDeath)) return false;
 
-      // Parse the death date
-      const { day, month, year } = getDayMonthYearFromString(person.dateOfDeath || '');
-      if (day === 0 || month === 0 || year === 0) return false;
+        try {
+          // Parse the death date
+          const { day, month, year } = getDayMonthYearFromString(person.dateOfDeath);
+          if (day === 0 || month === 0 || year === 0) return false;
 
-      const deathDate = new HDate(new Date(year, month, day));
-      const deathMonth = deathDate.getMonth();
+          const deathDate = new HDate(new Date(year, month - 1, day));
+          const deathMonth = deathDate.getMonth();
 
-      // Simple case: death month matches current month (not Adar related)
-      if (deathMonth === currentMonth && deathMonth !== months.ADAR_I && deathMonth !== months.ADAR_II) {
-        return true;
-      }
+          // Simple case: death month matches current month (not Adar related)
+          if (deathMonth === currentMonth && deathMonth !== months.ADAR_I && deathMonth !== months.ADAR_II) {
+            return true;
+          }
 
-      // Complex case: Handle Adar months
-      const wasDeathYearLeap = deathDate.isLeapYear();
-      if (isCurrentYearLeap) {
-        if (wasDeathYearLeap) {
-          // Death year was also a leap year
-          // Rule: Adar I → Adar I, Adar II → Adar II (exact match)
-          return deathMonth === currentMonth;
-        } else {
-          // Death year was regular (only had Adar = month 12) yahrzeits on Adar I
-          return deathMonth === months.ADAR_I && currentMonth === months.ADAR_I;
+          // Complex case: Handle Adar months
+          const wasDeathYearLeap = deathDate.isLeapYear();
+          if (isCurrentYearLeap) {
+            if (wasDeathYearLeap) {
+              // Death year was also a leap year
+              // Rule: Adar I → Adar I, Adar II → Adar II (exact match)
+              return deathMonth === currentMonth;
+            } else {
+              // Death year was regular (only had Adar = month 12) yahrzeits on Adar I
+              return deathMonth === months.ADAR_I && currentMonth === months.ADAR_I;
+            }
+          } else {
+            // CURRENT YEAR IS REGULAR (only has Adar = month 12)
+            if (wasDeathYearLeap) {
+              // Death year was a leap year, current year is regular, join both Adar months
+              return deathMonth === months.ADAR_I || deathMonth === months.ADAR_II;
+            } else {
+              // Both death and current years are regular
+              return deathMonth === currentMonth;
+            }
+          }
+        } catch {
+          return false;
         }
-      } else {
-        // CURRENT YEAR IS REGULAR (only has Adar = month 12)
-        if (wasDeathYearLeap) {
-          // Death year was a leap year, current year is regular, join both Adar months
-          return deathMonth === months.ADAR_I || deathMonth === months.ADAR_II;
-        } else {
-          // Both death and current years are regular
-          return deathMonth === currentMonth;
-        }
-      }
-    });
+      });
+    } catch {
+      filteredDeceased = settings.deceased;
+    }
   }
 
-  const cellsPerPage = settings.displaySettings.tableRows * settings.displaySettings.tableColumns;
-  const totalPages = Math.ceil(filteredDeceased.length / cellsPerPage || 1);
+  const rows = settings.displaySettings?.tableRows || 2;
+  const cols = settings.displaySettings?.tableColumns || 3;
+  const cellsPerPage = rows * cols;
+  const totalPages = Math.ceil(filteredDeceased.length / (cellsPerPage || 1));
 
   return { filteredDeceased, totalPages };
 }

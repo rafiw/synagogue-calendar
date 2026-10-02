@@ -5,7 +5,7 @@ import { router } from 'expo-router';
 import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ImageBackground, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { defaultPageDisplayTime } from '@utils/utils';
+import { defaultPageDisplayTime, safeJsonParse } from '@utils/utils';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import { Message, Settings } from '@utils/defs';
 import {
@@ -18,13 +18,17 @@ import {
 import { getEventImage } from '@utils/eventAssets';
 
 export async function getSubPages(): Promise<number> {
-  const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
-  if (!localSettings?.messagesSettings?.enable || !localSettings?.messagesSettings?.messages) return 0;
+  try {
+    const localSettingsString = await AsyncStorage.getItem('settings');
+    const localSettings = safeJsonParse<Settings | null>(localSettingsString, null);
+    if (!localSettings?.messagesSettings?.enable || !Array.isArray(localSettings?.messagesSettings?.messages)) return 1;
 
-  // Filter to only count active messages
-  const activeMessages = localSettings.messagesSettings.messages.filter((msg: Message) => isMessageActive(msg));
-  return calculateMessagesSubPages(activeMessages);
+    // Filter to only count active messages
+    const activeMessages = localSettings.messagesSettings.messages.filter((msg: Message) => isMessageActive(msg));
+    return Math.max(1, calculateMessagesSubPages(activeMessages));
+  } catch {
+    return 1;
+  }
 }
 
 const Messages: React.FC = () => {

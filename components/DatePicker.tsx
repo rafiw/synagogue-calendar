@@ -8,18 +8,25 @@ interface DatePickerProps {
   value: string;
   format: 'YYYY-MM-DD' | 'DD/MM/YYYY';
   onChange: (value: string) => void;
+  maxDate?: Date;
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: dateFormat, onChange }) => {
+export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: dateFormat, onChange, maxDate }) => {
   const [showPicker, setShowPicker] = useState(false);
 
   const parseDate = (dateString: string, format: 'YYYY-MM-DD' | 'DD/MM/YYYY'): Date => {
     if (!dateString) return new Date();
-    if (format === 'YYYY-MM-DD') {
-      return new Date(dateString);
-    } else {
-      const [day = '1', month = '1', year = '1970'] = dateString.split('/');
-      return new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+    try {
+      if (format === 'YYYY-MM-DD') {
+        const d = new Date(dateString);
+        return isNaN(d.getTime()) ? new Date() : d;
+      } else {
+        const [day = '1', month = '1', year = '1970'] = dateString.split('/');
+        const d = new Date(parseInt(year, 10), parseInt(month, 10) - 1, parseInt(day, 10));
+        return isNaN(d.getTime()) ? new Date() : d;
+      }
+    } catch {
+      return new Date();
     }
   };
 
@@ -49,6 +56,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
         <DateTimePicker
           value={parseDate(value, dateFormat)}
           mode="date"
+          maximumDate={maxDate}
           display={Platform.OS === 'ios' ? 'spinner' : 'default'}
           onChange={(_event: DateTimePickerEvent, selectedDate?: Date) => {
             setShowPicker(Platform.OS === 'ios');

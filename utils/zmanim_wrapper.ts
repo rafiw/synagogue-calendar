@@ -63,18 +63,43 @@ export class ZmanimWrapper {
       this.now.setDate(this.now.getDate() + 236);
       this.now.setHours(8);
     }
-    this.nusach = nusach;
-    // Create a location object based on provided latitude, longitude, and timezone
-    this.il = tzid?.toLowerCase().includes('jerusalem');
-    this.location = new Location(latitude, longitude, this.il, tzid, undefined, undefined, undefined, elevation);
-    this.hdate = Zmanim.makeSunsetAwareHDate(this.location, this.now, false);
-    // this.hdate = new HDate(now);
+    this.nusach = nusach || 'ashkenaz';
+
+    const isValidLat = typeof latitude === 'number' && !isNaN(latitude) && latitude >= -90 && latitude <= 90;
+    const isValidLng = typeof longitude === 'number' && !isNaN(longitude) && longitude >= -180 && longitude <= 180;
+    const safeLat = isValidLat ? latitude : 31.7667;
+    const safeLng = isValidLng ? longitude : 35.2333;
+    const safeElevation = typeof elevation === 'number' && !isNaN(elevation) ? elevation : 0;
+    const safeTzid = tzid && typeof tzid === 'string' && tzid.trim() !== '' ? tzid : 'Asia/Jerusalem';
+
+    if (!isValidLat || !isValidLng) {
+      console.warn(
+        `Invalid coordinates supplied to ZmanimWrapper [lat: ${latitude}, lng: ${longitude}]. Falling back to [${safeLat}, ${safeLng}].`,
+      );
+    }
+
+    // Create a location object based on safe latitude, longitude, and timezone
+    this.il = safeTzid.toLowerCase().includes('jerusalem');
+    this.location = new Location(safeLat, safeLng, this.il, safeTzid, undefined, undefined, undefined, safeElevation);
+
+    try {
+      this.hdate = Zmanim.makeSunsetAwareHDate(this.location, this.now, false);
+    } catch (e) {
+      console.error('Failed to make sunset aware HDate, falling back to new HDate(now):', e);
+      this.hdate = new HDate(this.now);
+    }
 
     // Create a Zmanim object based on today's Hebrew date and the location
-    this.zmanim = new Zmanim(this.location, this.hdate, false);
+    try {
+      this.zmanim = new Zmanim(this.location, this.hdate, false);
+    } catch (e) {
+      console.error('Failed to instantiate Zmanim with location, falling back to default location:', e);
+      const fallbackLoc = new Location(31.7667, 35.2333, true, 'Asia/Jerusalem');
+      this.zmanim = new Zmanim(fallbackLoc, this.hdate, false);
+    }
 
-    this.language = language;
-    this.purimSettings = purimSettings;
+    this.language = language || 'he';
+    this.purimSettings = purimSettings || { regular: true, shushan: false };
   }
 
   private getEvents(days: number = 7): Event[] {

@@ -166,13 +166,61 @@ const HelpSection = () => {
 };
 
 const GeneralSettingsTab = () => {
-  const { settings, updateSettings, isLoading } = useSettings();
+  const { settings, updateSettings, isLoading, resetToDefaults, revertToPreviousSettings, hasBackupSettings } =
+    useSettings();
   const { t, i18n } = useTranslation();
   const { height } = useWindowDimensions();
   const [background] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
   const [rtl, setRtl] = useState(false);
+  const [hasBackup, setHasBackup] = useState(false);
   const heightScale = useHeightScale() * 0.5;
   const isSmallHeight = height < 600;
+
+  useEffect(() => {
+    void hasBackupSettings().then(setHasBackup);
+  }, [hasBackupSettings]);
+
+  const handleRevertToPrevious = () => {
+    showAlert(t('revert_to_previous_settings'), t('revert_confirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('revert_to_previous_settings'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const success = await revertToPreviousSettings();
+            if (success) {
+              showAlert(t('success'), t('revert_success'));
+            } else {
+              showAlert(t('error'), t('no_backup_found'));
+            }
+          } catch (error) {
+            console.error('Failed to revert settings:', error);
+            showAlert(t('error'), t('no_backup_found'));
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleResetToDefaults = () => {
+    showAlert(t('reset_to_defaults'), t('reset_confirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('reset_to_defaults'),
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await resetToDefaults();
+            showAlert(t('success'), t('reset_success'));
+            setHasBackup(true);
+          } catch (error) {
+            console.error('Failed to reset settings:', error);
+          }
+        },
+      },
+    ]);
+  };
 
   // Responsive sizes with height adjustment
   const labelSize = Math.round(useResponsiveFontSize('bodySmall') * heightScale);
@@ -840,6 +888,52 @@ const GeneralSettingsTab = () => {
             )}
           </View>
         </View>
+      </View>
+
+      {/* Revert to Previous Settings */}
+      {hasBackup && (
+        <View
+          className="border border-amber-300 bg-amber-50 rounded-xl"
+          style={{ padding, marginTop: margin, gap: smallPadding }}
+        >
+          <Text className="font-bold text-amber-800" style={{ fontSize: labelSize * 1.1 }}>
+            {t('revert_to_previous_settings')}
+          </Text>
+          <Text className="text-gray-600" style={{ fontSize: textSize * 0.9 }}>
+            {t('revert_description')}
+          </Text>
+          <TouchableOpacity
+            className="bg-amber-600 rounded-lg items-center self-start"
+            style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+            onPress={handleRevertToPrevious}
+          >
+            <Text className="text-white font-medium" style={{ fontSize: textSize }}>
+              {t('revert_to_previous_settings')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Danger Zone: Reset to Defaults */}
+      <View
+        className="border border-red-200 bg-red-50 rounded-xl"
+        style={{ padding, marginTop: margin, gap: smallPadding }}
+      >
+        <Text className="font-bold text-red-700" style={{ fontSize: labelSize * 1.1 }}>
+          {t('reset_to_defaults')}
+        </Text>
+        <Text className="text-gray-600" style={{ fontSize: textSize * 0.9 }}>
+          {t('reset_description')}
+        </Text>
+        <TouchableOpacity
+          className="bg-red-600 rounded-lg items-center self-start"
+          style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+          onPress={handleResetToDefaults}
+        >
+          <Text className="text-white font-medium" style={{ fontSize: textSize }}>
+            {t('reset_to_defaults')}
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Color Picker Modal */}

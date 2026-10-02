@@ -9,6 +9,7 @@ import { isRTL } from '@utils/utils';
 import { NumberInput } from '@components/NumberInput';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import { useSettings } from '@context/settingsContext';
+import { isValidTimeHHMM, normalizeTimeHHMM, compareTimeStrings } from '@utils/validation';
 
 // Checkbox styles - extracted to avoid inline style warnings
 const checkboxStyles = {
@@ -71,31 +72,17 @@ const ClassesSettingsTab = () => {
     updateSettings({ classesSettings: { ...settings.classesSettings, classes: updatedClasses } });
   };
 
-  const validateTime = (timeStr: string): boolean => {
-    const timeRegex = /^([01]?[0-9]|2[0-3]):([0-5][0-9])$/;
-    return timeRegex.test(timeStr);
-  };
-
-  const compareTimeStrings = (time1: string, time2: string): number => {
-    if (!time1 || !time2) return 0;
-    const [h1, m1] = time1.split(':').map(Number);
-    const [h2, m2] = time2.split(':').map(Number);
-    const mins1 = (h1 || 0) * 60 + (m1 || 0);
-    const mins2 = (h2 || 0) * 60 + (m2 || 0);
-    return mins1 - mins2;
-  };
-
   const getTimeWarning = (startTime: string, endTime: string): string | null => {
-    if (!startTime || !endTime) return null;
+    if (!startTime && !endTime) return null;
 
-    if (startTime && !validateTime(startTime)) {
+    if (startTime && !isValidTimeHHMM(startTime)) {
       return t('invalid_time_format');
     }
-    if (endTime && !validateTime(endTime)) {
+    if (endTime && !isValidTimeHHMM(endTime)) {
       return t('invalid_time_format');
     }
 
-    if (compareTimeStrings(startTime, endTime) >= 0) {
+    if (startTime && endTime && compareTimeStrings(startTime, endTime) >= 0) {
       return t('end_time_before_start');
     }
 
@@ -231,39 +218,71 @@ const ClassesSettingsTab = () => {
         {/* Time */}
         <View style={{ gap: smallPadding }}>
           <View className={`flex-row ${rtl ? 'space-x-reverse' : ''}`} style={{ gap: padding }}>
-            <View className="flex-1">
-              <Text
-                className="text-gray-600 text-center"
-                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
-              >
-                {rtl ? t('end_time') : t('start_time')}
-              </Text>
-              <TextInput
-                value={rtl ? item.end : item.start}
-                onChangeText={(value) => handleUpdateClass(index, rtl ? 'end' : 'start', value)}
-                className="border border-gray-300 rounded-md text-center"
-                style={{ padding: smallPadding, fontSize: textSize }}
-                placeholder="HH:MM"
-                textAlign={rtl ? 'right' : 'left'}
-              />
-            </View>
+            {(() => {
+              const field1 = rtl ? 'end' : 'start';
+              const val1 = rtl ? item.end : item.start;
+              const isInvalid1 = Boolean(val1 && !isValidTimeHHMM(val1));
 
-            <View className="flex-1">
-              <Text
-                className="text-gray-600 text-center"
-                style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
-              >
-                {rtl ? t('start_time') : t('end_time')}
-              </Text>
-              <TextInput
-                value={rtl ? item.start : item.end}
-                onChangeText={(value) => handleUpdateClass(index, rtl ? 'start' : 'end', value)}
-                className="border border-gray-300 rounded-md text-center"
-                style={{ padding: smallPadding, fontSize: textSize }}
-                placeholder="HH:MM"
-                textAlign={rtl ? 'right' : 'left'}
-              />
-            </View>
+              return (
+                <View className="flex-1">
+                  <Text
+                    className="text-gray-600 text-center"
+                    style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
+                  >
+                    {rtl ? t('end_time') : t('start_time')}
+                  </Text>
+                  <TextInput
+                    value={val1}
+                    onChangeText={(value) => handleUpdateClass(index, field1, value)}
+                    onBlur={() => {
+                      const normalized = normalizeTimeHHMM(val1);
+                      if (normalized && normalized !== val1) {
+                        handleUpdateClass(index, field1, normalized);
+                      }
+                    }}
+                    className={`border rounded-md text-center ${
+                      isInvalid1 ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                    }`}
+                    style={{ padding: smallPadding, fontSize: textSize }}
+                    placeholder="HH:MM"
+                    textAlign={rtl ? 'right' : 'left'}
+                  />
+                </View>
+              );
+            })()}
+
+            {(() => {
+              const field2 = rtl ? 'start' : 'end';
+              const val2 = rtl ? item.start : item.end;
+              const isInvalid2 = Boolean(val2 && !isValidTimeHHMM(val2));
+
+              return (
+                <View className="flex-1">
+                  <Text
+                    className="text-gray-600 text-center"
+                    style={{ fontSize: labelSize, marginBottom: smallPadding / 2 }}
+                  >
+                    {rtl ? t('start_time') : t('end_time')}
+                  </Text>
+                  <TextInput
+                    value={val2}
+                    onChangeText={(value) => handleUpdateClass(index, field2, value)}
+                    onBlur={() => {
+                      const normalized = normalizeTimeHHMM(val2);
+                      if (normalized && normalized !== val2) {
+                        handleUpdateClass(index, field2, normalized);
+                      }
+                    }}
+                    className={`border rounded-md text-center ${
+                      isInvalid2 ? 'border-red-400 bg-red-50' : 'border-gray-300'
+                    }`}
+                    style={{ padding: smallPadding, fontSize: textSize }}
+                    placeholder="HH:MM"
+                    textAlign={rtl ? 'right' : 'left'}
+                  />
+                </View>
+              );
+            })()}
           </View>
           {(() => {
             const warning = getTimeWarning(item.start, item.end);

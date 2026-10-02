@@ -260,5 +260,21 @@
   "deceased_delete_all": "מחק הכל",
   "confirm_delete_all_deceased": "האם אתה בטוח שברצונך למחוק את כל {{count}} רשומות הנפטרים? לא ניתן לבטל פעולה זו.",
   "all_deceased_deleted": "כל רשומות הנפטרים נמחקו בהצלחה.",
-  "no_deceased_to_delete": "אין רשומות נפטרים למחיקה."
+  "no_deceased_to_delete": "אין רשומות נפטרים למחיקה.",
+  "invalid_latitude": "קו רוחב חייב להיות בין 90- ל-90",
+  "invalid_longitude": "קו אורך חייב להיות בין 180- ל-180",
+  "reset_to_defaults": "איפוס להגדרות ברירת מחדל",
+  "reset_confirm": "האם אתה בטוח שברצונך לאפס את כל ההגדרות לברירת המחדל?",
+  "reset_description": "שחזור כל ההגדרות לברירת המחדל המקורית. פעולה זו תדרוס שינויים מקומיים.",
+  "reset_success": "ההגדרות אופסו לברירת המחדל",
+  "cancel": "ביטול",
+  "invalid_date_format": "התאריך חייב להיות בפורמט YYYY-MM-DD",
+  "date_cannot_be_in_future": "התאריך אינו יכול להיות בעתיד",
+  "end_date_before_start_date": "תאריך הסיום אינו יכול להיות לפני תאריך ההתחלה",
+  "birth_date_after_death_date": "תאריך הלידה אינו יכול להיות אחרי תאריך הפטירה",
+  "revert_to_previous_settings": "שחזר הגדרות קודמות",
+  "revert_confirm": "האם אתה בטוח שברצונך לשחזר את ההגדרות השמורות הקודמות?",
+  "revert_description": "שחזור ההגדרות לגיבוי התקין הקודם שנשמר לפני השינוי האחרון.",
+  "revert_success": "ההגדרות שוחזרו לגיבוי הקודם",
+  "no_backup_found": "לא נמצא גיבוי של הגדרות קודמות"
 }

@@ -5,18 +5,22 @@ import { DeceasedPerson, Settings } from '@utils/defs';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import MemorialCandle from './MemorialCandle';
-import { isRTL2 } from '@utils/utils';
+import { isRTL2, safeJsonParse } from '@utils/utils';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useFontScale } from '@utils/responsive';
 
 // Export function to calculate sub-pages for timing in index.tsx
 export async function getSubPages(): Promise<number> {
-  const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
-  if (!localSettings?.deceasedSettings?.deceased) return 0;
+  try {
+    const localSettingsString = await AsyncStorage.getItem('settings');
+    const localSettings = safeJsonParse<Settings | null>(localSettingsString, null);
+    if (!Array.isArray(localSettings?.deceasedSettings?.deceased)) return 1;
 
-  return Math.max(0, calculateDeceasedPages(localSettings.deceasedSettings).totalPages);
+    return Math.max(1, calculateDeceasedPages(localSettings.deceasedSettings).totalPages);
+  } catch {
+    return 1;
+  }
 }
 
 // Types for dynamic sizing
@@ -50,12 +54,23 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
   const isRightToLeft = isRTL2(settings.synagogueSettings.language);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString(settings.synagogueSettings.language === 'he' ? 'he-IL' : 'en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    if (!dateString) return '-';
+    try {
+      const parts = dateString.split('-').map(Number);
+      if (parts.length === 3 && parts[0] && parts[1] && parts[2]) {
+        const date = new Date(parts[0], parts[1] - 1, parts[2]);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString(settings.synagogueSettings.language === 'he' ? 'he-IL' : 'en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+        }
+      }
+      return dateString;
+    } catch {
+      return dateString;
+    }
   };
 
   const renderSimpleTemplate = () => (

@@ -41,9 +41,30 @@ const ZmanimSettingsTab = () => {
     checkRTL();
   }, []);
 
+  const [latText, setLatText] = useState((settings.zmanimSettings.latitude ?? 31.7667).toString());
+  const [lngText, setLngText] = useState((settings.zmanimSettings.longitude ?? 35.2333).toString());
+  const [elevText, setElevText] = useState((settings.zmanimSettings.elevation ?? 0).toString());
+  const [latError, setLatError] = useState<string | null>(null);
+  const [lngError, setLngError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLatText((settings.zmanimSettings.latitude ?? 31.7667).toString());
+    setLngText((settings.zmanimSettings.longitude ?? 35.2333).toString());
+    setElevText((settings.zmanimSettings.elevation ?? 0).toString());
+  }, [
+    settings.zmanimSettings.city,
+    settings.zmanimSettings.latitude,
+    settings.zmanimSettings.longitude,
+    settings.zmanimSettings.elevation,
+  ]);
+
   const handleCityChange = (city: string) => {
     const chosen_city = cities.find((x) => x.name === city || x.hebrew_name === city) || cities[0]!;
     setSelectedLocation(city);
+    setLatText(chosen_city.latitude.toString());
+    setLngText(chosen_city.longitude.toString());
+    setLatError(null);
+    setLngError(null);
     updateSettings({
       zmanimSettings: {
         ...settings.zmanimSettings,
@@ -52,6 +73,89 @@ const ZmanimSettingsTab = () => {
         longitude: chosen_city.longitude,
       },
     });
+  };
+
+  const handleLatChange = (text: string) => {
+    setLatText(text);
+    const trimmed = text.trim();
+    if (trimmed === '' || trimmed === '-' || trimmed === '.') {
+      return;
+    }
+    const val = Number(trimmed);
+    if (isNaN(val) || val < -90 || val > 90) {
+      setLatError(t('invalid_latitude'));
+      return;
+    }
+    setLatError(null);
+    updateSettings({
+      zmanimSettings: {
+        ...settings.zmanimSettings,
+        latitude: val,
+      },
+    });
+  };
+
+  const handleLatBlur = () => {
+    const trimmed = latText.trim();
+    const val = Number(trimmed);
+    if (trimmed === '' || isNaN(val) || val < -90 || val > 90) {
+      setLatText((settings.zmanimSettings.latitude ?? 31.7667).toString());
+      setLatError(null);
+    }
+  };
+
+  const handleLngChange = (text: string) => {
+    setLngText(text);
+    const trimmed = text.trim();
+    if (trimmed === '' || trimmed === '-' || trimmed === '.') {
+      return;
+    }
+    const val = Number(trimmed);
+    if (isNaN(val) || val < -180 || val > 180) {
+      setLngError(t('invalid_longitude'));
+      return;
+    }
+    setLngError(null);
+    updateSettings({
+      zmanimSettings: {
+        ...settings.zmanimSettings,
+        longitude: val,
+      },
+    });
+  };
+
+  const handleLngBlur = () => {
+    const trimmed = lngText.trim();
+    const val = Number(trimmed);
+    if (trimmed === '' || isNaN(val) || val < -180 || val > 180) {
+      setLngText((settings.zmanimSettings.longitude ?? 35.2333).toString());
+      setLngError(null);
+    }
+  };
+
+  const handleElevChange = (text: string) => {
+    setElevText(text);
+    const trimmed = text.trim();
+    if (trimmed === '' || trimmed === '-') {
+      return;
+    }
+    const val = Number(trimmed);
+    if (!isNaN(val)) {
+      updateSettings({
+        zmanimSettings: {
+          ...settings.zmanimSettings,
+          elevation: val,
+        },
+      });
+    }
+  };
+
+  const handleElevBlur = () => {
+    const trimmed = elevText.trim();
+    const val = Number(trimmed);
+    if (trimmed === '' || isNaN(val)) {
+      setElevText((settings.zmanimSettings.elevation ?? 0).toString());
+    }
   };
 
   const handleOlsonChange = (olson: string) => {
@@ -208,30 +312,38 @@ const ZmanimSettingsTab = () => {
                       {t('latitude')}
                     </Text>
                     <TextInput
-                      className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                      className={`w-full border rounded-lg bg-gray-50 ${latError ? 'border-red-500' : 'border-gray-300'}`}
                       style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                      value={settings.zmanimSettings.latitude.toString()}
-                      onChangeText={(v) =>
-                        updateSettings({ zmanimSettings: { ...settings.zmanimSettings, latitude: Number(v) } })
-                      }
+                      value={latText}
+                      onChangeText={handleLatChange}
+                      onBlur={handleLatBlur}
                       keyboardType="numeric"
                       placeholder="Enter latitude"
                     />
+                    {latError && (
+                      <Text className="text-red-500 font-medium" style={{ fontSize: labelSize * 0.9 }}>
+                        {latError}
+                      </Text>
+                    )}
                   </View>
                   <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
                     <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
                       {t('longitude')}
                     </Text>
                     <TextInput
-                      className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                      className={`w-full border rounded-lg bg-gray-50 ${lngError ? 'border-red-500' : 'border-gray-300'}`}
                       style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                      value={settings.zmanimSettings.longitude.toString()}
-                      onChangeText={(v) =>
-                        updateSettings({ zmanimSettings: { ...settings.zmanimSettings, longitude: Number(v) } })
-                      }
+                      value={lngText}
+                      onChangeText={handleLngChange}
+                      onBlur={handleLngBlur}
                       keyboardType="numeric"
                       placeholder="Enter longitude"
                     />
+                    {lngError && (
+                      <Text className="text-red-500 font-medium" style={{ fontSize: labelSize * 0.9 }}>
+                        {lngError}
+                      </Text>
+                    )}
                   </View>
                 </View>
                 {/* Second Row: Elevation */}
@@ -242,10 +354,9 @@ const ZmanimSettingsTab = () => {
                   <TextInput
                     className="w-full border border-gray-300 rounded-lg bg-gray-50"
                     style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                    value={settings.zmanimSettings.elevation?.toString() || '0'}
-                    onChangeText={(v) =>
-                      updateSettings({ zmanimSettings: { ...settings.zmanimSettings, elevation: Number(v) } })
-                    }
+                    value={elevText}
+                    onChangeText={handleElevChange}
+                    onBlur={handleElevBlur}
                     keyboardType="numeric"
                     placeholder="0"
                   />

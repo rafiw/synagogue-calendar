@@ -10,7 +10,6 @@
 import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions } from 'react-native';
 import { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from '@components/Header';
 import Footer from '@components/Footer';
@@ -38,28 +37,22 @@ const lazyScreenFallback = (
   </View>
 );
 
-const getClassSubPages = async (): Promise<number> => {
-  const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
-  if (!localSettings?.classesSettings?.classes) return 0;
-  return Math.ceil(localSettings.classesSettings.classes.length / classesPerPage);
+const getClassSubPages = (settings: Settings): number => {
+  if (!Array.isArray(settings?.classesSettings?.classes)) return 1;
+  return Math.max(1, Math.ceil(settings.classesSettings.classes.length / classesPerPage));
 };
 
-const getMessagesSubPages = async (): Promise<number> => {
-  const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
-  if (!localSettings?.messagesSettings?.enable || !localSettings?.messagesSettings?.messages) return 0;
+const getMessagesSubPages = (settings: Settings): number => {
+  if (!settings?.messagesSettings?.enable || !Array.isArray(settings?.messagesSettings?.messages)) return 1;
 
-  const activeMessages = localSettings.messagesSettings.messages.filter((msg: Message) => isMessageActive(msg));
-  return calculateMessagesSubPages(activeMessages);
+  const activeMessages = settings.messagesSettings.messages.filter((msg: Message) => isMessageActive(msg));
+  return Math.max(1, calculateMessagesSubPages(activeMessages));
 };
 
-const getDeceasedSubPages = async (): Promise<number> => {
-  const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
-  if (!localSettings?.deceasedSettings?.deceased) return 0;
+const getDeceasedSubPages = (settings: Settings): number => {
+  if (!settings?.deceasedSettings?.deceased || !Array.isArray(settings.deceasedSettings.deceased)) return 1;
 
-  return Math.max(0, calculateDeceasedPages(localSettings.deceasedSettings).totalPages);
+  return Math.max(1, calculateDeceasedPages(settings.deceasedSettings).totalPages);
 };
 
 export default function App() {
@@ -96,12 +89,10 @@ export default function App() {
     }
   }, [settings.synagogueSettings.language]);
 
-  const createScreens = useCallback(async (): Promise<Screen[]> => {
-    const [classSubPages, messagesSubPages, deceasedSubPages] = await Promise.all([
-      getClassSubPages(),
-      getMessagesSubPages(),
-      getDeceasedSubPages(),
-    ]);
+  const createScreens = useCallback((): Screen[] => {
+    const classSubPages = getClassSubPages(settings);
+    const messagesSubPages = getMessagesSubPages(settings);
+    const deceasedSubPages = getDeceasedSubPages(settings);
 
     return [
       {
@@ -177,16 +168,15 @@ export default function App() {
   }, [settings]);
 
   useEffect(() => {
-    const loadScreens = async () => {
-      setIsLoadingScreens(true);
-      try {
-        const loadedScreens = await createScreens();
-        setScreens(loadedScreens);
-      } finally {
-        setIsLoadingScreens(false);
-      }
-    };
-    loadScreens();
+    try {
+      const loadedScreens = createScreens();
+      setScreens(loadedScreens);
+    } catch (e) {
+      console.error('Failed to create screens:', e);
+      setScreens([]);
+    } finally {
+      setIsLoadingScreens(false);
+    }
   }, [createScreens]);
 
   useEffect(() => {

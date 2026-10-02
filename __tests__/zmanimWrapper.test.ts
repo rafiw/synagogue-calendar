@@ -46,6 +46,28 @@ describe('ZmanimWrapper', () => {
       const sephardicWrapper = new ZmanimWrapper('sephardic', latitude, longitude, tzid, language, purimSettings);
       expect(sephardicWrapper).toBeDefined();
     });
+
+    it('should safely fall back when given NaN or null coordinates without throwing', () => {
+      const nanWrapper = new ZmanimWrapper(nusach, NaN, NaN, tzid, language, purimSettings);
+      expect(nanWrapper).toBeDefined();
+      expect(nanWrapper.getSunrise()).toBeTruthy();
+
+      const nullWrapper = new ZmanimWrapper(nusach, null as any, null as any, tzid, language, purimSettings);
+      expect(nullWrapper).toBeDefined();
+      expect(nullWrapper.getSunset()).toBeTruthy();
+    });
+
+    it('should safely fall back when given out-of-range coordinates', () => {
+      const outOfRangeWrapper = new ZmanimWrapper(nusach, 999, -500, tzid, language, purimSettings);
+      expect(outOfRangeWrapper).toBeDefined();
+      expect(outOfRangeWrapper.getSunrise()).toBeTruthy();
+    });
+
+    it('should safely handle missing or empty tzid and invalid elevation', () => {
+      const fallbackWrapper = new ZmanimWrapper(nusach, latitude, longitude, '' as any, language, purimSettings, NaN);
+      expect(fallbackWrapper).toBeDefined();
+      expect(fallbackWrapper.getSunrise()).toBeTruthy();
+    });
   });
 
   describe('basic zmanim times', () => {

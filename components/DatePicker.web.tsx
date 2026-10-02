@@ -11,17 +11,22 @@ interface DatePickerProps {
   value: string;
   format: 'YYYY-MM-DD' | 'DD/MM/YYYY';
   onChange: (value: string) => void;
+  maxDate?: Date;
 }
 
-export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: dateFormat, onChange }) => {
+export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: dateFormat, onChange, maxDate }) => {
   const [showPicker, setShowPicker] = useState(false);
 
   const parseDate = (dateString: string, format: 'YYYY-MM-DD' | 'DD/MM/YYYY'): Date => {
     if (!dateString) return new Date();
-    if (format === 'YYYY-MM-DD') {
-      return parseFns(dateString, 'yyyy-MM-dd', new Date());
-    } else {
-      return parseFns(dateString, 'dd/MM/yyyy', new Date());
+    try {
+      const parsed =
+        format === 'YYYY-MM-DD'
+          ? parseFns(dateString, 'yyyy-MM-dd', new Date())
+          : parseFns(dateString, 'dd/MM/yyyy', new Date());
+      return isNaN(parsed.getTime()) ? new Date() : parsed;
+    } catch {
+      return new Date();
     }
   };
 
@@ -87,7 +92,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ label, value, format: da
                 }}
                 captionLayout="dropdown"
                 startMonth={new Date(new Date().getFullYear() - 200, 0)}
-                endMonth={new Date()}
+                endMonth={maxDate ?? new Date(new Date().getFullYear() + 20, 11)}
                 defaultMonth={selectedDate}
               />
             </div>

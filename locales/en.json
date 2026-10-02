@@ -260,5 +260,21 @@
   "deceased_delete_all": "Delete All",
   "confirm_delete_all_deceased": "Are you sure you want to delete all {{count}} deceased records? This action cannot be undone.",
   "all_deceased_deleted": "All deceased records have been deleted.",
-  "no_deceased_to_delete": "No deceased records to delete."
+  "no_deceased_to_delete": "No deceased records to delete.",
+  "invalid_latitude": "Latitude must be between -90 and 90",
+  "invalid_longitude": "Longitude must be between -180 and 180",
+  "reset_to_defaults": "Reset to Defaults",
+  "reset_confirm": "Are you sure you want to reset all settings to defaults?",
+  "reset_description": "Restore all settings to their original factory defaults. This will overwrite local changes.",
+  "reset_success": "Settings reset to defaults",
+  "cancel": "Cancel",
+  "invalid_date_format": "Date must be in YYYY-MM-DD format",
+  "date_cannot_be_in_future": "Date cannot be in the future",
+  "end_date_before_start_date": "End date cannot be earlier than start date",
+  "birth_date_after_death_date": "Date of birth cannot be after date of death",
+  "revert_to_previous_settings": "Revert to Previous Settings",
+  "revert_confirm": "Are you sure you want to revert to the previous saved settings?",
+  "revert_description": "Restore settings to the previous working backup taken before the last change.",
+  "revert_success": "Settings reverted to previous backup",
+  "no_backup_found": "No previous settings backup found"
 }

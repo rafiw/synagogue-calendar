@@ -49,14 +49,19 @@ function AppContent() {
   );
 }
 
+import { ErrorBoundary } from '@components/ErrorBoundary';
+export { ErrorBoundary };
+
 export default function RootLayout() {
   return (
     // <StrictMode>
     <SafeAreaProvider>
       <GestureHandlerRootView className="flex-1">
-        <SettingsProvider>
-          <AppContent />
-        </SettingsProvider>
+        <ErrorBoundary>
+          <SettingsProvider>
+            <AppContent />
+          </SettingsProvider>
+        </ErrorBoundary>
       </GestureHandlerRootView>
     </SafeAreaProvider>
     // </StrictMode>

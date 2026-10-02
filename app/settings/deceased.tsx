@@ -25,6 +25,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { isValidDateString, validateDeceasedPersonDates } from '@utils/validation';
 
 // Local storage key for image delete URLs (not synced to GitHub for security)
 const DELETE_URLS_STORAGE_KEY = 'deceased_image_delete_urls';
@@ -154,10 +155,11 @@ const DateInputComponent = DatePicker;
 
 // Helper function to convert Gregorian date to Hebrew date string
 const convertToHebrewDate = (gregorianDateString?: string, language: string = 'he'): string | null => {
-  if (!gregorianDateString) return null;
+  if (!gregorianDateString || !isValidDateString(gregorianDateString)) return null;
 
   try {
-    const gregorianDate = new Date(gregorianDateString);
+    const [year = 0, month = 1, day = 1] = gregorianDateString.split('-').map(Number);
+    const gregorianDate = new Date(year, month - 1, day);
     if (isNaN(gregorianDate.getTime())) return null;
     const hdate = new HDate(gregorianDate);
     return language === 'he' ? hdate.renderGematriya() : hdate.render(language);
@@ -284,6 +286,13 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
       return;
     }
 
+    const dateValidation = validateDeceasedPersonDates(dateOfBirth, dateOfDeath);
+    if (!dateValidation.valid) {
+      const errKey = dateValidation.dodError || dateValidation.dobError || 'error';
+      showAlert(t('error'), t(errKey));
+      return;
+    }
+
     const newPerson: DeceasedPerson = {
       id: personId,
       name: name.trim(),
@@ -377,59 +386,78 @@ const DeceasedPersonForm = ({ person, onSave, onCancel, imgbbApiKey }: DeceasedP
         </View>
       </View>
 
-      <View style={{ marginBottom: margin }}>
-        <Text className="text-gray-600" style={{ fontSize: smallLabelSize, marginBottom: smallPadding / 2 }}>
-          {t('deceased_date_of_birth')} (YYYY-MM-DD) <Text className="text-gray-400">({t('optional')})</Text>
-        </Text>
-        <DateInputComponent
-          label=""
-          value={dateOfBirth}
-          format="YYYY-MM-DD"
-          onChange={(value) => setDateOfBirth(value)}
-        />
-      </View>
-
-      <View style={{ marginBottom: margin }}>
-        <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding / 2 }}>
-          <Text className="text-gray-600" style={{ fontSize: smallLabelSize }}>
-            {t('deceased_date_of_birth')} ({t('hebrew')}) <Text className="text-gray-400">({t('optional')})</Text>
-          </Text>
-          {!!dateOfBirth && (
-            <TouchableOpacity
-              onPress={() => {
-                const hebrewDate = convertToHebrewDate(dateOfBirth);
-                if (hebrewDate) {
-                  setHebrewDateOfBirth(hebrewDate);
-                }
-              }}
-              style={{ paddingHorizontal: smallPadding, paddingVertical: smallPadding / 2 }}
-            >
-              <Text className="text-blue-500" style={{ fontSize: smallLabelSize }}>
-                {t('reset')}
+      {(() => {
+        const dateValidation = validateDeceasedPersonDates(dateOfBirth, dateOfDeath);
+        return (
+          <>
+            <View style={{ marginBottom: margin }}>
+              <Text className="text-gray-600" style={{ fontSize: smallLabelSize, marginBottom: smallPadding / 2 }}>
+                {t('deceased_date_of_birth')} (YYYY-MM-DD) <Text className="text-gray-400">({t('optional')})</Text>
               </Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        <TextInput
-          className="border border-gray-300 rounded-lg bg-white"
-          style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-          value={hebrewDateOfBirth}
-          onChangeText={(value) => setHebrewDateOfBirth(value)}
-          placeholder={t('hebrew_date_placeholder')}
-        />
-      </View>
+              <DateInputComponent
+                label=""
+                value={dateOfBirth}
+                format="YYYY-MM-DD"
+                maxDate={new Date()}
+                onChange={(value) => setDateOfBirth(value)}
+              />
+              {dateValidation.dobError && (
+                <Text className="text-red-500 font-medium" style={{ fontSize: smallLabelSize, marginTop: 4 }}>
+                  {t(dateValidation.dobError)}
+                </Text>
+              )}
+            </View>
 
-      <View style={{ marginBottom: margin }}>
-        <Text className="text-gray-600" style={{ fontSize: smallLabelSize, marginBottom: smallPadding / 2 }}>
-          {t('deceased_date_of_death')} (YYYY-MM-DD) <Text className="text-gray-400">({t('optional')})</Text>
-        </Text>
-        <DateInputComponent
-          label=""
-          value={dateOfDeath}
-          format="YYYY-MM-DD"
-          onChange={(value) => setDateOfDeath(value)}
-        />
-      </View>
+            <View style={{ marginBottom: margin }}>
+              <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding / 2 }}>
+                <Text className="text-gray-600" style={{ fontSize: smallLabelSize }}>
+                  {t('deceased_date_of_birth')} ({t('hebrew')}) <Text className="text-gray-400">({t('optional')})</Text>
+                </Text>
+                {!!dateOfBirth && (
+                  <TouchableOpacity
+                    onPress={() => {
+                      const hebrewDate = convertToHebrewDate(dateOfBirth);
+                      if (hebrewDate) {
+                        setHebrewDateOfBirth(hebrewDate);
+                      }
+                    }}
+                    style={{ paddingHorizontal: smallPadding, paddingVertical: smallPadding / 2 }}
+                  >
+                    <Text className="text-blue-500" style={{ fontSize: smallLabelSize }}>
+                      {t('reset')}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <TextInput
+                className="border border-gray-300 rounded-lg bg-white"
+                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                value={hebrewDateOfBirth}
+                onChangeText={(value) => setHebrewDateOfBirth(value)}
+                placeholder={t('hebrew_date_placeholder')}
+              />
+            </View>
+
+            <View style={{ marginBottom: margin }}>
+              <Text className="text-gray-600" style={{ fontSize: smallLabelSize, marginBottom: smallPadding / 2 }}>
+                {t('deceased_date_of_death')} (YYYY-MM-DD) <Text className="text-gray-400">({t('optional')})</Text>
+              </Text>
+              <DateInputComponent
+                label=""
+                value={dateOfDeath}
+                format="YYYY-MM-DD"
+                maxDate={new Date()}
+                onChange={(value) => setDateOfDeath(value)}
+              />
+              {dateValidation.dodError && (
+                <Text className="text-red-500 font-medium" style={{ fontSize: smallLabelSize, marginTop: 4 }}>
+                  {t(dateValidation.dodError)}
+                </Text>
+              )}
+            </View>
+          </>
+        );
+      })()}
 
       <View style={{ marginBottom: margin }}>
         <View className="flex-row items-center justify-between" style={{ marginBottom: smallPadding / 2 }}>

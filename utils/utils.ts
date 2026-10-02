@@ -14,6 +14,16 @@ export function getHebrewDayName(dayNum: number): string {
   return hebrewDays.get(dayNum) || '';
 }
 
+export function safeJsonParse<T>(jsonString: string | null | undefined, fallback: T): T {
+  if (!jsonString) return fallback;
+  try {
+    const parsed = JSON.parse(jsonString);
+    return parsed !== null && parsed !== undefined ? (parsed as T) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export function getSettings() {
   return {
     language: 'he',
@@ -23,9 +33,14 @@ export function getSettings() {
 }
 
 export async function isRTL(): Promise<boolean> {
-  const localSettingsString = await AsyncStorage.getItem('settings');
-  const settings = localSettingsString ? JSON.parse(localSettingsString) : null;
-  return settings ? settings.language === 'he' : true;
+  try {
+    const localSettingsString = await AsyncStorage.getItem('settings');
+    const settings = safeJsonParse<any>(localSettingsString, null);
+    if (!settings) return true;
+    return settings.synagogueSettings?.language === 'he' || settings.language === 'he';
+  } catch {
+    return true;
+  }
 }
 
 export function isRTL2(language: 'he' | 'en'): boolean {

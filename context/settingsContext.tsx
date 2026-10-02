@@ -3,183 +3,23 @@ import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import * as SecureStore from 'expo-secure-store';
-import { cities } from '@assets/data';
-import { Settings } from '@utils/defs';
-const defaultName = 'בית כנסת לדוגמא';
+import {
+  defaultName,
+  defaultSettings,
+  mergeSettings,
+  SETTINGS_STORAGE_KEY,
+  BACKUP_SETTINGS_STORAGE_KEY,
+} from '@utils/settingsMerge';
+export { defaultName, defaultSettings, mergeSettings, SETTINGS_STORAGE_KEY, BACKUP_SETTINGS_STORAGE_KEY };
 
-const defaultSettings: Settings = {
-  lastUpdateTime: new Date(),
-  githubSettings: {
-    gistId: '',
-    gistFileName: 'synagogue-settings.json',
-    githubKey: '',
-  },
-  synagogueSettings: {
-    name: defaultName,
-    language: 'he',
-    nusach: 'ashkenaz',
-    backgroundSettings: {
-      mode: 'gradient',
-      imageUrl: '',
-      solidColor: '#E3F2FD',
-      gradientColors: ['#E3F2FD', '#BBDEFB', '#90CAF9'],
-      gradientStart: { x: 1, y: 1 },
-      gradientEnd: { x: 0, y: 0 },
-    },
-    footerSettings: {
-      enable: false,
-      text: '',
-    },
-  },
-  zmanimSettings: {
-    enable: true,
-    screenDisplayTime: 10,
-    city: cities[0]?.hebrew_name || '',
-    latitude: 31.7667,
-    longitude: 35.2333,
-    elevation: 0,
-    olson: 'Asia/Jerusalem',
-    il: true,
-    purimSettings: {
-      regular: true,
-      shushan: false,
-    },
-  },
-  messagesSettings: {
-    enable: true,
-    screenDisplayTime: 10,
-    messages: [
-      {
-        id: 'msg_default_1',
-        text: 'מזל טוב למשפחת כהן לרגל הולדת הבן 👶 יהי רצון שיגדל לתורה, לחופה ולמעשים טובים.',
-        enabled: true,
-      },
-      {
-        id: 'msg_default_2',
-        text: 'אנו שמחים לברך את המתפללים והאורחים החדשים שהצטרפו אלינו היום. תרגישו בבית',
-        enabled: true,
-      },
-      {
-        id: 'msg_default_3',
-        text: 'החל מהשבוע: שיעור בגמרא עם הרב לוי כל יום שלישי בשעה 20:30 בבית הכנסת.',
-        enabled: true,
-      },
-    ],
-  },
-  classesSettings: {
-    enable: true,
-    screenDisplayTime: 10,
-    classes: [
-      {
-        id: 'class_1768698520454_52xjbtgq6',
-        day: [0, 1, 2, 3, 4, 6],
-        start: '22:00',
-        end: '21:00',
-        tutor: 'משה כהן',
-        subject: 'דף יומי',
-      },
-      {
-        id: 'class_1768767659451_j99pmr5ea',
-        day: [5],
-        start: '12:00',
-        end: '13:00',
-        tutor: 'משה כהן',
-        subject: 'דף יומי',
-      },
-      {
-        id: 'class_1768767679349_gyuwn19ix',
-        day: [0, 3],
-        start: '21:00',
-        end: '21:00',
-        tutor: 'הרב יפרח',
-        subject: 'מסילת ישרים',
-      },
-    ],
-  },
-  deceasedSettings: {
-    enable: true,
-    screenDisplayTime: 10,
-    deceased: [],
-    imgbbApiKey: '',
-    displaySettings: {
-      tableRows: 2,
-      tableColumns: 3,
-      displayMode: 'all',
-      defaultTemplate: 'simple',
-    },
-  },
-  scheduleSettings: {
-    enable: true,
-    screenDisplayTime: 10,
-    columns: [
-      {
-        id: '1768569282274',
-        title: 'שבת',
-        prayers: [
-          {
-            id: '1768569315318',
-            name: 'מנחה ערב שבת',
-            time: "10 דק' אחרי כניסת שבת",
-          },
-          {
-            id: '1768569329105',
-            name: 'שחרית',
-            time: '8:30',
-          },
-          {
-            id: '1768569339611',
-            name: 'מנחה שבת',
-            time: '16:00',
-          },
-        ],
-      },
-      {
-        id: '1768768271286',
-        title: 'ימי חול',
-        prayers: [
-          {
-            id: '1768768280476',
-            name: 'שחרית',
-            time: '6:00',
-          },
-          {
-            id: '1768768287501',
-            name: 'שחרית',
-            time: '7:00',
-          },
-          {
-            id: '1768768296689',
-            name: 'מנחה',
-            time: '20 דק לפני שקיעה',
-          },
-          {
-            id: '1768768306304',
-            name: 'ערבית',
-            time: 'סמוך למנחה',
-          },
-          {
-            id: '1768768313552',
-            name: 'ערבית',
-            time: '20:00',
-          },
-        ],
-      },
-    ],
-  },
-  dailyHalakhaSettings: {
-    enable: true,
-    screenDisplayTime: 10,
-    selectedBooks: ['פניני הלכה, זמנים'],
-    showRelatedHolidaysHalachot: false,
-    halakhaItemsPerDay: 3,
-  },
-};
-
-interface SettingsContextType {
+export interface SettingsContextType {
   settings: Settings;
   isLoading: boolean;
   updateSettings: (newSettings: Partial<Settings>) => void;
   saveSettings: () => Promise<void>;
+  resetToDefaults: () => Promise<void>;
+  revertToPreviousSettings: () => Promise<boolean>;
+  hasBackupSettings: () => Promise<boolean>;
 }
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -222,6 +62,19 @@ const setSecureGithubKey = async (key: string): Promise<void> => {
   }
 };
 
+const backupCurrentLocalSettings = async (): Promise<void> => {
+  try {
+    const existing = await AsyncStorage.getItem(SETTINGS_STORAGE_KEY);
+    if (existing) {
+      // Validate that it is valid JSON before backing up
+      JSON.parse(existing);
+      await AsyncStorage.setItem(BACKUP_SETTINGS_STORAGE_KEY, existing);
+    }
+  } catch (error) {
+    console.error('Failed to backup current settings:', error);
+  }
+};
+
 export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<Settings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
@@ -252,11 +105,8 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           // Check if all required keys are present
           const hasAllRequiredKeys = requiredKeys.every((requiredKey) => requiredKey in data);
           if (hasAllRequiredKeys) {
-            // Return the transformed record
-            return {
-              ...data,
-              lastUpdateTime: new Date(data.lastUpdateTime), // Convert timestamp to Date
-            };
+            // Sanitize remote settings with defaults to guarantee type safety
+            return mergeSettings(data, defaultSettings);
           }
         } catch (error) {
           console.error('Failed to parse file content as JSON', gist.files[filename].content, error);
@@ -277,8 +127,25 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const loadSettings = async () => {
     try {
       // Load local settings
-      const localSettingsString = await AsyncStorage.getItem('settings');
-      const localSettings = localSettingsString ? JSON.parse(localSettingsString) : null;
+      const localSettingsString = await AsyncStorage.getItem(SETTINGS_STORAGE_KEY);
+      let localSettings: any = null;
+      if (localSettingsString) {
+        try {
+          localSettings = JSON.parse(localSettingsString);
+        } catch (parseError) {
+          console.error('Corrupted JSON detected in AsyncStorage settings, resetting storage:', parseError);
+          localSettings = null;
+          await AsyncStorage.removeItem(SETTINGS_STORAGE_KEY);
+        }
+      }
+
+      // If local settings exist but no backup exists yet, initialize the backup
+      const existingBackup = await AsyncStorage.getItem(BACKUP_SETTINGS_STORAGE_KEY);
+      if (!existingBackup && localSettingsString && localSettings) {
+        try {
+          await AsyncStorage.setItem(BACKUP_SETTINGS_STORAGE_KEY, localSettingsString);
+        } catch {}
+      }
 
       // Migrate githubKey from AsyncStorage to encrypted storage if it exists
       if (localSettings?.githubKey) {
@@ -304,6 +171,7 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       if (!localSettings && !remoteSettings) {
         // First time use - use defaults
         setSettings(defaultSettings);
+        latestSettings.current = defaultSettings;
         return;
       }
 
@@ -319,106 +187,12 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         } else {
           const localDate = new Date(localSettings.lastUpdateTime);
           const remoteDate = new Date(remoteSettings.lastUpdateTime);
-          finalSettings = remoteDate > localDate ? remoteSettings : localSettings;
+          finalSettings =
+            !isNaN(remoteDate.getTime()) && !isNaN(localDate.getTime()) && remoteDate > localDate
+              ? remoteSettings
+              : localSettings;
         }
       }
-
-      // Deep merge loaded settings with default settings to ensure all fields are present
-      const mergeSettings = (loaded: any, defaults: Settings): Settings => {
-        const merged = { ...defaults };
-
-        // Merge top-level settings
-        if (loaded) {
-          Object.keys(loaded).forEach((key) => {
-            if (key === 'lastUpdateTime') {
-              merged.lastUpdateTime = new Date(loaded.lastUpdateTime);
-            } else if (key === 'githubSettings' && loaded.githubSettings) {
-              merged.githubSettings = { ...defaults.githubSettings, ...loaded.githubSettings };
-            } else if (key === 'synagogueSettings' && loaded.synagogueSettings) {
-              merged.synagogueSettings = {
-                ...defaults.synagogueSettings,
-                ...loaded.synagogueSettings,
-                backgroundSettings: {
-                  ...defaults.synagogueSettings.backgroundSettings,
-                  ...loaded.synagogueSettings?.backgroundSettings,
-                },
-                footerSettings: {
-                  ...defaults.synagogueSettings.footerSettings,
-                  ...loaded.synagogueSettings?.footerSettings,
-                },
-              };
-            } else if (key === 'zmanimSettings' && loaded.zmanimSettings) {
-              merged.zmanimSettings = {
-                ...defaults.zmanimSettings,
-                ...loaded.zmanimSettings,
-                purimSettings: {
-                  ...defaults.zmanimSettings.purimSettings,
-                  ...loaded.zmanimSettings?.purimSettings,
-                },
-              };
-            } else if (key === 'messagesSettings' && loaded.messagesSettings) {
-              merged.messagesSettings = {
-                ...defaults.messagesSettings,
-                ...loaded.messagesSettings,
-                messages: loaded.messagesSettings.messages || defaults.messagesSettings.messages,
-              };
-            } else if (key === 'classesSettings' && loaded.classesSettings) {
-              // Normalize classes to ensure backward compatibility - ensure location field exists
-              const normalizedClasses = (loaded.classesSettings.classes || defaults.classesSettings.classes).map(
-                (cls: any) => ({
-                  ...cls,
-                  // Ensure location is either a non-empty string or undefined (for backward compatibility)
-                  location:
-                    cls.location && typeof cls.location === 'string' && cls.location.trim() !== ''
-                      ? cls.location.trim()
-                      : undefined,
-                }),
-              );
-              merged.classesSettings = {
-                ...defaults.classesSettings,
-                ...loaded.classesSettings,
-                classes: normalizedClasses,
-              };
-            } else if (key === 'deceasedSettings' && loaded.deceasedSettings) {
-              merged.deceasedSettings = {
-                ...defaults.deceasedSettings,
-                ...loaded.deceasedSettings,
-                deceased: loaded.deceasedSettings.deceased || defaults.deceasedSettings.deceased,
-                displaySettings: {
-                  ...defaults.deceasedSettings.displaySettings,
-                  ...loaded.deceasedSettings?.displaySettings,
-                },
-              };
-            } else if (key === 'scheduleSettings' && loaded.scheduleSettings) {
-              // Normalize prayers to ensure backward compatibility - ensure timeType and offsetMinutes fields exist
-              const normalizedColumns = (loaded.scheduleSettings.columns || defaults.scheduleSettings.columns).map(
-                (column: any) => ({
-                  ...column,
-                  prayers: (column.prayers || []).map((prayer: any) => ({
-                    ...prayer,
-                    // Ensure timeType defaults to 'time' if not present (for backward compatibility)
-                    timeType: prayer.timeType || 'time',
-                    // offsetMinutes can be undefined for old prayers (only needed for sunrise/sunset offsets)
-                    offsetMinutes: prayer.offsetMinutes !== undefined ? prayer.offsetMinutes : undefined,
-                  })),
-                }),
-              );
-              merged.scheduleSettings = {
-                ...defaults.scheduleSettings,
-                ...loaded.scheduleSettings,
-                columns: normalizedColumns,
-              };
-            } else if (key === 'dailyHalakhaSettings' && loaded.dailyHalakhaSettings) {
-              merged.dailyHalakhaSettings = {
-                ...defaults.dailyHalakhaSettings,
-                ...loaded.dailyHalakhaSettings,
-                selectedBooks: loaded.dailyHalakhaSettings.selectedBooks || defaults.dailyHalakhaSettings.selectedBooks,
-              };
-            }
-          });
-        }
-        return merged;
-      };
 
       const settingsToSet = mergeSettings(finalSettings, defaultSettings);
       // Ensure githubKey is included in settings state
@@ -435,9 +209,16 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
         settingsWithoutKey.githubSettings = githubSettingsWithoutKey;
       }
-      await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
+      await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsWithoutKey));
     } catch (error) {
-      console.error('Error loading settings:', error);
+      console.error('Error loading settings, self-healing with default settings:', error);
+      setSettings(defaultSettings);
+      latestSettings.current = defaultSettings;
+      try {
+        await AsyncStorage.setItem('settings', JSON.stringify(defaultSettings));
+      } catch (healError) {
+        console.error('Failed to write default settings during self-healing:', healError);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -445,11 +226,11 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const updateRemoteSettings = async (settings: Settings): Promise<boolean> => {
     try {
-      const settingsWithoutKey = { ...settings };
+      const settingsWithoutKey: any = { ...settings };
       const githubKey = settings.githubSettings.githubKey;
       if (settingsWithoutKey.githubSettings) {
         const { githubKey: _, ...githubSettingsWithoutKey } = settingsWithoutKey.githubSettings;
-        settingsWithoutKey.githubSettings = githubSettingsWithoutKey as any;
+        settingsWithoutKey.githubSettings = githubSettingsWithoutKey;
       }
       const response = await fetch(`https://api.github.com/gists/${settings.githubSettings.gistId}`, {
         method: 'PATCH',
@@ -587,6 +368,9 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const applyRemoteSettings = async (remoteSettings: Settings) => {
+    // Backup existing settings JSON before remote overwrite
+    await backupCurrentLocalSettings();
+
     const githubKey = await getSecureGithubKey();
     const settingsWithKey = { ...remoteSettings };
     if (settingsWithKey.githubSettings) {
@@ -597,17 +381,20 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     latestSettings.current = settingsWithKey;
 
     // Store without githubKey in AsyncStorage
-    const settingsWithoutKey = { ...settingsWithKey };
+    const settingsWithoutKey: any = { ...settingsWithKey };
     if (settingsWithoutKey.githubSettings) {
       const { githubKey: _, ...rest } = settingsWithoutKey.githubSettings;
-      settingsWithoutKey.githubSettings = rest as any;
+      settingsWithoutKey.githubSettings = rest;
     }
-    await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
+    await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsWithoutKey));
   };
 
   const saveSettings = async () => {
     try {
       const current = latestSettings.current;
+
+      // Backup existing settings JSON before saving new changes
+      await backupCurrentLocalSettings();
 
       // Store githubKey in encrypted storage
       if (current.githubSettings?.githubKey) {
@@ -615,13 +402,13 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       }
 
       // Remove githubKey before storing in AsyncStorage
-      const settingsWithoutKey = { ...current };
+      const settingsWithoutKey: any = { ...current };
       if (settingsWithoutKey.githubSettings) {
         const { githubKey: _, ...rest } = settingsWithoutKey.githubSettings;
-        settingsWithoutKey.githubSettings = rest as any;
+        settingsWithoutKey.githubSettings = rest;
       }
 
-      await AsyncStorage.setItem('settings', JSON.stringify(settingsWithoutKey));
+      await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsWithoutKey));
       hasPendingEdits.current = false;
 
       // Sync with remote gist
@@ -648,8 +435,91 @@ export const SettingsProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const resetToDefaults = async () => {
+    try {
+      // Backup existing settings JSON before reset
+      await backupCurrentLocalSettings();
+
+      const githubKey = await getSecureGithubKey();
+      const freshDefaults: Settings = {
+        ...defaultSettings,
+        lastUpdateTime: new Date(),
+      };
+      if (freshDefaults.githubSettings) {
+        freshDefaults.githubSettings.githubKey = githubKey;
+      }
+
+      setSettings(freshDefaults);
+      latestSettings.current = freshDefaults;
+      hasPendingEdits.current = false;
+
+      const settingsWithoutKey: any = { ...freshDefaults };
+      if (settingsWithoutKey.githubSettings) {
+        const { githubKey: _, ...rest } = settingsWithoutKey.githubSettings;
+        settingsWithoutKey.githubSettings = rest;
+      }
+
+      await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsWithoutKey));
+    } catch (error) {
+      console.error('Error resetting settings to defaults:', error);
+      throw error;
+    }
+  };
+
+  const revertToPreviousSettings = async (): Promise<boolean> => {
+    try {
+      const backupString = await AsyncStorage.getItem(BACKUP_SETTINGS_STORAGE_KEY);
+      if (!backupString) return false;
+
+      const parsedBackup = JSON.parse(backupString);
+      const resolvedBackup = mergeSettings(parsedBackup, defaultSettings);
+
+      const githubKey = await getSecureGithubKey();
+      if (resolvedBackup.githubSettings) {
+        resolvedBackup.githubSettings.githubKey = githubKey;
+      }
+
+      setSettings(resolvedBackup);
+      latestSettings.current = resolvedBackup;
+      hasPendingEdits.current = false;
+
+      const settingsWithoutKey: any = { ...resolvedBackup };
+      if (settingsWithoutKey.githubSettings) {
+        const { githubKey: _, ...rest } = settingsWithoutKey.githubSettings;
+        settingsWithoutKey.githubSettings = rest;
+      }
+
+      await AsyncStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settingsWithoutKey));
+      return true;
+    } catch (error) {
+      console.error('Error reverting to previous settings:', error);
+      return false;
+    }
+  };
+
+  const hasBackupSettings = async (): Promise<boolean> => {
+    try {
+      const backup = await AsyncStorage.getItem(BACKUP_SETTINGS_STORAGE_KEY);
+      if (!backup) return false;
+      JSON.parse(backup);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   return (
-    <SettingsContext.Provider value={{ settings, updateSettings, saveSettings, isLoading }}>
+    <SettingsContext.Provider
+      value={{
+        settings,
+        updateSettings,
+        saveSettings,
+        resetToDefaults,
+        revertToPreviousSettings,
+        hasBackupSettings,
+        isLoading,
+      }}
+    >
       {children}
     </SettingsContext.Provider>
   );

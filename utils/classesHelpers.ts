@@ -62,6 +62,8 @@ export function validateDayNumbers(dayNumbers: number[]): boolean {
   return dayNumbers.every((num) => num >= 0 && num <= 6);
 }
 
+import { isValidDateString } from './validation';
+
 /**
  * Sort classes by start time
  * @param classes - Array of classes to sort
@@ -69,9 +71,11 @@ export function validateDayNumbers(dayNumbers: number[]): boolean {
  */
 export function sortClassesByTime(classes: Class[]): Class[] {
   return [...classes].sort((a, b) => {
-    const timeA = a.start.replace(':', '');
-    const timeB = b.start.replace(':', '');
-    return parseInt(timeA, 10) - parseInt(timeB, 10);
+    const timeA = (a.start || '').replace(':', '');
+    const timeB = (b.start || '').replace(':', '');
+    const parsedA = parseInt(timeA, 10);
+    const parsedB = parseInt(timeB, 10);
+    return (isNaN(parsedA) ? 0 : parsedA) - (isNaN(parsedB) ? 0 : parsedB);
   });
 }
 
@@ -82,7 +86,7 @@ export function sortClassesByTime(classes: Class[]): Class[] {
  * @returns Array of classes that occur on the specified day
  */
 export function filterClassesByDay(classes: Class[], dayNumber: number): Class[] {
-  return classes.filter((classItem) => classItem.day.includes(dayNumber));
+  return classes.filter((classItem) => classItem.day?.includes(dayNumber));
 }
 
 /**
@@ -92,13 +96,13 @@ export function filterClassesByDay(classes: Class[], dayNumber: number): Class[]
  * @returns True if the class occurs today
  */
 export function isClassToday(classItem: Class, currentDayOfWeek: number): boolean {
-  return classItem.day.includes(currentDayOfWeek);
+  return Boolean(classItem.day?.includes(currentDayOfWeek));
 }
 
 export function getDayMonthYearFromString(dateString: string): { day: number; month: number; year: number } {
   // dateString is in the format of YYYY-MM-DD
   try {
-    const [yearStr, monthStr, dayStr] = dateString.split('-');
+    const [yearStr, monthStr, dayStr] = (dateString || '').split('-');
     if (!dayStr || !monthStr || !yearStr) {
       return { day: 0, month: 0, year: 0 };
     }
@@ -125,26 +129,33 @@ export function getDayMonthYearFromString(dateString: string): { day: number; mo
  * @returns True if the message should be displayed
  */
 export function isMessageActive(message: Message, referenceDate?: Date): boolean {
-  if (!message.enabled) return false;
-
-  // If no dates set, always active
-  if (!message.startDate && !message.endDate) return true;
+  if (!message?.enabled) return false;
 
   const now = referenceDate ? new Date(referenceDate) : new Date();
   now.setHours(0, 0, 0, 0);
 
   // Check start date if set
-  if (message.startDate) {
-    const start = new Date(message.startDate);
-    start.setHours(0, 0, 0, 0);
-    if (now < start) return false;
+  if (message.startDate && isValidDateString(message.startDate)) {
+    try {
+      const [year = 0, month = 1, day = 1] = message.startDate.split('-').map(Number);
+      const start = new Date(year, month - 1, day);
+      start.setHours(0, 0, 0, 0);
+      if (!isNaN(start.getTime()) && now < start) return false;
+    } catch {
+      // ignore invalid date
+    }
   }
 
   // Check end date if set
-  if (message.endDate) {
-    const end = new Date(message.endDate);
-    end.setHours(23, 59, 59, 999);
-    if (now > end) return false;
+  if (message.endDate && isValidDateString(message.endDate)) {
+    try {
+      const [year = 0, month = 1, day = 1] = message.endDate.split('-').map(Number);
+      const end = new Date(year, month - 1, day);
+      end.setHours(23, 59, 59, 999);
+      if (!isNaN(end.getTime()) && now > end) return false;
+    } catch {
+      // ignore invalid date
+    }
   }
 
   return true;
@@ -157,11 +168,17 @@ export function isMessageActive(message: Message, referenceDate?: Date): boolean
  * @returns True if the message end date has passed
  */
 export function isMessageExpired(message: Message, referenceDate?: Date): boolean {
-  if (!message.endDate) return false;
-  const end = new Date(message.endDate);
-  end.setHours(23, 59, 59, 999);
-  const now = referenceDate ? new Date(referenceDate) : new Date();
-  return now > end;
+  if (!message?.endDate || !isValidDateString(message.endDate)) return false;
+  try {
+    const [year = 0, month = 1, day = 1] = message.endDate.split('-').map(Number);
+    const end = new Date(year, month - 1, day);
+    end.setHours(23, 59, 59, 999);
+    if (isNaN(end.getTime())) return false;
+    const now = referenceDate ? new Date(referenceDate) : new Date();
+    return now > end;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -171,12 +188,18 @@ export function isMessageExpired(message: Message, referenceDate?: Date): boolea
  * @returns True if the message start date is in the future
  */
 export function isMessageScheduled(message: Message, referenceDate?: Date): boolean {
-  if (!message.startDate) return false;
-  const start = new Date(message.startDate);
-  start.setHours(0, 0, 0, 0);
-  const now = referenceDate ? new Date(referenceDate) : new Date();
-  now.setHours(0, 0, 0, 0);
-  return now < start;
+  if (!message?.startDate || !isValidDateString(message.startDate)) return false;
+  try {
+    const [year = 0, month = 1, day = 1] = message.startDate.split('-').map(Number);
+    const start = new Date(year, month - 1, day);
+    start.setHours(0, 0, 0, 0);
+    if (isNaN(start.getTime())) return false;
+    const now = referenceDate ? new Date(referenceDate) : new Date();
+    now.setHours(0, 0, 0, 0);
+    return now < start;
+  } catch {
+    return false;
+  }
 }
 
 /**

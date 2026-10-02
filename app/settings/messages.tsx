@@ -7,6 +7,7 @@ import { DatePicker } from '@components/DatePicker';
 import { NumberInput } from '@components/NumberInput';
 import { EventType, Message, MessageType } from '@utils/defs';
 import { isMessageExpired, isMessageScheduled } from '@utils/classesHelpers';
+import { isValidDateRange } from '@utils/validation';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import { EVENT_TYPES, getEventImage } from '@utils/eventAssets';
 
@@ -337,6 +338,21 @@ const MessagesSettingsTab = () => {
                       )}
                     </View>
                   </View>
+
+                  {(() => {
+                    const dateValidation = isValidDateRange(item.startDate, item.endDate);
+                    if (!dateValidation.valid && dateValidation.errorKey) {
+                      return (
+                        <Text
+                          className="text-red-500 font-medium"
+                          style={{ fontSize: labelSize, marginTop: smallPadding / 2 }}
+                        >
+                          {t(dateValidation.errorKey)}
+                        </Text>
+                      );
+                    }
+                    return null;
+                  })()}
                 </View>
               );
             }}

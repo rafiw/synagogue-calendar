@@ -6,15 +6,19 @@ import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { daysOfWeek } from '@utils/classesHelpers';
 import { Class, Settings } from '@utils/defs';
-import { defaultPageDisplayTime, isRTL2 } from '@utils/utils';
+import { defaultPageDisplayTime, isRTL2, safeJsonParse } from '@utils/utils';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useResponsiveIconSize } from '@utils/responsive';
 
 const classesPerPage = 3.0;
 export async function getSubPages(): Promise<number> {
-  const localSettingsString = await AsyncStorage.getItem('settings');
-  const localSettings = localSettingsString ? (JSON.parse(localSettingsString) as Settings) : null;
-  if (!localSettings?.classesSettings?.classes) return 0;
-  return Math.ceil(localSettings.classesSettings.classes.length / classesPerPage);
+  try {
+    const localSettingsString = await AsyncStorage.getItem('settings');
+    const localSettings = safeJsonParse<Settings | null>(localSettingsString, null);
+    if (!Array.isArray(localSettings?.classesSettings?.classes)) return 1;
+    return Math.max(1, Math.ceil(localSettings.classesSettings.classes.length / classesPerPage));
+  } catch {
+    return 1;
+  }
 }
 
 const Classes: React.FC = () => {
@@ -140,7 +144,7 @@ const Classes: React.FC = () => {
                   className="flex-1 text-center font-bold text-gray-900"
                   style={{ fontSize: textSize, padding }}
                 >
-                  {getDayNames(classItem.day)}
+                  {getDayNames(classItem?.day || [])}
                 </Text>,
                 <Text
                   key={`${classItem.id}_time`}
@@ -148,8 +152,8 @@ const Classes: React.FC = () => {
                   style={{ fontSize: textSize, padding }}
                 >
                   {isRTL2(settings.synagogueSettings.language)
-                    ? `${classItem.end}-${classItem.start}`
-                    : `${classItem.start}-${classItem.end}`}
+                    ? `${classItem.end || ''}-${classItem.start || ''}`
+                    : `${classItem.start || ''}-${classItem.end || ''}`}
                 </Text>,
                 <Text
                   key={`${classItem.id}_tutor`}

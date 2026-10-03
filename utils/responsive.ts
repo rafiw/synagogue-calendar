@@ -18,32 +18,31 @@ export const useDeviceType = (): DeviceType => {
     return 'tv';
   }
 
-  // For web, consider the physical resolution, not just CSS pixels
-  // TV browsers often report small logical dimensions with high pixel ratio
-  // (e.g., 960x540 with ratio 2 = actual 1920x1080)
-  let effectiveWidth = width;
-  if (Platform.OS === 'web' && typeof window !== 'undefined') {
-    const pixelRatio = window.devicePixelRatio || 1;
-    // If pixel ratio is significantly > 1, use physical width for detection
-    // This helps distinguish TVs (high ratio, fullscreen) from tablets
-    if (pixelRatio >= 1.5) {
-      effectiveWidth = width * pixelRatio;
+  // On web, check mobile user agent or TV user agent
+  if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
+    const isMobileUA = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobileUA && width < 768) {
+      return 'mobile';
+    }
+
+    const isTvUA = /TV|SmartTV|Tizen|Web0S|NetCast|HbbTV|Android.*TV|GoogleTV/i.test(navigator.userAgent);
+    if (isTvUA) {
+      return 'tv';
     }
   }
 
-  // Desktop/PC monitors (web browser, Electron, etc.) - viewed from 1.5-3 feet
-  // These are large screens but NOT TVs
-  if (effectiveWidth > 1280) {
+  // Standard CSS breakpoints based on viewport width
+  if (width < 768) {
+    return 'mobile';
+  }
+
+  // Desktop/PC monitors (> 1280)
+  if (width > 1280) {
     return 'desktop';
   }
 
-  // Tablet range
-  if (effectiveWidth >= 768 && effectiveWidth <= 1280) {
-    return 'tablet';
-  }
-
-  // Default to mobile
-  return 'mobile';
+  // Tablet range (768 - 1280)
+  return 'tablet';
 };
 
 /**

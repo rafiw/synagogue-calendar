@@ -100,6 +100,78 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     </View>,
   ];
 
+  if (deviceType === 'mobile') {
+    const mobileTitleSize = Math.min(titleSize, 22);
+    const mobileDateSize = Math.min(dateSize, 14);
+    const mobileTimeSize = Math.min(timeSize, 16);
+
+    return (
+      <View
+        className="flex bg-white/40 backdrop-blur-sm shadow-2xl border border-white/50"
+        style={{
+          paddingHorizontal: containerPaddingX,
+          paddingVertical: containerPaddingY,
+          borderRadius: borderRadiusSize,
+        }}
+      >
+        {/* Top row: Title (centered) and Settings button */}
+        <View className={`flex flex-row items-center justify-between w-full ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <View style={{ width: iconSize + padding * 2 }} />
+          <View className="flex-1 items-center px-1">
+            <Text
+              className="font-bold text-gray-900 text-center"
+              style={{ fontSize: mobileTitleSize }}
+              numberOfLines={2}
+            >
+              {title}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => {
+              if (Platform.OS === 'web' && typeof document !== 'undefined') {
+                (document.activeElement as HTMLElement)?.blur?.();
+              }
+              router.push('/settings');
+            }}
+            className="bg-gray-800 rounded-lg shadow-md hover:bg-gray-700"
+            style={{ padding }}
+          >
+            <Ionicons name="settings-outline" size={iconSize} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Bottom row: Hebrew date & holiday on one side, time on the other */}
+        <View
+          className={`flex flex-row items-center justify-between w-full ${isRTL ? 'flex-row-reverse' : ''}`}
+          style={{ marginTop: Math.max(4, Math.round(padding * 0.5)) }}
+        >
+          <Text
+            className="font-semibold text-gray-800 flex-1"
+            style={{
+              fontSize: mobileDateSize,
+              textAlign: isRTL ? 'right' : 'left',
+              paddingHorizontal: 2,
+            }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {dayOfWeek} - {[zmanim.getHebrewDate(), ...zmanim.getHoliday()].filter(Boolean).join(' - ')}
+          </Text>
+          <Text
+            className="font-bold text-gray-800"
+            style={{
+              fontSize: mobileTimeSize,
+              marginLeft: isRTL ? 0 : 8,
+              marginRight: isRTL ? 8 : 0,
+            }}
+          >
+            {currentTime}
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
   const displayElements = isRTL ? [...elements].reverse() : elements;
   const style1 = isRTL ? 'flex-row-reverse text-right' : 'flex-row text-left';
 

@@ -55,8 +55,8 @@ export { ErrorBoundary };
 export default function RootLayout() {
   return (
     // <StrictMode>
-    <SafeAreaProvider>
-      <GestureHandlerRootView className="flex-1">
+    <SafeAreaProvider style={{ flex: 1, width: '100%', height: '100%' }}>
+      <GestureHandlerRootView style={{ flex: 1, width: '100%', height: '100%' }}>
         <ErrorBoundary>
           <SettingsProvider>
             <AppContent />

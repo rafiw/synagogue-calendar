@@ -227,6 +227,20 @@ function main() {
       htmlContent = htmlContent.replace('<head>', `<head>${metaTags}`);
     }
 
+    // Update viewport for mobile full-bleed fit
+    htmlContent = htmlContent.replace(
+      /<meta\s+name=["']viewport["'][^>]*>/i,
+      '<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">',
+    );
+
+    // Ensure #root expands to 100% width and height in expo-reset
+    if (htmlContent.includes('#root{display:flex}')) {
+      htmlContent = htmlContent.replace(
+        '#root{display:flex}',
+        '#root{display:flex;width:100%;height:100%;flex-direction:column;overflow:hidden;}',
+      );
+    }
+
     writeFileSync(htmlPath, htmlContent);
     console.log(`✅ Patched: ${htmlPath.replace(distDir, 'dist')}`);
   }

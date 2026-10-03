@@ -108,6 +108,32 @@ function main() {
     }
   }
   
+  // Clean up unused vector-icons font directory in dist/assets/node_modules/@expo
+  // Needed fonts (Ionicons, Feather) are already copied to dist/fonts and bundle-patched.
+  // The remaining 15+ unused TTF fonts have extremely long paths (>260 chars) causing Windows MAX_PATH errors in Git.
+  const expoAssetsDir = join(distDir, 'assets', 'node_modules', '@expo');
+  if (existsSync(expoAssetsDir)) {
+    rmSync(expoAssetsDir, { recursive: true, force: true });
+    console.log('🧹 Removed unused vector-icons in assets/node_modules/@expo');
+  }
+
+  // Remove redundant nested node_modules inside material-top-tabs to prevent path length issues
+  const nestedTopTabsNodeModules = join(distDir, 'assets', 'node_modules', '@react-navigation', 'material-top-tabs', 'node_modules');
+  if (existsSync(nestedTopTabsNodeModules)) {
+    rmSync(nestedTopTabsNodeModules, { recursive: true, force: true });
+    console.log('🧹 Removed redundant nested node_modules in material-top-tabs');
+  }
+
+  // Also clean up any lingering vendor/@expo or vendor nested node_modules
+  const vendorExpoDir = join(distDir, 'assets', 'vendor', '@expo');
+  if (existsSync(vendorExpoDir)) {
+    rmSync(vendorExpoDir, { recursive: true, force: true });
+  }
+  const vendorNestedTopTabs = join(distDir, 'assets', 'vendor', '@react-navigation', 'material-top-tabs', 'node_modules');
+  if (existsSync(vendorNestedTopTabs)) {
+    rmSync(vendorNestedTopTabs, { recursive: true, force: true });
+  }
+
   // 1. Move all assets under dist/assets/node_modules to dist/assets/vendor
   // This prevents git / gh-pages / webservers from ignoring or blocking node_modules paths
   const nodeModulesAssetsDir = join(distDir, 'assets', 'node_modules');

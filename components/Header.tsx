@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { useSettings } from '@context/settingsContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -86,7 +86,12 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     </View>,
     <View key={4} className="flex flex-row items-center">
       <TouchableOpacity
-        onPress={() => router.push('/settings')}
+        onPress={() => {
+          if (Platform.OS === 'web' && typeof document !== 'undefined') {
+            (document.activeElement as HTMLElement)?.blur?.();
+          }
+          router.push('/settings');
+        }}
         className="bg-gray-800 rounded-lg shadow-md hover:bg-gray-700"
         style={{ padding: padding }}
       >

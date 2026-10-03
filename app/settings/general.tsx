@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   Image,
   useWindowDimensions,
+  Platform,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -28,6 +29,17 @@ const checkboxStyles = {
     iconStyle: { borderColor: 'green' },
     innerIconStyle: { borderWidth: 2 },
   },
+};
+
+const PasswordFormWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  if (Platform.OS === 'web') {
+    return (
+      <form onSubmit={(e) => e.preventDefault()} style={{ margin: 0, padding: 0 }}>
+        {children}
+      </form>
+    );
+  }
+  return <View>{children}</View>;
 };
 
 const HelpSection = () => {
@@ -646,15 +658,19 @@ const GeneralSettingsTab = () => {
             <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
               {t('gist_key')}
             </Text>
-            <TextInput
-              className="w-full border border-gray-300 rounded-lg bg-gray-50"
-              style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-              value={settings.githubSettings.githubKey}
-              onChangeText={(githubKey) =>
-                updateSettings({ githubSettings: { ...settings.githubSettings, githubKey } })
-              }
-              secureTextEntry={true}
-            />
+            <PasswordFormWrapper>
+              <TextInput
+                className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                value={settings.githubSettings.githubKey}
+                onChangeText={(githubKey) =>
+                  updateSettings({ githubSettings: { ...settings.githubSettings, githubKey } })
+                }
+                secureTextEntry={true}
+                autoComplete="off"
+                textContentType="password"
+              />
+            </PasswordFormWrapper>
           </View>
 
           {/* Image Upload API Key (imgbb) - used e.g. by deceased images */}

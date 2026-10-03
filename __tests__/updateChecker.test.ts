@@ -45,6 +45,37 @@ describe('updateChecker', () => {
       const url = getBaseUrl();
       expect(typeof url).toBe('string');
       expect(url.length).toBeGreaterThan(0);
+      expect(url.endsWith('/')).toBe(true);
+    });
+
+    it('resolves repository base URL when navigated to /settings', () => {
+      const originalWindow = global.window;
+      global.window = {
+        location: {
+          origin: 'https://rafiw.github.io',
+          pathname: '/synagogue-calendar/settings/general',
+        },
+      } as any;
+
+      const url = getBaseUrl();
+      expect(url).toBe('https://rafiw.github.io/synagogue-calendar/');
+
+      global.window = originalWindow;
+    });
+
+    it('resolves root URL when on root domain in /settings', () => {
+      const originalWindow = global.window;
+      global.window = {
+        location: {
+          origin: 'https://example.com',
+          pathname: '/settings',
+        },
+      } as any;
+
+      const url = getBaseUrl();
+      expect(url).toBe('https://example.com/');
+
+      global.window = originalWindow;
     });
   });
 

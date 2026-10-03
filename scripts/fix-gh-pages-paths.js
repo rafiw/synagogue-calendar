@@ -201,12 +201,19 @@ function main() {
   writeFileSync(join(distDir, 'version.json'), JSON.stringify(versionData, null, 2));
   console.log(`📄 Generated version.json: ${versionData.version} (${versionData.buildTime})`);
 
+  // Also write version.json to dist/settings as a fallback for stale cached clients
+  const settingsDistDir = join(distDir, 'settings');
+  if (existsSync(settingsDistDir)) {
+    writeFileSync(join(settingsDistDir, 'version.json'), JSON.stringify(versionData, null, 2));
+    console.log('📄 Copied version.json to dist/settings/version.json');
+  }
+
   // Create .nojekyll and clean .gitignore in dist
   writeFileSync(join(distDir, '.nojekyll'), '');
   writeFileSync(join(distDir, '.gitignore'), '# Empty to allow all dist files\n');
   console.log('📄 Created .nojekyll and .gitignore in dist');
 
-  const metaTags = `\n    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n    <meta http-equiv="Pragma" content="no-cache">\n    <meta http-equiv="Expires" content="0">\n    <meta name="app-version" content="${versionData.version}">\n    <meta name="git-commit" content="${versionData.commit}">\n    <meta name="build-time" content="${versionData.buildTime}">\n    <meta name="build-timestamp" content="${versionData.timestamp}">`;
+  const metaTags = `\n    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n    <meta http-equiv="Pragma" content="no-cache">\n    <meta http-equiv="Expires" content="0">\n    <meta name="app-version" content="${versionData.version}">\n    <meta name="git-commit" content="${versionData.commit}">\n    <meta name="build-time" content="${versionData.buildTime}">\n    <meta name="build-timestamp" content="${versionData.timestamp}">\n    <meta name="base-url" content="/synagogue-calendar/">`;
 
   const htmlFiles = readdirSync(distDir, { recursive: true })
     .filter(f => f.toString().endsWith('.html'))

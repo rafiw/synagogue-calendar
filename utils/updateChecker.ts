@@ -22,13 +22,51 @@ let cachedCurrentBuildInfo: BuildInfo | null = null;
 
 /**
  * Returns the base URL for fetching version assets on the web.
- * Handles subpaths like https://rafiw.github.io/synagogue-calendar/ cleanly.
+ * Handles subpaths like https://rafiw.github.io/synagogue-calendar/ cleanly,
+ * and ensures sub-routes like /settings or /settings/general never corrupt the root base URL.
  */
 export const getBaseUrl = (): string => {
   if (typeof window === 'undefined' || !window.location) return './';
-  const pathname = window.location.pathname;
-  const dirPath = pathname.endsWith('/') ? pathname : pathname.substring(0, pathname.lastIndexOf('/') + 1);
-  return `${window.location.origin}${dirPath}`;
+
+  const origin = window.location.origin && window.location.origin !== 'null' ? window.location.origin : '';
+
+  // 1. Check for injected <meta name="base-url">
+  if (typeof document !== 'undefined') {
+    const metaBase = document.querySelector('meta[name="base-url"]')?.getAttribute('content');
+    if (metaBase) {
+      const normalized = metaBase.endsWith('/') ? metaBase : `${metaBase}/`;
+      const fullPath = normalized.startsWith('/') ? normalized : `/${normalized}`;
+      return origin ? `${origin}${fullPath}` : fullPath;
+    }
+
+    // 2. Derive root base path from loaded bundle script tags (<script src=".../_expo/...">)
+    const scripts = document.querySelectorAll('script[src*="_expo/"]');
+    for (let i = 0; i < scripts.length; i++) {
+      const src = scripts[i].getAttribute('src');
+      if (src) {
+        const expoIdx = src.indexOf('_expo/');
+        if (expoIdx !== -1) {
+          const basePath = src.substring(0, expoIdx);
+          const normalized = basePath.endsWith('/') ? basePath : `${basePath}/`;
+          const fullPath = normalized.startsWith('/') ? normalized : `/${normalized}`;
+          return origin ? `${origin}${fullPath}` : fullPath;
+        }
+      }
+    }
+  }
+
+  // 3. Check pathname for known repository subpath
+  const pathname = window.location.pathname || '/';
+  if (pathname.includes('/synagogue-calendar')) {
+    return origin ? `${origin}/synagogue-calendar/` : '/synagogue-calendar/';
+  }
+
+  // 4. Strip any sub-routes (e.g. /settings, /settings/general)
+  const cleanPath = pathname.split('/settings')[0];
+  const dirPath = cleanPath.endsWith('/') ? cleanPath : cleanPath.substring(0, cleanPath.lastIndexOf('/') + 1);
+  const normalizedDir = dirPath ? (dirPath.startsWith('/') ? dirPath : `/${dirPath}`) : '/';
+  const fullPath = normalizedDir.endsWith('/') ? normalizedDir : `${normalizedDir}/`;
+  return origin ? `${origin}${fullPath}` : fullPath;
 };
 
 /**

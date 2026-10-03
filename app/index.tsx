@@ -7,8 +7,8 @@
  * (at your option) any later version.
  */
 
-import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions } from 'react-native';
-import { lazy, Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions, Platform } from 'react-native';
+import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { router } from 'expo-router';
 
 import Header from '@components/Header';
@@ -22,15 +22,16 @@ import BackgroundWrapper from '@components/BackgroundWrapper';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import { isMessageActive, calculateMessagesSubPages } from '@utils/classesHelpers';
 import { useAutoUpdate } from '@utils/useAutoUpdate';
+import { lazyWithRetry } from '@utils/lazyWithRetry';
 
 const classesPerPage = 3.0;
 
-const Zmanim = lazy(() => import('@components/Zmanim'));
-const Classes = lazy(() => import('@components/Classes'));
-const Deceased = lazy(() => import('@components/Deceased'));
-const Messages = lazy(() => import('@components/Messages'));
-const Schedule = lazy(() => import('@components/Schedule'));
-const DailyHalakha = lazy(() => import('@components/DailyHalakha'));
+const Zmanim = lazyWithRetry(() => import('@components/Zmanim'));
+const Classes = lazyWithRetry(() => import('@components/Classes'));
+const Deceased = lazyWithRetry(() => import('@components/Deceased'));
+const Messages = lazyWithRetry(() => import('@components/Messages'));
+const Schedule = lazyWithRetry(() => import('@components/Schedule'));
+const DailyHalakha = lazyWithRetry(() => import('@components/DailyHalakha'));
 
 const lazyScreenFallback = (
   <View className="flex-1 justify-center items-center">
@@ -127,6 +128,21 @@ export default function App() {
       I18nManager.forceRTL(shouldBeRTL);
     }
   }, [settings.synagogueSettings.language]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      // Preload all screen chunks in the background shortly after mount so they are cached in memory
+      const preloadTimer = setTimeout(() => {
+        void import('@components/Zmanim').catch(() => {});
+        void import('@components/Classes').catch(() => {});
+        void import('@components/Deceased').catch(() => {});
+        void import('@components/Messages').catch(() => {});
+        void import('@components/Schedule').catch(() => {});
+        void import('@components/DailyHalakha').catch(() => {});
+      }, 1500);
+      return () => clearTimeout(preloadTimer);
+    }
+  }, []);
 
   const createScreens = useCallback((): Screen[] => {
     const classSubPages = getClassSubPages(settings);

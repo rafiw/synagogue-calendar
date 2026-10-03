@@ -7,8 +7,8 @@
  * (at your option) any later version.
  */
 
-import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions, Platform } from 'react-native';
-import { Suspense, useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions } from 'react-native';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { router } from 'expo-router';
 
 import Header from '@components/Header';
@@ -22,22 +22,15 @@ import BackgroundWrapper from '@components/BackgroundWrapper';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import { isMessageActive, calculateMessagesSubPages } from '@utils/classesHelpers';
 import { useAutoUpdate } from '@utils/useAutoUpdate';
-import { lazyWithRetry } from '@utils/lazyWithRetry';
+
+import Zmanim from '@components/Zmanim';
+import Classes from '@components/Classes';
+import Deceased from '@components/Deceased';
+import Messages from '@components/Messages';
+import Schedule from '@components/Schedule';
+import DailyHalakha from '@components/DailyHalakha';
 
 const classesPerPage = 3.0;
-
-const Zmanim = lazyWithRetry(() => import('@components/Zmanim'));
-const Classes = lazyWithRetry(() => import('@components/Classes'));
-const Deceased = lazyWithRetry(() => import('@components/Deceased'));
-const Messages = lazyWithRetry(() => import('@components/Messages'));
-const Schedule = lazyWithRetry(() => import('@components/Schedule'));
-const DailyHalakha = lazyWithRetry(() => import('@components/DailyHalakha'));
-
-const lazyScreenFallback = (
-  <View className="flex-1 justify-center items-center">
-    <ActivityIndicator size="large" color="#0000ff" />
-  </View>
-);
 
 const getClassSubPages = (settings: Settings): number => {
   if (!Array.isArray(settings?.classesSettings?.classes)) return 1;
@@ -129,21 +122,6 @@ export default function App() {
     }
   }, [settings.synagogueSettings.language]);
 
-  useEffect(() => {
-    if (Platform.OS === 'web') {
-      // Preload all screen chunks in the background shortly after mount so they are cached in memory
-      const preloadTimer = setTimeout(() => {
-        void import('@components/Zmanim').catch(() => {});
-        void import('@components/Classes').catch(() => {});
-        void import('@components/Deceased').catch(() => {});
-        void import('@components/Messages').catch(() => {});
-        void import('@components/Schedule').catch(() => {});
-        void import('@components/DailyHalakha').catch(() => {});
-      }, 1500);
-      return () => clearTimeout(preloadTimer);
-    }
-  }, []);
-
   const createScreens = useCallback((): Screen[] => {
     const classSubPages = getClassSubPages(settings);
     const messagesSubPages = getMessagesSubPages(settings);
@@ -153,70 +131,40 @@ export default function App() {
       {
         id: 1,
         name: 'zmanim',
-        content: () =>
-          settings.zmanimSettings.enable ? (
-            <Suspense fallback={lazyScreenFallback}>
-              <Zmanim />
-            </Suspense>
-          ) : null,
+        content: () => (settings.zmanimSettings.enable ? <Zmanim /> : null),
         presentTime: settings.zmanimSettings.screenDisplayTime || defaultPageDisplayTime,
       },
       {
         id: 2,
         name: 'classes',
-        content: () =>
-          settings.classesSettings.enable ? (
-            <Suspense fallback={lazyScreenFallback}>
-              <Classes />
-            </Suspense>
-          ) : null,
+        content: () => (settings.classesSettings.enable ? <Classes /> : null),
         presentTime:
           settings.classesSettings.screenDisplayTime * classSubPages || classSubPages * defaultPageDisplayTime,
       },
       {
         id: 3,
         name: 'deceased',
-        content: () =>
-          settings.deceasedSettings.enable ? (
-            <Suspense fallback={lazyScreenFallback}>
-              <Deceased />
-            </Suspense>
-          ) : null,
+        content: () => (settings.deceasedSettings.enable ? <Deceased /> : null),
         presentTime:
           settings.deceasedSettings.screenDisplayTime * deceasedSubPages || deceasedSubPages * defaultPageDisplayTime,
       },
       {
         id: 4,
         name: 'messages',
-        content: () =>
-          settings.messagesSettings.enable ? (
-            <Suspense fallback={lazyScreenFallback}>
-              <Messages />
-            </Suspense>
-          ) : null,
+        content: () => (settings.messagesSettings.enable ? <Messages /> : null),
         presentTime:
           settings.messagesSettings.screenDisplayTime * messagesSubPages || messagesSubPages * defaultPageDisplayTime,
       },
       {
         id: 5,
         name: 'schedule',
-        content: () =>
-          settings.scheduleSettings.enable ? (
-            <Suspense fallback={lazyScreenFallback}>
-              <Schedule />
-            </Suspense>
-          ) : null,
+        content: () => (settings.scheduleSettings.enable ? <Schedule /> : null),
         presentTime: settings.scheduleSettings.screenDisplayTime || defaultPageDisplayTime,
       },
       {
         id: 6,
         name: 'dailyHalakha',
-        content: () =>
-          settings.dailyHalakhaSettings?.enable ? (
-            <Suspense fallback={lazyScreenFallback}>
-              <DailyHalakha />
-            </Suspense>
-          ) : null,
+        content: () => (settings.dailyHalakhaSettings?.enable ? <DailyHalakha /> : null),
         presentTime: settings.dailyHalakhaSettings?.screenDisplayTime || defaultPageDisplayTime,
       },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0);

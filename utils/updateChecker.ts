@@ -253,14 +253,52 @@ export const checkForUpdate = async (): Promise<UpdateCheckResult> => {
   }
 };
 
+let isApplyingUpdate = false;
+const RELOAD_THROTTLE_MS = 60 * 1000; // 60 seconds loop guard
+
 /**
  * Applies the downloaded/available update.
- * On web: updates service worker if any and reloads the window.
+ * On web: clears caches, updates service worker, and reloads with cache-busting version param.
+ * Includes loop protection against rapid reloading.
  * On native: reloads using expo-updates.
  */
-export const applyUpdate = async (): Promise<void> => {
+export const applyUpdate = async (targetVersion?: string): Promise<void> => {
+  if (isApplyingUpdate) return;
+  isApplyingUpdate = true;
+
   if (Platform.OS === 'web') {
     if (typeof window !== 'undefined' && window.location) {
+      // Loop protection: check if we recently reloaded for this exact version
+      try {
+        const lastReloadKey = 'synagogue_last_update_reload';
+        const lastReloadRaw = window.sessionStorage?.getItem(lastReloadKey);
+        if (lastReloadRaw) {
+          const parsed = JSON.parse(lastReloadRaw);
+          const timeSince = Date.now() - (parsed.time || 0);
+          if (timeSince < RELOAD_THROTTLE_MS && parsed.version === targetVersion) {
+            console.warn(
+              `[AutoUpdate] Update reload already attempted within ${Math.round(timeSince / 1000)}s for version ${targetVersion}. Skipping duplicate reload.`,
+            );
+            isApplyingUpdate = false;
+            return;
+          }
+        }
+        window.sessionStorage?.setItem(lastReloadKey, JSON.stringify({ time: Date.now(), version: targetVersion }));
+      } catch {
+        // Ignore storage errors
+      }
+
+      // Clear any cache storages
+      if (typeof caches !== 'undefined' && caches.keys) {
+        try {
+          const keys = await caches.keys();
+          await Promise.all(keys.map((k) => caches.delete(k)));
+        } catch {
+          // Ignore
+        }
+      }
+
+      // Update service worker registrations if any
       if ('serviceWorker' in navigator) {
         try {
           const registrations = await navigator.serviceWorker.getRegistrations();
@@ -271,8 +309,15 @@ export const applyUpdate = async (): Promise<void> => {
           // Ignore
         }
       }
-      // Force reload bypassing cache
-      window.location.reload();
+
+      // Reload with cache busting query param to avoid loading stale index.html
+      try {
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('_v', targetVersion || String(Date.now()));
+        window.location.replace(currentUrl.toString());
+      } catch {
+        window.location.reload();
+      }
     }
     return;
   }
@@ -284,5 +329,7 @@ export const applyUpdate = async (): Promise<void> => {
     }
   } catch (err) {
     console.error('Failed to reload native update:', err);
+  } finally {
+    isApplyingUpdate = false;
   }
 };

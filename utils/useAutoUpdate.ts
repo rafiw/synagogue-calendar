@@ -57,8 +57,8 @@ export const useAutoUpdate = (options: UseAutoUpdateOptions = {}): UseAutoUpdate
   }, []);
 
   const applyUpdateNow = useCallback(async (): Promise<void> => {
-    await applyUpdate();
-  }, []);
+    await applyUpdate(updateInfo?.remoteVersion || updateInfo?.remoteBuildTime);
+  }, [updateInfo]);
 
   useEffect(() => {
     // In dev mode or if disabled / interval <= 0, do not run automated background polling

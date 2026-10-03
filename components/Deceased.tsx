@@ -247,7 +247,6 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
 };
 
 const getGridScaleFactor = (totalCells: number): number => {
-  console.log('totalCells', totalCells);
   if (totalCells === 1) return 2.5;
   if (totalCells <= 2) return 2;
   if (totalCells <= 4) return 1.8;

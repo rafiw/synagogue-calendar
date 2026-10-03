@@ -18,7 +18,7 @@
     "audit-translations": "node scripts/audit-translations.js",
     "lint:commit": "commitlint",
     "build:web": "npx expo export -p web && node scripts/fix-gh-pages-paths.js",
-    "deploy:web": "gh-pages -d dist --nojekyll",
+    "deploy:web": "gh-pages -d dist --nojekyll --dotfiles",
     "deploy": "yarn build:web && yarn deploy:web"
   },
   "dependencies": {

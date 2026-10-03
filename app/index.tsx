@@ -75,14 +75,19 @@ export default function App() {
   });
 
   const pendingReloadRef = useRef(false);
+  const reloadTriggeredRef = useRef(false);
 
   useEffect(() => {
-    if (hasUpdate) {
+    if (hasUpdate && !reloadTriggeredRef.current) {
       pendingReloadRef.current = true;
       if (screens.length <= 1) {
         const timer = setTimeout(
           () => {
-            applyUpdateNow();
+            if (!reloadTriggeredRef.current) {
+              reloadTriggeredRef.current = true;
+              pendingReloadRef.current = false;
+              applyUpdateNow();
+            }
           },
           (screens[0]?.presentTime || defaultPageDisplayTime) * 1000,
         );
@@ -92,7 +97,9 @@ export default function App() {
   }, [hasUpdate, screens, applyUpdateNow]);
 
   useEffect(() => {
-    if (pendingReloadRef.current && currentScreenIndex === 0 && screens.length > 1) {
+    if (pendingReloadRef.current && currentScreenIndex === 0 && screens.length > 1 && !reloadTriggeredRef.current) {
+      reloadTriggeredRef.current = true;
+      pendingReloadRef.current = false;
       applyUpdateNow();
     }
   }, [currentScreenIndex, screens.length, applyUpdateNow]);

@@ -6,7 +6,7 @@
  * 2. Patches the JS bundle to reference the new font paths
  */
 
-import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync, cpSync, rmSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { execSync } from 'child_process';
@@ -108,20 +108,42 @@ function main() {
     }
   }
   
-  // Patch the JS bundles to use the new font path
-  console.log('\n📝 Patching JS bundles to use new font paths...');
+  // 1. Move all assets under dist/assets/node_modules to dist/assets/vendor
+  // This prevents git / gh-pages / webservers from ignoring or blocking node_modules paths
+  const nodeModulesAssetsDir = join(distDir, 'assets', 'node_modules');
+  const vendorAssetsDir = join(distDir, 'assets', 'vendor');
+  if (existsSync(nodeModulesAssetsDir)) {
+    console.log('\n📦 Migrating node_modules assets to assets/vendor...');
+    mkdirSync(vendorAssetsDir, { recursive: true });
+    cpSync(nodeModulesAssetsDir, vendorAssetsDir, { recursive: true });
+    rmSync(nodeModulesAssetsDir, { recursive: true, force: true });
+    console.log('✅ Migrated dist/assets/node_modules → dist/assets/vendor');
+  }
+
+  // Patch the JS bundles to use the new font paths and vendor asset paths
+  console.log('\n📝 Patching JS bundles to use new asset paths...');
   
   for (const bundlePath of bundleFiles) {
     let bundleContent = readFileSync(bundlePath, 'utf8');
+    let modified = false;
     
     if (bundleContent.includes(oldPathPattern)) {
       bundleContent = bundleContent.split(oldPathPattern).join(newPathPattern);
+      modified = true;
+    }
+
+    if (bundleContent.includes('assets/node_modules')) {
+      bundleContent = bundleContent.split('assets/node_modules').join('assets/vendor');
+      modified = true;
+    }
+
+    if (modified) {
       writeFileSync(bundlePath, bundleContent);
       console.log(`✅ Patched: ${bundlePath.split('\\').pop() || bundlePath.split('/').pop()}`);
     }
   }
   
-  // Also patch HTML files and inject version metadata
+  // Also patch HTML files and inject version metadata & cache control headers
   console.log('\n📝 Patching HTML files and injecting version metadata...');
 
   const packageJson = JSON.parse(readFileSync(join(projectRoot, 'package.json'), 'utf8'));
@@ -153,7 +175,12 @@ function main() {
   writeFileSync(join(distDir, 'version.json'), JSON.stringify(versionData, null, 2));
   console.log(`📄 Generated version.json: ${versionData.version} (${versionData.buildTime})`);
 
-  const metaTags = `\n    <meta name="app-version" content="${versionData.version}">\n    <meta name="git-commit" content="${versionData.commit}">\n    <meta name="build-time" content="${versionData.buildTime}">\n    <meta name="build-timestamp" content="${versionData.timestamp}">`;
+  // Create .nojekyll and clean .gitignore in dist
+  writeFileSync(join(distDir, '.nojekyll'), '');
+  writeFileSync(join(distDir, '.gitignore'), '# Empty to allow all dist files\n');
+  console.log('📄 Created .nojekyll and .gitignore in dist');
+
+  const metaTags = `\n    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">\n    <meta http-equiv="Pragma" content="no-cache">\n    <meta http-equiv="Expires" content="0">\n    <meta name="app-version" content="${versionData.version}">\n    <meta name="git-commit" content="${versionData.commit}">\n    <meta name="build-time" content="${versionData.buildTime}">\n    <meta name="build-timestamp" content="${versionData.timestamp}">`;
 
   const htmlFiles = readdirSync(distDir, { recursive: true })
     .filter(f => f.toString().endsWith('.html'))
@@ -164,6 +191,10 @@ function main() {
     
     if (htmlContent.includes(oldPathPattern)) {
       htmlContent = htmlContent.split(oldPathPattern).join(newPathPattern);
+    }
+
+    if (htmlContent.includes('assets/node_modules')) {
+      htmlContent = htmlContent.split('assets/node_modules').join('assets/vendor');
     }
 
     if (htmlContent.includes('<head>') && !htmlContent.includes('name="build-time"')) {

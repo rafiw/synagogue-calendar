@@ -145,12 +145,18 @@ export interface FooterSettings {
   text?: string;
 }
 
+export interface AutoUpdateSettings {
+  enable?: boolean;
+  checkIntervalMinutes?: number;
+}
+
 export interface SynagogueSettings {
   name: string;
   language: Language;
   nusach: Nusach;
   backgroundSettings: BackgroundSettings;
   footerSettings?: FooterSettings;
+  autoUpdateSettings?: AutoUpdateSettings;
 }
 
 export interface Settings {

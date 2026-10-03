@@ -9,6 +9,7 @@
 import { readFileSync, writeFileSync, mkdirSync, copyFileSync, readdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -120,8 +121,40 @@ function main() {
     }
   }
   
-  // Also patch HTML files
-  console.log('\n📝 Patching HTML files...');
+  // Also patch HTML files and inject version metadata
+  console.log('\n📝 Patching HTML files and injecting version metadata...');
+
+  const packageJson = JSON.parse(readFileSync(join(projectRoot, 'package.json'), 'utf8'));
+  const buildTime = new Date().toISOString();
+  const buildTimestamp = Date.now();
+
+  let gitCommit = process.env.GITHUB_SHA || process.env.GIT_COMMIT || '';
+  if (!gitCommit) {
+    try {
+      gitCommit = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
+    } catch {
+      gitCommit = '';
+    }
+  } else if (gitCommit.length > 7) {
+    gitCommit = gitCommit.substring(0, 7);
+  }
+
+  // Use git hash as version, with fallback to package.json version
+  const versionString = gitCommit ? `#${gitCommit}` : (packageJson.version ? `v${packageJson.version}` : '1.0.0');
+
+  const versionData = {
+    version: versionString,
+    commit: gitCommit,
+    buildTime,
+    timestamp: buildTimestamp,
+  };
+
+  // Write version.json
+  writeFileSync(join(distDir, 'version.json'), JSON.stringify(versionData, null, 2));
+  console.log(`📄 Generated version.json: ${versionData.version} (${versionData.buildTime})`);
+
+  const metaTags = `\n    <meta name="app-version" content="${versionData.version}">\n    <meta name="git-commit" content="${versionData.commit}">\n    <meta name="build-time" content="${versionData.buildTime}">\n    <meta name="build-timestamp" content="${versionData.timestamp}">`;
+
   const htmlFiles = readdirSync(distDir, { recursive: true })
     .filter(f => f.toString().endsWith('.html'))
     .map(f => join(distDir, f.toString()));
@@ -131,12 +164,17 @@ function main() {
     
     if (htmlContent.includes(oldPathPattern)) {
       htmlContent = htmlContent.split(oldPathPattern).join(newPathPattern);
-      writeFileSync(htmlPath, htmlContent);
-      console.log(`✅ Patched: ${htmlPath.replace(distDir, 'dist')}`);
     }
+
+    if (htmlContent.includes('<head>') && !htmlContent.includes('name="build-time"')) {
+      htmlContent = htmlContent.replace('<head>', `<head>${metaTags}`);
+    }
+
+    writeFileSync(htmlPath, htmlContent);
+    console.log(`✅ Patched: ${htmlPath.replace(distDir, 'dist')}`);
   }
   
-  console.log('\n✨ Icon fonts fixed successfully!');
+  console.log('\n✨ Build post-processing completed successfully!');
 }
 
 main();

@@ -8,7 +8,7 @@
  */
 
 import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions } from 'react-native';
-import { lazy, Suspense, useState, useEffect, useCallback } from 'react';
+import { lazy, Suspense, useState, useEffect, useCallback, useRef } from 'react';
 import { router } from 'expo-router';
 
 import Header from '@components/Header';
@@ -21,6 +21,7 @@ import { useResponsiveSpacing, useDeviceType } from '@utils/responsive';
 import BackgroundWrapper from '@components/BackgroundWrapper';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import { isMessageActive, calculateMessagesSubPages } from '@utils/classesHelpers';
+import { useAutoUpdate } from '@utils/useAutoUpdate';
 
 const classesPerPage = 3.0;
 
@@ -60,10 +61,41 @@ export default function App() {
   const [screens, setScreens] = useState<Screen[]>([]);
   const { settings } = useSettings();
 
-  const { CurrentScreenComponent, isValid } = useScreenRotation({
+  const { CurrentScreenComponent, isValid, currentScreenIndex } = useScreenRotation({
     screens,
     defaultDisplayTime: defaultPageDisplayTime,
   });
+
+  const autoUpdateInterval = settings.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes ?? 1440;
+  const autoUpdateEnabled = autoUpdateInterval > 0 && (settings.synagogueSettings.autoUpdateSettings?.enable ?? true);
+
+  const { hasUpdate, applyUpdateNow } = useAutoUpdate({
+    enabled: autoUpdateEnabled,
+    intervalMinutes: autoUpdateInterval,
+  });
+
+  const pendingReloadRef = useRef(false);
+
+  useEffect(() => {
+    if (hasUpdate) {
+      pendingReloadRef.current = true;
+      if (screens.length <= 1) {
+        const timer = setTimeout(
+          () => {
+            applyUpdateNow();
+          },
+          (screens[0]?.presentTime || defaultPageDisplayTime) * 1000,
+        );
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [hasUpdate, screens, applyUpdateNow]);
+
+  useEffect(() => {
+    if (pendingReloadRef.current && currentScreenIndex === 0 && screens.length > 1) {
+      applyUpdateNow();
+    }
+  }, [currentScreenIndex, screens.length, applyUpdateNow]);
 
   // Responsive sizing based on device type - MUST call all hooks unconditionally
   const deviceType = useDeviceType();

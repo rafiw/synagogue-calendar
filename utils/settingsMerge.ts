@@ -29,6 +29,10 @@ export const defaultSettings: Settings = {
       enable: false,
       text: '',
     },
+    autoUpdateSettings: {
+      enable: true,
+      checkIntervalMinutes: 1440,
+    },
   },
   zmanimSettings: {
     enable: true,
@@ -244,6 +248,33 @@ export const mergeSettings = (loaded: any, defaults: Settings = defaultSettings)
         enable: typeof footer?.enable === 'boolean' ? footer.enable : defaults.synagogueSettings.footerSettings.enable,
         text: typeof footer?.text === 'string' ? footer.text : defaults.synagogueSettings.footerSettings.text,
       },
+      autoUpdateSettings: (() => {
+        let enable = defaults.synagogueSettings.autoUpdateSettings?.enable ?? true;
+        let checkIntervalMinutes = defaults.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes ?? 1440;
+
+        if (typeof s.autoUpdateSettings?.checkIntervalMinutes === 'number') {
+          if (s.autoUpdateSettings.checkIntervalMinutes === 0) {
+            enable = false;
+            checkIntervalMinutes = 0;
+          } else if (s.autoUpdateSettings.checkIntervalMinutes >= 60) {
+            enable = typeof s.autoUpdateSettings?.enable === 'boolean' ? s.autoUpdateSettings.enable : true;
+            checkIntervalMinutes = s.autoUpdateSettings.checkIntervalMinutes;
+          } else {
+            enable = typeof s.autoUpdateSettings?.enable === 'boolean' ? s.autoUpdateSettings.enable : true;
+            checkIntervalMinutes = 60;
+          }
+        } else if (typeof s.autoUpdateSettings?.enable === 'boolean') {
+          enable = s.autoUpdateSettings.enable;
+          checkIntervalMinutes = enable
+            ? (defaults.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes ?? 1440)
+            : 0;
+        }
+
+        return {
+          enable,
+          checkIntervalMinutes,
+        };
+      })(),
     };
   }
 

@@ -21,6 +21,7 @@ import { showAlert } from '@utils/alert';
 import { isRTL } from '@utils/utils';
 import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
+import { useAutoUpdate } from '@utils/useAutoUpdate';
 
 const checkboxStyles = {
   green: {
@@ -173,6 +174,7 @@ const GeneralSettingsTab = () => {
   const [background] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
   const [rtl, setRtl] = useState(false);
   const [hasBackup, setHasBackup] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const heightScale = useHeightScale() * 0.5;
   const isSmallHeight = height < 600;
 
@@ -220,6 +222,29 @@ const GeneralSettingsTab = () => {
         },
       },
     ]);
+  };
+
+  const autoUpdateInterval = settings.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes ?? 1440;
+  const autoUpdateEnabled = autoUpdateInterval > 0 && (settings.synagogueSettings.autoUpdateSettings?.enable ?? true);
+
+  const autoUpdate = useAutoUpdate({
+    enabled: autoUpdateEnabled,
+    intervalMinutes: autoUpdateInterval,
+    autoCheck: false,
+  });
+
+  const handleChangeInterval = (val: string) => {
+    const mins = parseInt(val, 10);
+    const safeMins = !isNaN(mins) && mins >= 0 ? mins : 1440;
+    updateSettings({
+      synagogueSettings: {
+        ...settings.synagogueSettings,
+        autoUpdateSettings: {
+          enable: safeMins > 0,
+          checkIntervalMinutes: safeMins,
+        },
+      },
+    });
   };
 
   // Responsive sizes with height adjustment
@@ -890,51 +915,165 @@ const GeneralSettingsTab = () => {
         </View>
       </View>
 
-      {/* Revert to Previous Settings */}
-      {hasBackup && (
-        <View
-          className="border border-amber-300 bg-amber-50 rounded-xl"
-          style={{ padding, marginTop: margin, gap: smallPadding }}
-        >
-          <Text className="font-bold text-amber-800" style={{ fontSize: labelSize * 1.1 }}>
-            {t('revert_to_previous_settings')}
+      {/* Advanced Settings Toggle Button */}
+      <TouchableOpacity
+        onPress={() => setShowAdvanced(!showAdvanced)}
+        className="flex-row items-center justify-between bg-gray-100 border border-gray-300 rounded-xl active:opacity-80"
+        style={{ padding, marginTop: margin * 1.5 }}
+      >
+        <View className="flex-row items-center" style={{ gap: smallPadding }}>
+          <Feather name="settings" size={iconSize} color="#4b5563" />
+          <Text className="font-bold text-gray-800" style={{ fontSize: labelSize * 1.1 }}>
+            {t('advanced_settings')}
           </Text>
-          <Text className="text-gray-600" style={{ fontSize: textSize * 0.9 }}>
-            {t('revert_description')}
-          </Text>
-          <TouchableOpacity
-            className="bg-amber-600 rounded-lg items-center self-start"
-            style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
-            onPress={handleRevertToPrevious}
-          >
-            <Text className="text-white font-medium" style={{ fontSize: textSize }}>
-              {t('revert_to_previous_settings')}
+        </View>
+        <Feather name={showAdvanced ? 'chevron-up' : 'chevron-down'} size={iconSize} color="#4b5563" />
+      </TouchableOpacity>
+
+      {/* Advanced Settings Content (Update, Update Interval, Recovery) */}
+      {showAdvanced && (
+        <View style={{ gap: margin, marginTop: smallPadding }}>
+          {/* App Updates Section */}
+          <View className="border border-blue-200 bg-blue-50/70 rounded-xl" style={{ padding, gap: smallPadding }}>
+            <View className="flex-row items-center justify-between">
+              <Text className="font-bold text-blue-900" style={{ fontSize: labelSize * 1.1 }}>
+                {t('app_updates')}
+              </Text>
+              <View className="bg-blue-200/80 px-2 py-0.5 rounded-full">
+                <Text className="text-blue-800 font-semibold" style={{ fontSize: textSize * 0.8 }}>
+                  {autoUpdate.currentBuild.version.startsWith('#') || autoUpdate.currentBuild.version.startsWith('v')
+                    ? autoUpdate.currentBuild.version
+                    : `v${autoUpdate.currentBuild.version}`}
+                </Text>
+              </View>
+            </View>
+
+            {autoUpdate.currentBuild.buildTime && (
+              <Text className="text-gray-500" style={{ fontSize: textSize * 0.85 }}>
+                {t('app_build_time')}:{' '}
+                {new Date(autoUpdate.currentBuild.buildTime).toLocaleString(i18n.language === 'he' ? 'he-IL' : 'en-US')}
+              </Text>
+            )}
+
+            {/* Update available banner */}
+            {autoUpdate.hasUpdate ? (
+              <View className="bg-green-100 border border-green-400 p-3 rounded-lg my-1 gap-2">
+                <Text className="text-green-800 font-bold" style={{ fontSize: textSize }}>
+                  🎉 {t('update_available')}{' '}
+                  {autoUpdate.updateInfo?.remoteVersion ? `(v${autoUpdate.updateInfo.remoteVersion})` : ''}
+                </Text>
+                <TouchableOpacity
+                  className="bg-green-600 rounded-lg items-center self-start"
+                  style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+                  onPress={() => {
+                    void autoUpdate.applyUpdateNow();
+                  }}
+                >
+                  <Text className="text-white font-medium" style={{ fontSize: textSize }}>
+                    {t('update_and_reload')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View className="flex-row items-center gap-2">
+                <Text className="text-gray-600" style={{ fontSize: textSize * 0.9 }}>
+                  {t('app_up_to_date')}
+                </Text>
+                {autoUpdate.lastChecked && (
+                  <Text className="text-gray-400" style={{ fontSize: textSize * 0.8 }}>
+                    ({t('last_checked')}: {autoUpdate.lastChecked.toLocaleTimeString()})
+                  </Text>
+                )}
+              </View>
+            )}
+
+            {/* Check for updates manual button */}
+            <TouchableOpacity
+              className="bg-blue-600 rounded-lg items-center self-start flex-row gap-2"
+              style={{ paddingHorizontal: padding, paddingVertical: smallPadding, marginTop: smallPadding / 2 }}
+              onPress={() => {
+                void autoUpdate.checkNow();
+              }}
+              disabled={autoUpdate.isChecking}
+            >
+              {autoUpdate.isChecking && <ActivityIndicator size="small" color="#ffffff" />}
+              <Text className="text-white font-medium" style={{ fontSize: textSize }}>
+                {autoUpdate.isChecking ? t('checking_for_updates') : t('check_for_updates')}
+              </Text>
+            </TouchableOpacity>
+
+            <View className="h-px bg-blue-200 my-2" />
+
+            {/* Update Check Interval Picker with Don't Check option */}
+            <View className="mt-1">
+              <Text className="font-semibold text-gray-800" style={{ fontSize: textSize }}>
+                {t('update_check_interval')}
+              </Text>
+              <Text className="text-gray-500 mb-2" style={{ fontSize: textSize * 0.85 }}>
+                {t('auto_update_description')}
+              </Text>
+              <View className="bg-white border border-gray-300 rounded-lg overflow-hidden">
+                <Picker
+                  selectedValue={
+                    settings.synagogueSettings.autoUpdateSettings?.enable === false ||
+                    settings.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes === 0
+                      ? '0'
+                      : String(settings.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes ?? 1440)
+                  }
+                  onValueChange={(val) => handleChangeInterval(val)}
+                  style={{ height: 44 }}
+                >
+                  <Picker.Item label={t('interval_hour')} value="60" />
+                  <Picker.Item label={t('interval_day')} value="1440" />
+                  <Picker.Item label={t('interval_week')} value="10080" />
+                  <Picker.Item label={t('interval_month')} value="43200" />
+                  <Picker.Item label={t('interval_never')} value="0" />
+                </Picker>
+              </View>
+            </View>
+          </View>
+
+          {/* Revert to Previous Settings */}
+          {hasBackup && (
+            <View className="border border-amber-300 bg-amber-50 rounded-xl" style={{ padding, gap: smallPadding }}>
+              <Text className="font-bold text-amber-800" style={{ fontSize: labelSize * 1.1 }}>
+                {t('revert_to_previous_settings')}
+              </Text>
+              <Text className="text-gray-600" style={{ fontSize: textSize * 0.9 }}>
+                {t('revert_description')}
+              </Text>
+              <TouchableOpacity
+                className="bg-amber-600 rounded-lg items-center self-start"
+                style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+                onPress={handleRevertToPrevious}
+              >
+                <Text className="text-white font-medium" style={{ fontSize: textSize }}>
+                  {t('revert_to_previous_settings')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Danger Zone: Reset to Defaults */}
+          <View className="border border-red-200 bg-red-50 rounded-xl" style={{ padding, gap: smallPadding }}>
+            <Text className="font-bold text-red-700" style={{ fontSize: labelSize * 1.1 }}>
+              {t('reset_to_defaults')}
             </Text>
-          </TouchableOpacity>
+            <Text className="text-gray-600" style={{ fontSize: textSize * 0.9 }}>
+              {t('reset_description')}
+            </Text>
+            <TouchableOpacity
+              className="bg-red-600 rounded-lg items-center self-start"
+              style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
+              onPress={handleResetToDefaults}
+            >
+              <Text className="text-white font-medium" style={{ fontSize: textSize }}>
+                {t('reset_to_defaults')}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
-
-      {/* Danger Zone: Reset to Defaults */}
-      <View
-        className="border border-red-200 bg-red-50 rounded-xl"
-        style={{ padding, marginTop: margin, gap: smallPadding }}
-      >
-        <Text className="font-bold text-red-700" style={{ fontSize: labelSize * 1.1 }}>
-          {t('reset_to_defaults')}
-        </Text>
-        <Text className="text-gray-600" style={{ fontSize: textSize * 0.9 }}>
-          {t('reset_description')}
-        </Text>
-        <TouchableOpacity
-          className="bg-red-600 rounded-lg items-center self-start"
-          style={{ paddingHorizontal: padding, paddingVertical: smallPadding }}
-          onPress={handleResetToDefaults}
-        >
-          <Text className="text-white font-medium" style={{ fontSize: textSize }}>
-            {t('reset_to_defaults')}
-          </Text>
-        </TouchableOpacity>
-      </View>
 
       {/* Color Picker Modal */}
       <ColorPickerModal

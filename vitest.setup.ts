@@ -37,3 +37,12 @@ vi.mock('expo-router', () => ({
   useLocalSearchParams: () => ({}),
   Link: ({ children }: { children: any }) => children,
 }));
+
+// Mock expo-updates
+vi.mock('expo-updates', () => ({
+  isEnabled: false,
+  manifest: null,
+  checkForUpdateAsync: vi.fn(() => Promise.resolve({ isAvailable: false })),
+  fetchUpdateAsync: vi.fn(() => Promise.resolve()),
+  reloadAsync: vi.fn(() => Promise.resolve()),
+}));

@@ -41,6 +41,7 @@ export default defineConfig({
       components: path.resolve(__dirname, './components'),
       context: path.resolve(__dirname, './context'),
       assets: path.resolve(__dirname, './assets'),
+      'react-native': 'react-native-web',
     },
   },
 });

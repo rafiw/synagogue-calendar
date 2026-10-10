@@ -86,7 +86,7 @@ const Zmanim: React.FC = () => {
     const hallelType = zmanim.getHallel();
     const tachanun = zmanim.getTachanun();
     const haveTachanun =
-      hallelType === HallelType.NO_HALLEL
+      hallelType === HallelType.NO_HALLEL || !isShabbat
         ? getTachanunLabel(tachanun?.shacharit, tachanun?.mincha, tachanun?.allCongs, isShabbat)
         : '';
     const fastDay = zmanim.isFastDay();

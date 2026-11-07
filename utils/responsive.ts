@@ -246,11 +246,14 @@ export const useResponsiveSpacing = (baseSpacing: number): number => {
  * Useful for TV and small screens to ensure content fits
  */
 export const useHeightScale = (): number => {
-  const { height } = useEffectiveDimensions();
+  const { width, height } = useEffectiveDimensions();
 
-  // Base scale is height / 1000 (e.g., 1000px = 1.0, 500px = 0.5)
-  // We cap it between 0.45 and 2.0 to avoid extreme sizes
-  return Math.min(Math.max(0.3, height / 670), 2.2);
+  // Use the shorter dimension (Math.min(width, height)) so that rotating a TV 90 degrees
+  // into vertical/portrait mode keeps fonts proportional to the narrow screen width
+  // instead of inflating 2x based on the tall vertical height.
+  const baseDimension = Math.min(width, height);
+
+  return Math.min(Math.max(0.3, baseDimension / 670), 2.2);
 };
 
 /**

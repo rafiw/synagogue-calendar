@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getHebrewDayName, getSettings, isRTL, isRTL2, getNoScreenText, safeJsonParse } from '../utils/utils';
 import { mergeSettings } from '../utils/settingsMerge';
 import { isPortraitLayout, getEffectiveDimensions } from '../utils/responsive';
+import { calculateScheduleSubPages } from '../utils/scheduleHelpers';
 import {
   generateQrMatrix,
   QRErrorCorrectLevel,
@@ -450,6 +451,36 @@ describe('utils', () => {
         githubKey: 'url_ghp',
         imgbbApiKey: 'url_imgbb',
       });
+    });
+  });
+
+  describe('calculateScheduleSubPages', () => {
+    const makeCol = (id: string, count: number) => ({
+      id,
+      title: `Col ${id}`,
+      prayers: Array.from({ length: count }, (_, i) => ({ id: `${id}_${i}`, name: `P${i}`, time: '08:00' })),
+    });
+
+    it('does not paginate when there are 2 small columns in landscape', () => {
+      const res = calculateScheduleSubPages([makeCol('1', 3), makeCol('2', 3)], false);
+      expect(res.shouldPaginate).toBe(false);
+      expect(res.totalPages).toBe(1);
+    });
+
+    it('paginates one column at a time when there are more than 2 columns', () => {
+      const res = calculateScheduleSubPages([makeCol('1', 2), makeCol('2', 2), makeCol('3', 2)], false);
+      expect(res.shouldPaginate).toBe(true);
+      expect(res.totalPages).toBe(3);
+    });
+
+    it('paginates when a column has many prayers (> 6) or in portrait with > 6 total prayers', () => {
+      const manyPrayers = calculateScheduleSubPages([makeCol('1', 7), makeCol('2', 2)], false);
+      expect(manyPrayers.shouldPaginate).toBe(true);
+      expect(manyPrayers.totalPages).toBe(2);
+
+      const portraitStacked = calculateScheduleSubPages([makeCol('1', 4), makeCol('2', 4)], true);
+      expect(portraitStacked.shouldPaginate).toBe(true);
+      expect(portraitStacked.totalPages).toBe(2);
     });
   });
 });

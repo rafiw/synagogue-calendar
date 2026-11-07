@@ -8,7 +8,14 @@ import MemorialCandle from './MemorialCandle';
 import { isRTL2, safeJsonParse } from '@utils/utils';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useFontScale } from '@utils/responsive';
+import {
+  isPortraitLayout,
+  useEffectiveDimensions,
+  useResponsiveFontSize,
+  useResponsiveSpacing,
+  useHeightScale,
+  useFontScale,
+} from '@utils/responsive';
 
 // Export function to calculate sub-pages for timing in index.tsx
 export async function getSubPages(): Promise<number> {
@@ -267,6 +274,8 @@ const Deceased: React.FC = () => {
   const router = useRouter();
   const { t } = useTranslation();
 
+  const { width, height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const isPortrait = isPortraitLayout(settings.synagogueSettings.screenOrientation, width, height);
   const heightScale = useHeightScale();
   const fontScale = useFontScale();
 
@@ -284,7 +293,14 @@ const Deceased: React.FC = () => {
 
   const { fontSize, candleSize } = useMemo(() => {
     const gridScale = getGridScaleFactor(tableRowsCount * tableColumnsCount);
-    const tableScale = gridScale * heightScale;
+    // In portrait/vertical view with multiple side-by-side columns, each cell is much narrower,
+    // so scale down proportionally to column count to prevent text from overflowing horizontally.
+    const portraitColumnFactor = isPortrait
+      ? tableColumnsCount > 1
+        ? 0.65 / Math.sqrt(tableColumnsCount)
+        : 0.78
+      : 1.0;
+    const tableScale = gridScale * heightScale * portraitColumnFactor;
 
     const fontSize: FontSizes = {
       name: Math.round(responsiveName * tableScale),
@@ -298,7 +314,7 @@ const Deceased: React.FC = () => {
       label: Math.round(responsiveSmallText * tableScale),
     };
 
-    const candleScale = gridScale * fontScale * heightScale;
+    const candleScale = gridScale * fontScale * heightScale * portraitColumnFactor;
     const candleSize: CandleSizes = {
       simple: Math.round(40 * candleScale),
       card: Math.round(35 * candleScale),
@@ -310,6 +326,7 @@ const Deceased: React.FC = () => {
   }, [
     tableRowsCount,
     tableColumnsCount,
+    isPortrait,
     heightScale,
     fontScale,
     responsiveName,

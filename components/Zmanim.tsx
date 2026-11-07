@@ -216,13 +216,21 @@ const Zmanim: React.FC = () => {
     ];
   }, [computedZmanim, t]);
 
-  // Adjust heightScale based on InfoGroup items array size
-  const heightScale = useHeightScale() * (dailyInfoItems.length > 10 ? 0.8 : dailyInfoItems.length > 8 ? 0.85 : 0.95);
+  // Adjust heightScale based on InfoGroup items array size and portrait stacking
+  const baseHeightScale = useHeightScale();
+  const nonNullTimeItemsCount = dayTimeItems.filter(Boolean).length;
+  const totalPortraitRows = dailyInfoItems.length + nonNullTimeItemsCount;
+  const maxLandscapeRows = Math.max(dailyInfoItems.length, Math.ceil(dayTimeItems.length / 2));
+  const portraitScaleFactor = isSmallWidth
+    ? Math.min(1.0, Math.max(0.65, 19 / Math.max(16, totalPortraitRows)))
+    : Math.min(0.82, Math.max(0.6, 5.6 / Math.max(7, maxLandscapeRows)));
+  const heightScale = baseHeightScale * portraitScaleFactor;
 
   // Responsive sizes with height adjustment
   const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
   const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
   const padding = Math.round(useResponsiveSpacing(12) * heightScale);
+  const itemVerticalPadding = Math.max(2, Math.round(padding * 0.45));
   const margin = Math.round(useResponsiveSpacing(4) * heightScale);
 
   const InfoGroup = ({ title, items }: { title: string; items: { text: string }[] }) => (
@@ -230,14 +238,17 @@ const Zmanim: React.FC = () => {
       className={`${backgroundColor} rounded-lg ${isSmallWidth ? 'w-full' : 'flex-1'} shadow-md`}
       style={{ padding, margin }}
     >
-      <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
+      <Text
+        className={`font-bold ${headLineColor} text-center`}
+        style={{ fontSize: titleSize, marginBottom: itemVerticalPadding }}
+      >
         {title}
       </Text>
       {items.map((item, index) => (
         <Text
           key={index}
           className={`${textColor} text-center`}
-          style={{ fontSize: textSize, paddingVertical: padding }}
+          style={{ fontSize: textSize, paddingVertical: itemVerticalPadding }}
         >
           {item.text}
         </Text>
@@ -259,21 +270,24 @@ const Zmanim: React.FC = () => {
       className={`${backgroundColor} rounded-lg ${isSmallWidth ? 'w-full' : 'flex-1'} shadow-md`}
       style={{ padding, margin }}
     >
-      <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
+      <Text
+        className={`font-bold ${headLineColor} text-center`}
+        style={{ fontSize: titleSize, marginBottom: itemVerticalPadding }}
+      >
         {title}
       </Text>
-      <View className={`flex-row${rtl ? '-reverse' : ''} flex-wrap`}>
+      <View className={isSmallWidth ? 'flex-col' : `flex-row${rtl ? '-reverse' : ''} flex-wrap`}>
         {items.map((item, index) =>
           item ? (
             <Text
               key={index}
-              className={`${textColor} text-center w-1/2`}
-              style={{ fontSize: textSize, paddingVertical: padding }}
+              className={`${textColor} text-center ${isSmallWidth ? 'w-full' : 'w-1/2'}`}
+              style={{ fontSize: textSize, paddingVertical: itemVerticalPadding }}
             >
               {item.text}
             </Text>
-          ) : (
-            <View key={index} className="w-1/2" style={{ paddingVertical: padding }} />
+          ) : isSmallWidth ? null : (
+            <View key={index} className="w-1/2" style={{ paddingVertical: itemVerticalPadding }} />
           ),
         )}
       </View>

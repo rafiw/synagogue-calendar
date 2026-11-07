@@ -17,10 +17,11 @@ import { useSettings } from '@context/settingsContext';
 import { defaultPageDisplayTime, getNoScreenText } from '@utils/utils';
 import { useScreenRotation } from '@utils/useScreenRotation';
 import { Message, Screen, Settings } from '@utils/defs';
-import { useResponsiveSpacing, useDeviceType, useEffectiveDimensions } from '@utils/responsive';
+import { isPortraitLayout, useResponsiveSpacing, useDeviceType, useEffectiveDimensions } from '@utils/responsive';
 import BackgroundWrapper from '@components/BackgroundWrapper';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import { isMessageActive, calculateMessagesSubPages } from '@utils/classesHelpers';
+import { calculateScheduleSubPages } from '@utils/scheduleHelpers';
 import { useAutoUpdate } from '@utils/useAutoUpdate';
 
 import Zmanim from '@components/Zmanim';
@@ -48,6 +49,12 @@ const getDeceasedSubPages = (settings: Settings): number => {
   if (!settings?.deceasedSettings?.deceased || !Array.isArray(settings.deceasedSettings.deceased)) return 1;
 
   return Math.max(1, calculateDeceasedPages(settings.deceasedSettings).totalPages);
+};
+
+const getScheduleSubPages = (settings: Settings, isPortrait: boolean): number => {
+  if (!settings?.scheduleSettings?.enable || !Array.isArray(settings?.scheduleSettings?.columns)) return 1;
+
+  return Math.max(1, calculateScheduleSubPages(settings.scheduleSettings.columns, isPortrait).totalPages);
 };
 
 export default function App() {
@@ -100,7 +107,8 @@ export default function App() {
 
   // Responsive sizing based on device type - MUST call all hooks unconditionally
   const deviceType = useDeviceType(settings.synagogueSettings.screenOrientation);
-  const { height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const { width, height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const isPortrait = isPortraitLayout(settings.synagogueSettings.screenOrientation, width, height);
   const baseSpacing = useResponsiveSpacing(12);
 
   // Scale down for small height screens (like TV at 540px logical height)
@@ -126,6 +134,7 @@ export default function App() {
     const classSubPages = getClassSubPages(settings);
     const messagesSubPages = getMessagesSubPages(settings);
     const deceasedSubPages = getDeceasedSubPages(settings);
+    const scheduleSubPages = getScheduleSubPages(settings, isPortrait);
 
     return [
       {
@@ -159,7 +168,8 @@ export default function App() {
         id: 5,
         name: 'schedule',
         content: () => (settings.scheduleSettings.enable ? <Schedule /> : null),
-        presentTime: settings.scheduleSettings.screenDisplayTime || defaultPageDisplayTime,
+        presentTime:
+          settings.scheduleSettings.screenDisplayTime * scheduleSubPages || scheduleSubPages * defaultPageDisplayTime,
       },
       {
         id: 6,
@@ -168,7 +178,7 @@ export default function App() {
         presentTime: settings.dailyHalakhaSettings?.screenDisplayTime || defaultPageDisplayTime,
       },
     ].filter((screen) => screen.content() !== null && screen.presentTime > 0);
-  }, [settings]);
+  }, [settings, isPortrait]);
 
   useEffect(() => {
     try {

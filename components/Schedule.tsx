@@ -1,8 +1,8 @@
 import { useSettings } from '@context/settingsContext';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View } from 'react-native';
-import { isRTL } from '@utils/utils';
+import { defaultPageDisplayTime, isRTL } from '@utils/utils';
 import {
   isPortraitLayout,
   useEffectiveDimensions,
@@ -10,15 +10,53 @@ import {
   useResponsiveSpacing,
   useHeightScale,
 } from '@utils/responsive';
-import { getPrayerDisplayTime } from '@utils/scheduleHelpers';
+import { calculateScheduleSubPages, getPrayerDisplayTime } from '@utils/scheduleHelpers';
 
 const Schedule: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
   const { width, height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const [rtl, setRtl] = useState(false);
-  const heightScale = useHeightScale();
+  const [currentPage, setCurrentPage] = useState(0);
+  const baseHeightScale = useHeightScale();
   const isSmallHeight = isPortraitLayout(settings.synagogueSettings.screenOrientation, width, height);
+
+  const { shouldPaginate, totalPages, columnsWithPrayers } = useMemo(
+    () => calculateScheduleSubPages(settings.scheduleSettings?.columns, isSmallHeight),
+    [settings.scheduleSettings?.columns, isSmallHeight],
+  );
+
+  const displayedColumns = useMemo(() => {
+    if (!shouldPaginate || columnsWithPrayers.length <= 1) {
+      return columnsWithPrayers;
+    }
+    const safeIndex = currentPage % columnsWithPrayers.length;
+    const col = columnsWithPrayers[safeIndex];
+    return col ? [col] : columnsWithPrayers.slice(0, 1);
+  }, [columnsWithPrayers, currentPage, shouldPaginate]);
+
+  const pageDisplayTime = settings.scheduleSettings?.screenDisplayTime || defaultPageDisplayTime;
+
+  useEffect(() => {
+    if (currentPage >= totalPages && totalPages > 0) {
+      setCurrentPage(0);
+    }
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    if (!shouldPaginate || totalPages <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentPage((prev) => (prev + 1) % totalPages);
+    }, pageDisplayTime * 1000);
+
+    return () => clearInterval(timer);
+  }, [pageDisplayTime, shouldPaginate, totalPages]);
+
+  // Auto-scale down if the currently displayed column has many prayers
+  const activePrayersCount = displayedColumns.reduce((max, col) => Math.max(max, col.prayers.length), 0);
+  const scaleAdjustment = activePrayersCount > 7 ? Math.max(0.65, 7 / activePrayersCount) : 1.0;
+  const heightScale = baseHeightScale * scaleAdjustment;
 
   // Responsive sizes
   const mainTitleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale) * 0.9;
@@ -43,7 +81,7 @@ const Schedule: React.FC = () => {
     rtl: boolean;
   }) => (
     <View
-      className={`${backgroundColor} rounded-2xl ${isSmallHeight ? 'w-full' : 'flex-1'} shadow-lg border border-gray-200`}
+      className={`${backgroundColor} rounded-2xl ${isSmallHeight || shouldPaginate ? 'w-full' : 'flex-1'} shadow-lg border border-gray-200`}
       style={{ padding, margin }}
     >
       <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
@@ -95,9 +133,6 @@ const Schedule: React.FC = () => {
       </View>
     );
 
-  const columns = settings.scheduleSettings?.columns || [];
-  const columnsWithPrayers = columns.filter((column) => column.prayers.length > 0);
-
   return (
     <View className="flex-1" style={{ padding: itemPadding }}>
       {/* Headline */}
@@ -106,11 +141,24 @@ const Schedule: React.FC = () => {
           <Text className={`${headLineColor} font-bold text-center`} style={{ fontSize: mainTitleSize }}>
             {t('schedule_title')}
           </Text>
+          {/* Page Indicators when cycling through columns */}
+          {shouldPaginate && totalPages > 1 && (
+            <View className="flex-row justify-center space-x-2" style={{ marginTop: margin }}>
+              {Array.from({ length: totalPages }).map((_, index) => (
+                <View
+                  key={index}
+                  className={`h-2 rounded-full ${index === currentPage ? 'w-8 bg-blue-500' : 'w-2 bg-gray-400'}`}
+                />
+              ))}
+            </View>
+          )}
         </View>
       )}
       {/* Row(s) for columns */}
-      <View className={`${isSmallHeight ? 'flex-col' : 'flex-row flex-wrap'} justify-center items-start`}>
-        {columnsWithPrayers.map((column) => (
+      <View
+        className={`${isSmallHeight || shouldPaginate ? 'flex-col' : 'flex-row flex-wrap'} justify-center items-start`}
+      >
+        {displayedColumns.map((column) => (
           <InfoGroup
             key={column.id}
             title={column.title}

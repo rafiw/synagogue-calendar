@@ -9,11 +9,18 @@ import { isRTL } from '@utils/utils';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 
+const getCityValueForLanguage = (city: string | undefined, language: string | undefined): string => {
+  const matchedCity = cities.find((x) => x.name === city || x.hebrew_name === city) || cities[0]!;
+  return language === 'en' ? matchedCity.name : matchedCity.hebrew_name;
+};
+
 const ZmanimSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t } = useTranslation();
   const { height } = useWindowDimensions();
-  const [selectedLocation, setSelectedLocation] = useState(cities[0]!.name);
+  const [selectedLocation, setSelectedLocation] = useState(() =>
+    getCityValueForLanguage(settings.zmanimSettings.city, settings.synagogueSettings.language),
+  );
   const [olson, setOlson] = useState(settings.zmanimSettings.olson);
   const [purimSettings, setPurimSettings] = useState(
     settings.zmanimSettings.purimSettings || { regular: true, shushan: false },
@@ -48,11 +55,17 @@ const ZmanimSettingsTab = () => {
   const [lngError, setLngError] = useState<string | null>(null);
 
   useEffect(() => {
+    setSelectedLocation(getCityValueForLanguage(settings.zmanimSettings.city, settings.synagogueSettings.language));
+    setOlson(settings.zmanimSettings.olson);
+    setPurimSettings(settings.zmanimSettings.purimSettings || { regular: true, shushan: false });
     setLatText((settings.zmanimSettings.latitude ?? 31.7667).toString());
     setLngText((settings.zmanimSettings.longitude ?? 35.2333).toString());
     setElevText((settings.zmanimSettings.elevation ?? 0).toString());
   }, [
+    settings.synagogueSettings.language,
     settings.zmanimSettings.city,
+    settings.zmanimSettings.olson,
+    settings.zmanimSettings.purimSettings,
     settings.zmanimSettings.latitude,
     settings.zmanimSettings.longitude,
     settings.zmanimSettings.elevation,

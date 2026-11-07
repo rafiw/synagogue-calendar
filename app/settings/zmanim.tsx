@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TextInput, ActivityIndicator, TouchableOpacity } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import DropdownPicker from '@components/DropdownPicker';
 import { useSettings } from '@context/settingsContext';
 import { cities, olsons } from '@assets/data';
 import { isIsraelTimezone, resolveDefaultCandleLightingMins } from '@utils/zmanim_wrapper';
@@ -360,24 +360,18 @@ const ZmanimSettingsTab = () => {
                     {t('location')}
                   </Text>
                   <View className="border border-gray-300 rounded-lg bg-gray-50">
-                    <Picker
+                    <DropdownPicker
                       nativeID="location-select"
+                      title={t('location')}
                       selectedValue={selectedLocation}
                       onValueChange={handleCityChange}
                       style={{ height: pickerHeight }}
-                    >
-                      {settings.synagogueSettings.language === 'en'
-                        ? cities.map((location) => (
-                            <Picker.Item key={location.name} label={location.name} value={location.name} />
-                          ))
-                        : cities.map((location) => (
-                            <Picker.Item
-                              key={location.hebrew_name}
-                              label={location.hebrew_name}
-                              value={location.hebrew_name}
-                            />
-                          ))}
-                    </Picker>
+                      options={
+                        settings.synagogueSettings.language === 'en'
+                          ? cities.map((location) => ({ label: location.name, value: location.name }))
+                          : cities.map((location) => ({ label: location.hebrew_name, value: location.hebrew_name }))
+                      }
+                    />
                   </View>
                 </View>
                 {/* olson */}
@@ -386,16 +380,14 @@ const ZmanimSettingsTab = () => {
                     {t('olson')}
                   </Text>
                   <View className="border border-gray-300 rounded-lg bg-gray-50">
-                    <Picker
+                    <DropdownPicker
                       nativeID="olson-select"
+                      title={t('olson')}
                       selectedValue={olson}
                       onValueChange={handleOlsonChange}
                       style={{ height: pickerHeight }}
-                    >
-                      {olsons.map((olson) => (
-                        <Picker.Item key={olson} label={olson} value={olson} />
-                      ))}
-                    </Picker>
+                      options={olsons.map((o) => ({ label: o, value: o }))}
+                    />
                   </View>
                 </View>
               </View>

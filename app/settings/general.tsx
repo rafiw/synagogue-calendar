@@ -12,7 +12,6 @@ import {
   Modal,
 } from 'react-native';
 import { useLocalSearchParams, useGlobalSearchParams } from 'expo-router';
-import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useSettings } from '@context/settingsContext';
 import { ScreenOrientationMode } from '@utils/defs';
@@ -20,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import ExternalLink from '@utils/PressableLink';
 import ColorPickerModal from '@components/ColorPickerModal';
+import DropdownPicker from '@components/DropdownPicker';
 import QRCodeView from '@components/QRCodeView';
 import { buildCredentialsSetupUrl, parseCredentialsFromParams } from '@utils/qrcode';
 import { showAlert } from '@utils/alert';
@@ -202,7 +202,9 @@ const GeneralSettingsTab = () => {
   const localParams = useLocalSearchParams();
   const globalParams = useGlobalSearchParams();
   const appliedQrParamsRef = useRef(false);
-  const { height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const { width, height, physicalWidth, physicalHeight, isRotated, rotationDegrees } = useEffectiveDimensions(
+    settings.synagogueSettings.screenOrientation,
+  );
   const [background] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
   const [rtl, setRtl] = useState(false);
   const [hasBackup, setHasBackup] = useState(false);
@@ -629,15 +631,17 @@ const GeneralSettingsTab = () => {
                 {t('language')}
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker
+                <DropdownPicker
                   nativeID="language-select"
+                  title={t('language')}
                   selectedValue={settings.synagogueSettings.language}
-                  onValueChange={(value) => void handleChangeLanguage(value)}
+                  onValueChange={(value) => void handleChangeLanguage(value as 'he' | 'en')}
                   style={{ height: pickerHeight }}
-                >
-                  <Picker.Item label="English" value="en" />
-                  <Picker.Item label="עברית" value="he" />
-                </Picker>
+                  options={[
+                    { label: 'English', value: 'en' },
+                    { label: 'עברית', value: 'he' },
+                  ]}
+                />
               </View>
             </View>
             {/* nusach */}
@@ -646,15 +650,17 @@ const GeneralSettingsTab = () => {
                 {t('nusach')}
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker
+                <DropdownPicker
                   nativeID="nusach-select"
+                  title={t('nusach')}
                   selectedValue={settings.synagogueSettings.nusach}
-                  onValueChange={handleChangeNusach}
+                  onValueChange={(value) => handleChangeNusach(value as 'ashkenaz' | 'sephardic')}
                   style={{ height: pickerHeight }}
-                >
-                  <Picker.Item label={t('nusach_ashkenaz')} value="ashkenaz" />
-                  <Picker.Item label={t('nusach_sephardic')} value="sephardic" />
-                </Picker>
+                  options={[
+                    { label: t('nusach_ashkenaz'), value: 'ashkenaz' },
+                    { label: t('nusach_sephardic'), value: 'sephardic' },
+                  ]}
+                />
               </View>
             </View>
             {/* Screen Orientation */}
@@ -663,16 +669,18 @@ const GeneralSettingsTab = () => {
                 {t('screen_orientation')}
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
-                <Picker
+                <DropdownPicker
                   nativeID="screen-orientation-select"
+                  title={t('screen_orientation')}
                   selectedValue={settings.synagogueSettings.screenOrientation || 'auto'}
-                  onValueChange={handleChangeScreenOrientation}
+                  onValueChange={(value) => handleChangeScreenOrientation(value as ScreenOrientationMode)}
                   style={{ height: pickerHeight }}
-                >
-                  <Picker.Item label={t('orientation_auto')} value="auto" />
-                  <Picker.Item label={t('orientation_horizontal')} value="horizontal" />
-                  <Picker.Item label={t('orientation_vertical')} value="vertical" />
-                </Picker>
+                  options={[
+                    { label: t('orientation_auto'), value: 'auto' },
+                    { label: t('orientation_horizontal'), value: 'horizontal' },
+                    { label: t('orientation_vertical'), value: 'vertical' },
+                  ]}
+                />
               </View>
             </View>
           </View>
@@ -1151,8 +1159,9 @@ const GeneralSettingsTab = () => {
                 {t('auto_update_description')}
               </Text>
               <View className="bg-white border border-gray-300 rounded-lg overflow-hidden">
-                <Picker
+                <DropdownPicker
                   nativeID="update-interval-select"
+                  title={t('update_check_interval')}
                   selectedValue={
                     settings.synagogueSettings.autoUpdateSettings?.enable === false ||
                     settings.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes === 0
@@ -1161,13 +1170,14 @@ const GeneralSettingsTab = () => {
                   }
                   onValueChange={(val) => handleChangeInterval(val)}
                   style={{ height: 44 }}
-                >
-                  <Picker.Item label={t('interval_hour')} value="60" />
-                  <Picker.Item label={t('interval_day')} value="1440" />
-                  <Picker.Item label={t('interval_week')} value="10080" />
-                  <Picker.Item label={t('interval_month')} value="43200" />
-                  <Picker.Item label={t('interval_never')} value="0" />
-                </Picker>
+                  options={[
+                    { label: t('interval_hour'), value: '60' },
+                    { label: t('interval_day'), value: '1440' },
+                    { label: t('interval_week'), value: '10080' },
+                    { label: t('interval_month'), value: '43200' },
+                    { label: t('interval_never'), value: '0' },
+                  ]}
+                />
               </View>
             </View>
           </View>
@@ -1234,113 +1244,142 @@ const GeneralSettingsTab = () => {
         animationType="fade"
         onRequestClose={() => setShowCredentialsQrModal(false)}
       >
-        <View className="flex-1 bg-black/60 items-center justify-center p-4">
-          <View
-            className="bg-white rounded-2xl w-full max-w-lg items-center shadow-2xl"
-            style={{ padding: padding * 1.5, gap: smallPadding * 1.5 }}
-          >
-            <View className="flex-row items-center justify-between w-full">
-              <View className="flex-row items-center" style={{ gap: smallPadding }}>
-                <Ionicons name="qr-code-outline" size={iconSize * 1.2} color="#4f46e5" />
-                <Text className="font-bold text-gray-800" style={{ fontSize: labelSize * 1.2 }}>
-                  {t('credentials_qr_title')}
-                </Text>
-              </View>
-              <TouchableOpacity onPress={() => setShowCredentialsQrModal(false)} style={{ padding: smallPadding / 2 }}>
-                <Feather name="x" size={iconSize * 1.2} color="#6b7280" />
-              </TouchableOpacity>
-            </View>
-
-            <Text className="text-gray-600 text-center" style={{ fontSize: textSize * 0.9 }}>
-              {t('credentials_qr_description')}
-            </Text>
-
-            {/* QR Mode Tabs */}
-            <View className="flex-row flex-wrap justify-center w-full" style={{ gap: smallPadding }}>
-              {(
-                [
-                  { id: 'quick', label: t('qr_tab_quick_setup') },
-                  { id: 'gistId', label: t('qr_tab_gist_id') },
-                  { id: 'gistKey', label: t('qr_tab_gist_key') },
-                  { id: 'imgbbKey', label: t('qr_tab_imgbb_key') },
-                ] as const
-              ).map((tab) => {
-                const isActive = activeQrTab === tab.id;
-                return (
-                  <TouchableOpacity
-                    key={tab.id}
-                    onPress={() => setActiveQrTab(tab.id)}
-                    className={`rounded-lg border ${
-                      isActive ? 'bg-indigo-600 border-indigo-600' : 'bg-gray-100 border-gray-300'
-                    }`}
-                    style={{ paddingHorizontal: smallPadding * 1.2, paddingVertical: smallPadding * 0.8 }}
-                  >
-                    <Text
-                      className={`font-semibold ${isActive ? 'text-white' : 'text-gray-700'}`}
-                      style={{ fontSize: textSize * 0.85 }}
-                    >
-                      {tab.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            {/* QR Display Area */}
-            {(() => {
-              const gistId = settings.githubSettings.gistId?.trim() || '';
-              const githubKey = settings.githubSettings.githubKey?.trim() || '';
-              const imgbbApiKey = settings.deceasedSettings.imgbbApiKey?.trim() || '';
-
-              const baseUrl =
-                Platform.OS === 'web' && typeof window !== 'undefined'
-                  ? `${window.location.origin}${window.location.pathname.replace(/\/settings(\/.*)?$/, '')}/settings/general`
-                  : 'https://rafiw.github.io/synagogue-calendar/settings/general';
-
-              let qrValue = '';
-              if (activeQrTab === 'quick') {
-                if (gistId || githubKey || imgbbApiKey) {
-                  qrValue = buildCredentialsSetupUrl({ gistId, githubKey, imgbbApiKey }, baseUrl);
+        <View
+          style={
+            isRotated
+              ? {
+                  width: physicalWidth,
+                  height: physicalHeight,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
                 }
-              } else if (activeQrTab === 'gistId') {
-                qrValue = gistId;
-              } else if (activeQrTab === 'gistKey') {
-                qrValue = githubKey;
-              } else if (activeQrTab === 'imgbbKey') {
-                qrValue = imgbbApiKey;
-              }
-
-              const qrSize = Math.min(260, Math.max(160, Math.round(height * 0.35)));
-
-              if (!qrValue) {
-                return (
-                  <View
-                    className="bg-gray-50 border border-dashed border-gray-300 rounded-xl items-center justify-center w-full"
-                    style={{ height: qrSize, padding }}
-                  >
-                    <Text className="text-gray-500 text-center" style={{ fontSize: textSize }}>
-                      {t('qr_empty_key')}
+              : { flex: 1, width: '100%', height: '100%' }
+          }
+        >
+          <View
+            style={
+              isRotated
+                ? {
+                    width,
+                    height,
+                    transform: [{ rotate: rotationDegrees }],
+                  }
+                : { flex: 1, width: '100%', height: '100%' }
+            }
+          >
+            <View className="flex-1 bg-black/60 items-center justify-center p-4">
+              <View
+                className="bg-white rounded-2xl w-full max-w-lg items-center shadow-2xl"
+                style={{ padding: padding * 1.5, gap: smallPadding * 1.5 }}
+              >
+                <View className="flex-row items-center justify-between w-full">
+                  <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                    <Ionicons name="qr-code-outline" size={iconSize * 1.2} color="#4f46e5" />
+                    <Text className="font-bold text-gray-800" style={{ fontSize: labelSize * 1.2 }}>
+                      {t('credentials_qr_title')}
                     </Text>
                   </View>
-                );
-              }
-
-              return (
-                <View className="items-center justify-center p-2 bg-gray-50 rounded-xl border border-gray-200">
-                  <QRCodeView value={qrValue} size={qrSize} />
+                  <TouchableOpacity
+                    onPress={() => setShowCredentialsQrModal(false)}
+                    style={{ padding: smallPadding / 2 }}
+                  >
+                    <Feather name="x" size={iconSize * 1.2} color="#6b7280" />
+                  </TouchableOpacity>
                 </View>
-              );
-            })()}
 
-            <TouchableOpacity
-              onPress={() => setShowCredentialsQrModal(false)}
-              className="w-full bg-indigo-600 rounded-xl items-center"
-              style={{ padding: smallPadding * 1.5 }}
-            >
-              <Text className="text-white font-semibold" style={{ fontSize: buttonTextSize }}>
-                {t('close')}
-              </Text>
-            </TouchableOpacity>
+                <Text className="text-gray-600 text-center" style={{ fontSize: textSize * 0.9 }}>
+                  {t('credentials_qr_description')}
+                </Text>
+
+                {/* QR Mode Tabs */}
+                <View className="flex-row flex-wrap justify-center w-full" style={{ gap: smallPadding }}>
+                  {(
+                    [
+                      { id: 'quick', label: t('qr_tab_quick_setup') },
+                      { id: 'gistId', label: t('qr_tab_gist_id') },
+                      { id: 'gistKey', label: t('qr_tab_gist_key') },
+                      { id: 'imgbbKey', label: t('qr_tab_imgbb_key') },
+                    ] as const
+                  ).map((tab) => {
+                    const isActive = activeQrTab === tab.id;
+                    return (
+                      <TouchableOpacity
+                        key={tab.id}
+                        onPress={() => setActiveQrTab(tab.id)}
+                        className={`rounded-lg border ${
+                          isActive ? 'bg-indigo-600 border-indigo-600' : 'bg-gray-100 border-gray-300'
+                        }`}
+                        style={{ paddingHorizontal: smallPadding * 1.2, paddingVertical: smallPadding * 0.8 }}
+                      >
+                        <Text
+                          className={`font-semibold ${isActive ? 'text-white' : 'text-gray-700'}`}
+                          style={{ fontSize: textSize * 0.85 }}
+                        >
+                          {tab.label}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* QR Display Area */}
+                {(() => {
+                  const gistId = settings.githubSettings.gistId?.trim() || '';
+                  const githubKey = settings.githubSettings.githubKey?.trim() || '';
+                  const imgbbApiKey = settings.deceasedSettings.imgbbApiKey?.trim() || '';
+
+                  const baseUrl =
+                    Platform.OS === 'web' && typeof window !== 'undefined'
+                      ? `${window.location.origin}${window.location.pathname.replace(/\/settings(\/.*)?$/, '')}/settings/general`
+                      : 'https://rafiw.github.io/synagogue-calendar/settings/general';
+
+                  let qrValue = '';
+                  if (activeQrTab === 'quick') {
+                    if (gistId || githubKey || imgbbApiKey) {
+                      qrValue = buildCredentialsSetupUrl({ gistId, githubKey, imgbbApiKey }, baseUrl);
+                    }
+                  } else if (activeQrTab === 'gistId') {
+                    qrValue = gistId;
+                  } else if (activeQrTab === 'gistKey') {
+                    qrValue = githubKey;
+                  } else if (activeQrTab === 'imgbbKey') {
+                    qrValue = imgbbApiKey;
+                  }
+
+                  const qrSize = Math.min(260, Math.max(160, Math.round(height * 0.35)));
+
+                  if (!qrValue) {
+                    return (
+                      <View
+                        className="bg-gray-50 border border-dashed border-gray-300 rounded-xl items-center justify-center w-full"
+                        style={{ height: qrSize, padding }}
+                      >
+                        <Text className="text-gray-500 text-center" style={{ fontSize: textSize }}>
+                          {t('qr_empty_key')}
+                        </Text>
+                      </View>
+                    );
+                  }
+
+                  return (
+                    <View className="items-center justify-center p-2 bg-gray-50 rounded-xl border border-gray-200">
+                      <QRCodeView value={qrValue} size={qrSize} />
+                    </View>
+                  );
+                })()}
+
+                <TouchableOpacity
+                  onPress={() => setShowCredentialsQrModal(false)}
+                  className="w-full bg-indigo-600 rounded-xl items-center"
+                  style={{ padding: smallPadding * 1.5 }}
+                >
+                  <Text className="text-white font-semibold" style={{ fontSize: buttonTextSize }}>
+                    {t('close')}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </View>
       </Modal>

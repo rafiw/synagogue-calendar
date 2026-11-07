@@ -8,12 +8,21 @@ import { ScheduleColumn, Prayer, PrayerTimeType } from '@utils/defs';
 import { showConfirm, showAlert } from '@utils/alert';
 import { isRTL } from '@utils/utils';
 import { NumberInput } from '@components/NumberInput';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import {
+  useResponsiveFontSize,
+  useResponsiveIconSize,
+  useResponsiveSpacing,
+  useHeightScale,
+  useEffectiveDimensions,
+} from '@utils/responsive';
 import { getPrayerDisplayTime } from '@utils/scheduleHelpers';
 
 const ScheduleSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
+  const { width, height, physicalWidth, physicalHeight, isRotated, rotationDegrees } = useEffectiveDimensions(
+    settings.synagogueSettings.screenOrientation,
+  );
   const [editingColumn, setEditingColumn] = useState<ScheduleColumn | null>(null);
   const [editingPrayer, setEditingPrayer] = useState<Prayer | null>(null);
   const [isColumnModalVisible, setIsColumnModalVisible] = useState(false);
@@ -422,40 +431,67 @@ const ScheduleSettingsTab = () => {
         animationType="slide"
         onRequestClose={() => setIsColumnModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white rounded-lg w-4/5 max-w-md" style={{ padding: padding * 1.5 }}>
-            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
-              {editingColumn ? t('schedule_edit_column') : t('schedule_add_column')}
-            </Text>
-
-            <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_column_title')}</Text>
-            <TextInput
-              className="border border-gray-300 rounded-lg"
-              style={{ padding: smallPadding, fontSize: textSize, marginBottom: margin }}
-              value={columnTitle}
-              onChangeText={setColumnTitle}
-              placeholder={t('schedule_column_title')}
-            />
-
-            <View className="flex-row" style={{ gap: smallPadding }}>
-              <TouchableOpacity
-                className="flex-1 bg-gray-300 rounded-lg"
-                style={{ padding: smallPadding * 1.5 }}
-                onPress={() => setIsColumnModalVisible(false)}
-              >
-                <Text className="text-center font-semibold" style={{ fontSize: buttonTextSize }}>
-                  {t('deceased_cancel')}
+        <View
+          style={
+            isRotated
+              ? {
+                  width: physicalWidth,
+                  height: physicalHeight,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                }
+              : { flex: 1, width: '100%', height: '100%' }
+          }
+        >
+          <View
+            style={
+              isRotated
+                ? {
+                    width,
+                    height,
+                    transform: [{ rotate: rotationDegrees }],
+                  }
+                : { flex: 1, width: '100%', height: '100%' }
+            }
+          >
+            <View className="flex-1 justify-center items-center bg-black/50">
+              <View className="bg-white rounded-lg w-4/5 max-w-md" style={{ padding: padding * 1.5 }}>
+                <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
+                  {editingColumn ? t('schedule_edit_column') : t('schedule_add_column')}
                 </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-blue-500 rounded-lg"
-                style={{ padding: smallPadding * 1.5 }}
-                onPress={saveColumn}
-              >
-                <Text className="text-center font-semibold text-white" style={{ fontSize: buttonTextSize }}>
-                  {t('save')}
-                </Text>
-              </TouchableOpacity>
+
+                <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_column_title')}</Text>
+                <TextInput
+                  nativeID="schedule-column-title-input"
+                  className="border border-gray-300 rounded-lg"
+                  style={{ padding: smallPadding, fontSize: textSize, marginBottom: margin }}
+                  value={columnTitle}
+                  onChangeText={setColumnTitle}
+                  placeholder={t('schedule_column_title')}
+                />
+
+                <View className="flex-row" style={{ gap: smallPadding }}>
+                  <TouchableOpacity
+                    className="flex-1 bg-gray-300 rounded-lg"
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={() => setIsColumnModalVisible(false)}
+                  >
+                    <Text className="text-center font-semibold" style={{ fontSize: buttonTextSize }}>
+                      {t('deceased_cancel')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 bg-blue-500 rounded-lg"
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={saveColumn}
+                  >
+                    <Text className="text-center font-semibold text-white" style={{ fontSize: buttonTextSize }}>
+                      {t('save')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </View>
         </View>
@@ -468,132 +504,160 @@ const ScheduleSettingsTab = () => {
         animationType="slide"
         onRequestClose={() => setIsPrayerModalVisible(false)}
       >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white rounded-lg w-4/5 max-w-md" style={{ padding: padding * 1.5 }}>
-            <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
-              {editingPrayer ? t('schedule_edit_prayer') : t('schedule_add_prayer')}
-            </Text>
-
-            <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_prayer_name')}</Text>
-            <TextInput
-              className="border border-gray-300 rounded-lg"
-              style={{ padding: smallPadding, fontSize: textSize, marginBottom: margin }}
-              value={prayerName}
-              onChangeText={setPrayerName}
-              placeholder={t('schedule_prayer_name')}
-            />
-
-            <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_prayer_time')}</Text>
-
-            {/* Time Type Selector */}
-            <View className="flex-row" style={{ gap: smallPadding, marginBottom: margin }}>
-              <TouchableOpacity
-                className={`flex-1 rounded-lg ${prayerTimeType === 'time' ? 'bg-blue-500' : 'bg-gray-200'}`}
-                style={{ padding: smallPadding }}
-                onPress={() => {
-                  setPrayerTimeType('time');
-                  setIsOffsetValid(true);
-                }}
-              >
-                <Text
-                  className={`text-center font-semibold ${prayerTimeType === 'time' ? 'text-white' : 'text-gray-700'}`}
-                  style={{ fontSize: labelSize }}
-                >
-                  {t('schedule_time_type_time')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className={`flex-1 rounded-lg ${prayerTimeType === 'sunrise_offset' ? 'bg-blue-500' : 'bg-gray-200'}`}
-                style={{ padding: smallPadding }}
-                onPress={() => {
-                  setPrayerTimeType('sunrise_offset');
-                  setIsOffsetValid(true);
-                }}
-              >
-                <Text
-                  className={`text-center font-semibold ${prayerTimeType === 'sunrise_offset' ? 'text-white' : 'text-gray-700'}`}
-                  style={{ fontSize: labelSize }}
-                >
-                  {t('schedule_time_type_sunrise')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className={`flex-1 rounded-lg ${prayerTimeType === 'sunset_offset' ? 'bg-blue-500' : 'bg-gray-200'}`}
-                style={{ padding: smallPadding }}
-                onPress={() => {
-                  setPrayerTimeType('sunset_offset');
-                  setIsOffsetValid(true);
-                }}
-              >
-                <Text
-                  className={`text-center font-semibold ${prayerTimeType === 'sunset_offset' ? 'text-white' : 'text-gray-700'}`}
-                  style={{ fontSize: labelSize }}
-                >
-                  {t('schedule_time_type_sunset')}
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* input Time Type */}
-            <View style={{ marginBottom: margin }}>
-              <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>
-                {prayerTimeType === 'time' ? t('schedule_prayer_time') : t('schedule_offset_minutes')}
-              </Text>
-              <TextInput
-                className="border rounded-lg"
-                style={{
-                  padding: smallPadding,
-                  fontSize: textSize,
-                  borderColor: prayerTimeType === 'time' ? '#d1d5db' : isOffsetValid ? '#d1d5db' : '#ef4444',
-                  borderWidth: 2,
-                }}
-                value={prayerTimeType === 'time' ? prayerTime : prayerOffsetMinutes}
-                onChangeText={(text) => {
-                  if (prayerTimeType === 'time') {
-                    setPrayerTime(text);
-                  } else {
-                    setPrayerOffsetMinutes(text);
-                    // Validate: allow empty string, negative sign, and numbers
-                    const isValid = /^-?\d+$/.test(text) || text === '' || text === '-';
-                    setIsOffsetValid(isValid);
+        <View
+          style={
+            isRotated
+              ? {
+                  width: physicalWidth,
+                  height: physicalHeight,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden',
+                }
+              : { flex: 1, width: '100%', height: '100%' }
+          }
+        >
+          <View
+            style={
+              isRotated
+                ? {
+                    width,
+                    height,
+                    transform: [{ rotate: rotationDegrees }],
                   }
-                }}
-                placeholder={prayerTimeType === 'time' ? '08:00' : '0'}
-                keyboardType={prayerTimeType === 'time' ? 'default' : 'numeric'}
-              />
-              {prayerTimeType !== 'time' && !isOffsetValid && (
-                <Text style={{ fontSize: textSize * 0.8, color: '#ef4444', marginTop: smallPadding / 2 }}>
-                  {t('schedule_invalid_offset')}
+                : { flex: 1, width: '100%', height: '100%' }
+            }
+          >
+            <View className="flex-1 justify-center items-center bg-black/50">
+              <View className="bg-white rounded-lg w-4/5 max-w-md" style={{ padding: padding * 1.5 }}>
+                <Text className="font-bold" style={{ fontSize: titleSize, marginBottom: margin }}>
+                  {editingPrayer ? t('schedule_edit_prayer') : t('schedule_add_prayer')}
                 </Text>
-              )}
-              {prayerTimeType !== 'time' && isOffsetValid && (
-                <Text style={{ fontSize: textSize * 0.8, color: '#666', marginTop: smallPadding / 2 }}>
-                  {prayerTimeType === 'sunrise_offset'
-                    ? t('schedule_offset_sunrise_hint')
-                    : t('schedule_offset_sunset_hint')}
-                </Text>
-              )}
-            </View>
 
-            <View className="flex-row" style={{ gap: smallPadding }}>
-              <TouchableOpacity
-                className="flex-1 bg-gray-300 rounded-lg"
-                style={{ padding: smallPadding * 1.5 }}
-                onPress={() => setIsPrayerModalVisible(false)}
-              >
-                <Text className="text-center font-semibold" style={{ fontSize: buttonTextSize }}>
-                  {t('deceased_cancel')}
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                className="flex-1 bg-green-500 rounded-lg"
-                style={{ padding: smallPadding * 1.5 }}
-                onPress={savePrayer}
-              >
-                <Text className="text-center font-semibold text-white" style={{ fontSize: buttonTextSize }}>
-                  {t('save')}
-                </Text>
-              </TouchableOpacity>
+                <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_prayer_name')}</Text>
+                <TextInput
+                  nativeID="schedule-prayer-name-input"
+                  className="border border-gray-300 rounded-lg"
+                  style={{ padding: smallPadding, fontSize: textSize, marginBottom: margin }}
+                  value={prayerName}
+                  onChangeText={setPrayerName}
+                  placeholder={t('schedule_prayer_name')}
+                />
+
+                <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>{t('schedule_prayer_time')}</Text>
+
+                {/* Time Type Selector */}
+                <View className="flex-row" style={{ gap: smallPadding, marginBottom: margin }}>
+                  <TouchableOpacity
+                    className={`flex-1 rounded-lg ${prayerTimeType === 'time' ? 'bg-blue-500' : 'bg-gray-200'}`}
+                    style={{ padding: smallPadding }}
+                    onPress={() => {
+                      setPrayerTimeType('time');
+                      setIsOffsetValid(true);
+                    }}
+                  >
+                    <Text
+                      className={`text-center font-semibold ${prayerTimeType === 'time' ? 'text-white' : 'text-gray-700'}`}
+                      style={{ fontSize: labelSize }}
+                    >
+                      {t('schedule_time_type_time')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`flex-1 rounded-lg ${prayerTimeType === 'sunrise_offset' ? 'bg-blue-500' : 'bg-gray-200'}`}
+                    style={{ padding: smallPadding }}
+                    onPress={() => {
+                      setPrayerTimeType('sunrise_offset');
+                      setIsOffsetValid(true);
+                    }}
+                  >
+                    <Text
+                      className={`text-center font-semibold ${prayerTimeType === 'sunrise_offset' ? 'text-white' : 'text-gray-700'}`}
+                      style={{ fontSize: labelSize }}
+                    >
+                      {t('schedule_time_type_sunrise')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`flex-1 rounded-lg ${prayerTimeType === 'sunset_offset' ? 'bg-blue-500' : 'bg-gray-200'}`}
+                    style={{ padding: smallPadding }}
+                    onPress={() => {
+                      setPrayerTimeType('sunset_offset');
+                      setIsOffsetValid(true);
+                    }}
+                  >
+                    <Text
+                      className={`text-center font-semibold ${prayerTimeType === 'sunset_offset' ? 'text-white' : 'text-gray-700'}`}
+                      style={{ fontSize: labelSize }}
+                    >
+                      {t('schedule_time_type_sunset')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* input Time Type */}
+                <View style={{ marginBottom: margin }}>
+                  <Text style={{ fontSize: labelSize, marginBottom: smallPadding }}>
+                    {prayerTimeType === 'time' ? t('schedule_prayer_time') : t('schedule_offset_minutes')}
+                  </Text>
+                  <TextInput
+                    nativeID="schedule-prayer-time-input"
+                    className="border rounded-lg"
+                    style={{
+                      padding: smallPadding,
+                      fontSize: textSize,
+                      borderColor: prayerTimeType === 'time' ? '#d1d5db' : isOffsetValid ? '#d1d5db' : '#ef4444',
+                      borderWidth: 2,
+                    }}
+                    value={prayerTimeType === 'time' ? prayerTime : prayerOffsetMinutes}
+                    onChangeText={(text) => {
+                      if (prayerTimeType === 'time') {
+                        setPrayerTime(text);
+                      } else {
+                        setPrayerOffsetMinutes(text);
+                        // Validate: allow empty string, negative sign, and numbers
+                        const isValid = /^-?\d+$/.test(text) || text === '' || text === '-';
+                        setIsOffsetValid(isValid);
+                      }
+                    }}
+                    placeholder={prayerTimeType === 'time' ? '08:00' : '0'}
+                    keyboardType={prayerTimeType === 'time' ? 'default' : 'numeric'}
+                  />
+                  {prayerTimeType !== 'time' && !isOffsetValid && (
+                    <Text style={{ fontSize: textSize * 0.8, color: '#ef4444', marginTop: smallPadding / 2 }}>
+                      {t('schedule_invalid_offset')}
+                    </Text>
+                  )}
+                  {prayerTimeType !== 'time' && isOffsetValid && (
+                    <Text style={{ fontSize: textSize * 0.8, color: '#666', marginTop: smallPadding / 2 }}>
+                      {prayerTimeType === 'sunrise_offset'
+                        ? t('schedule_offset_sunrise_hint')
+                        : t('schedule_offset_sunset_hint')}
+                    </Text>
+                  )}
+                </View>
+
+                <View className="flex-row" style={{ gap: smallPadding }}>
+                  <TouchableOpacity
+                    className="flex-1 bg-gray-300 rounded-lg"
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={() => setIsPrayerModalVisible(false)}
+                  >
+                    <Text className="text-center font-semibold" style={{ fontSize: buttonTextSize }}>
+                      {t('deceased_cancel')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className="flex-1 bg-green-500 rounded-lg"
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={savePrayer}
+                  >
+                    <Text className="text-center font-semibold text-white" style={{ fontSize: buttonTextSize }}>
+                      {t('save')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
           </View>
         </View>

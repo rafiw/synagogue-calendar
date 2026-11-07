@@ -847,7 +847,9 @@ const generateCSV = (people: DeceasedPerson[]): string => {
 const DeceasedSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
-  const { height, width } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const { height, width, physicalWidth, physicalHeight, isRotated, rotationDegrees } = useEffectiveDimensions(
+    settings.synagogueSettings.screenOrientation,
+  );
   const [showForm, setShowForm] = useState(false);
   const [showCsvHelp, setShowCsvHelp] = useState(false);
   const [editingPerson, setEditingPerson] = useState<DeceasedPerson | undefined>();
@@ -1374,29 +1376,55 @@ const DeceasedSettingsTab = () => {
                 setEditingPerson(undefined);
               }}
             >
-              <View className="flex-1 justify-center items-center bg-black/50" style={{ padding }}>
-                <View className="w-11/12 max-w-2xl" style={{ maxHeight: height * 0.9 }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setShowForm(false);
-                      setEditingPerson(undefined);
-                    }}
-                    className="self-end bg-white rounded-full items-center justify-center"
-                    style={{ width: 32 * heightScale, height: 32 * heightScale, marginBottom: smallPadding }}
-                  >
-                    <Text className="text-gray-600 font-bold" style={{ fontSize: titleSize }}>
-                      ✕
-                    </Text>
-                  </TouchableOpacity>
-                  <DeceasedPersonForm
-                    person={editingPerson}
-                    onSave={editingPerson ? editDeceasedPerson : addDeceasedPerson}
-                    onCancel={() => {
-                      setShowForm(false);
-                      setEditingPerson(undefined);
-                    }}
-                    imgbbApiKey={settings.deceasedSettings.imgbbApiKey || ''}
-                  />
+              <View
+                style={
+                  isRotated
+                    ? {
+                        width: physicalWidth,
+                        height: physicalHeight,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                      }
+                    : { flex: 1, width: '100%', height: '100%' }
+                }
+              >
+                <View
+                  style={
+                    isRotated
+                      ? {
+                          width,
+                          height,
+                          transform: [{ rotate: rotationDegrees }],
+                        }
+                      : { flex: 1, width: '100%', height: '100%' }
+                  }
+                >
+                  <View className="flex-1 justify-center items-center bg-black/50" style={{ padding }}>
+                    <View className="w-11/12 max-w-2xl" style={{ maxHeight: height * 0.9 }}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setShowForm(false);
+                          setEditingPerson(undefined);
+                        }}
+                        className="self-end bg-white rounded-full items-center justify-center"
+                        style={{ width: 32 * heightScale, height: 32 * heightScale, marginBottom: smallPadding }}
+                      >
+                        <Text className="text-gray-600 font-bold" style={{ fontSize: titleSize }}>
+                          ✕
+                        </Text>
+                      </TouchableOpacity>
+                      <DeceasedPersonForm
+                        person={editingPerson}
+                        onSave={editingPerson ? editDeceasedPerson : addDeceasedPerson}
+                        onCancel={() => {
+                          setShowForm(false);
+                          setEditingPerson(undefined);
+                        }}
+                        imgbbApiKey={settings.deceasedSettings.imgbbApiKey || ''}
+                      />
+                    </View>
+                  </View>
                 </View>
               </View>
             </Modal>

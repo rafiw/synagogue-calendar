@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 
@@ -38,6 +38,19 @@ export default function SettingsLayout() {
   const { width, height } = useEffectiveDimensions(screenOrientation);
   const heightScale = useHeightScale() / 1.5;
 
+  // Lock initial viewport dimensions while ignoring transient virtual-keyboard height shrinks
+  // so opening an on-screen keyboard inside a modal does not swap between TV and mobile layouts.
+  const [stableDims, setStableDims] = useState(() => ({ width, height }));
+  useEffect(() => {
+    setStableDims((prev) => {
+      // Only update layout dimensions when width changes (e.g. orientation change) or height grows back
+      if (Math.abs(width - prev.width) > 20 || height > prev.height) {
+        return { width, height };
+      }
+      return prev;
+    });
+  }, [width, height]);
+
   // Responsive sizes with height adjustment
   const titleSize = Math.round(useResponsiveFontSize('displaySmall') * heightScale);
   const tabTextSize = Math.round(useResponsiveFontSize('bodyMedium') * heightScale);
@@ -47,7 +60,12 @@ export default function SettingsLayout() {
   const sidebarWidth = Math.round(192 * heightScale);
 
   // Use sidebar layout for TV/wide screens unless user forced vertical portrait layout
-  const isTVLayout = screenOrientation === 'vertical' ? false : height < 700 && width > height;
+  const isTVLayout =
+    screenOrientation === 'vertical'
+      ? false
+      : screenOrientation === 'horizontal'
+        ? true
+        : stableDims.height < 700 && stableDims.width > stableDims.height;
 
   const handleSave = useCallback(() => {
     void saveSettings();

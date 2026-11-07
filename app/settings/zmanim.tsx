@@ -3,6 +3,7 @@ import { View, Text, TextInput, ActivityIndicator, TouchableOpacity, useWindowDi
 import { Picker } from '@react-native-picker/picker';
 import { useSettings } from '@context/settingsContext';
 import { cities, olsons } from '@assets/data';
+import { isIsraelTimezone, resolveDefaultCandleLightingMins } from '@utils/zmanim_wrapper';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
 import { isRTL } from '@utils/utils';
@@ -51,6 +52,17 @@ const ZmanimSettingsTab = () => {
   const [latText, setLatText] = useState((settings.zmanimSettings.latitude ?? 31.7667).toString());
   const [lngText, setLngText] = useState((settings.zmanimSettings.longitude ?? 35.2333).toString());
   const [elevText, setElevText] = useState((settings.zmanimSettings.elevation ?? 0).toString());
+  const [candleMinsText, setCandleMinsText] = useState(
+    (
+      settings.zmanimSettings.candleLightingMins ??
+      resolveDefaultCandleLightingMins(
+        settings.zmanimSettings.city,
+        settings.zmanimSettings.latitude,
+        settings.zmanimSettings.longitude,
+        settings.zmanimSettings.olson,
+      )
+    ).toString(),
+  );
   const [latError, setLatError] = useState<string | null>(null);
   const [lngError, setLngError] = useState<string | null>(null);
 
@@ -61,6 +73,17 @@ const ZmanimSettingsTab = () => {
     setLatText((settings.zmanimSettings.latitude ?? 31.7667).toString());
     setLngText((settings.zmanimSettings.longitude ?? 35.2333).toString());
     setElevText((settings.zmanimSettings.elevation ?? 0).toString());
+    setCandleMinsText(
+      (
+        settings.zmanimSettings.candleLightingMins ??
+        resolveDefaultCandleLightingMins(
+          settings.zmanimSettings.city,
+          settings.zmanimSettings.latitude,
+          settings.zmanimSettings.longitude,
+          settings.zmanimSettings.olson,
+        )
+      ).toString(),
+    );
   }, [
     settings.synagogueSettings.language,
     settings.zmanimSettings.city,
@@ -69,6 +92,7 @@ const ZmanimSettingsTab = () => {
     settings.zmanimSettings.latitude,
     settings.zmanimSettings.longitude,
     settings.zmanimSettings.elevation,
+    settings.zmanimSettings.candleLightingMins,
   ]);
 
   const handleCityChange = (city: string) => {
@@ -76,6 +100,7 @@ const ZmanimSettingsTab = () => {
     setSelectedLocation(city);
     setLatText(chosen_city.latitude.toString());
     setLngText(chosen_city.longitude.toString());
+    setCandleMinsText(chosen_city.candleLightingMins.toString());
     setLatError(null);
     setLngError(null);
     updateSettings({
@@ -84,6 +109,7 @@ const ZmanimSettingsTab = () => {
         city,
         latitude: chosen_city.latitude,
         longitude: chosen_city.longitude,
+        candleLightingMins: chosen_city.candleLightingMins,
       },
     });
   };
@@ -171,9 +197,61 @@ const ZmanimSettingsTab = () => {
     }
   };
 
-  const handleOlsonChange = (olson: string) => {
-    setOlson(olson);
-    updateSettings({ zmanimSettings: { ...settings.zmanimSettings, olson: olson } });
+  const handleCandleMinsChange = (text: string) => {
+    setCandleMinsText(text);
+    const trimmed = text.trim();
+    if (trimmed === '') {
+      return;
+    }
+    const val = parseInt(trimmed, 10);
+    if (!isNaN(val) && val > 0 && val <= 120) {
+      updateSettings({
+        zmanimSettings: {
+          ...settings.zmanimSettings,
+          candleLightingMins: val,
+        },
+      });
+    }
+  };
+
+  const handleCandleMinsBlur = () => {
+    const trimmed = candleMinsText.trim();
+    const val = parseInt(trimmed, 10);
+    if (trimmed === '' || isNaN(val) || val <= 0 || val > 120) {
+      const fallback =
+        settings.zmanimSettings.candleLightingMins ??
+        resolveDefaultCandleLightingMins(
+          settings.zmanimSettings.city,
+          settings.zmanimSettings.latitude,
+          settings.zmanimSettings.longitude,
+          settings.zmanimSettings.olson,
+        );
+      setCandleMinsText(fallback.toString());
+    }
+  };
+
+  const handleOlsonChange = (newOlson: string) => {
+    setOlson(newOlson);
+    const wasIl = isIsraelTimezone(settings.zmanimSettings.olson);
+    const nowIl = isIsraelTimezone(newOlson);
+    let nextCandleMins = settings.zmanimSettings.candleLightingMins;
+    if (wasIl !== nowIl) {
+      nextCandleMins = resolveDefaultCandleLightingMins(
+        nowIl ? settings.zmanimSettings.city : undefined,
+        settings.zmanimSettings.latitude,
+        settings.zmanimSettings.longitude,
+        newOlson,
+      );
+      setCandleMinsText(nextCandleMins.toString());
+    }
+    updateSettings({
+      zmanimSettings: {
+        ...settings.zmanimSettings,
+        olson: newOlson,
+        il: nowIl,
+        ...(nextCandleMins !== undefined ? { candleLightingMins: nextCandleMins } : {}),
+      },
+    });
   };
 
   const handlePurimToggle = (type: 'regular' | 'shushan') => {
@@ -359,20 +437,58 @@ const ZmanimSettingsTab = () => {
                     )}
                   </View>
                 </View>
-                {/* Second Row: Elevation */}
-                <View style={{ gap: smallPadding }}>
-                  <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
-                    {t('elevation')}
-                  </Text>
-                  <TextInput
-                    className="w-full border border-gray-300 rounded-lg bg-gray-50"
-                    style={{ padding: smallPadding * 1.5, fontSize: textSize }}
-                    value={elevText}
-                    onChangeText={handleElevChange}
-                    onBlur={handleElevBlur}
-                    keyboardType="numeric"
-                    placeholder="0"
-                  />
+                {/* Second Row: Elevation and Candle Lighting Minutes */}
+                <View className={isSmallHeight ? 'flex-row' : ''} style={{ gap: padding }}>
+                  <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
+                    <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                      {t('elevation')}
+                    </Text>
+                    <TextInput
+                      className="w-full border border-gray-300 rounded-lg bg-gray-50"
+                      style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                      value={elevText}
+                      onChangeText={handleElevChange}
+                      onBlur={handleElevBlur}
+                      keyboardType="numeric"
+                      placeholder="0"
+                    />
+                  </View>
+                  <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
+                    <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                      {t('candle_lighting_mins')}
+                    </Text>
+                    <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                      <TextInput
+                        className="flex-1 border border-gray-300 rounded-lg bg-gray-50"
+                        style={{ padding: smallPadding * 1.5, fontSize: textSize }}
+                        value={candleMinsText}
+                        onChangeText={handleCandleMinsChange}
+                        onBlur={handleCandleMinsBlur}
+                        keyboardType="numeric"
+                        placeholder="20"
+                      />
+                      {[18, 20, 30, 40].map((mins) => {
+                        const isSelected = Number(candleMinsText) === mins;
+                        return (
+                          <TouchableOpacity
+                            key={mins}
+                            onPress={() => handleCandleMinsChange(mins.toString())}
+                            className={`rounded-lg border items-center justify-center ${
+                              isSelected ? 'bg-blue-500 border-blue-500' : 'bg-gray-100 border-gray-300'
+                            }`}
+                            style={{ paddingHorizontal: smallPadding * 1.2, paddingVertical: smallPadding * 1.2 }}
+                          >
+                            <Text
+                              className={`font-medium ${isSelected ? 'text-white' : 'text-gray-700'}`}
+                              style={{ fontSize: labelSize }}
+                            >
+                              {mins}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
                 </View>
               </View>
 

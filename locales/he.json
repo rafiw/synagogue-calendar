@@ -16,6 +16,7 @@
   "latitude": "קו רוחב",
   "longitude": "קו אורך",
   "elevation": "גובה (מ') אופציונלי",
+  "candle_lighting_mins": "הדלקת נרות (דקות לפני שקיעה)",
   "background": "רקע",
   "save": "שמור",
   "loading_settings": "טוען הגדרות...",

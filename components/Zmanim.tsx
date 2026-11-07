@@ -63,6 +63,8 @@ const Zmanim: React.FC = () => {
         settings.synagogueSettings.language,
         settings.zmanimSettings.purimSettings,
         settings.zmanimSettings.elevation,
+        settings.zmanimSettings.candleLightingMins,
+        settings.zmanimSettings.city,
       ),
     [
       settings.synagogueSettings.nusach,
@@ -72,6 +74,8 @@ const Zmanim: React.FC = () => {
       settings.zmanimSettings.olson,
       settings.zmanimSettings.purimSettings,
       settings.zmanimSettings.elevation,
+      settings.zmanimSettings.candleLightingMins,
+      settings.zmanimSettings.city,
       timeTick,
     ],
   );

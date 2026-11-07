@@ -24,6 +24,48 @@ import {
 } from '@hebcal/core';
 import { Nusach, PurimSettings } from './defs';
 import { getLeyningOnDate, Leyning } from '@hebcal/leyning';
+import { cities } from '@assets/data';
+
+export const isIsraelTimezone = (tzid?: string): boolean => {
+  if (!tzid || typeof tzid !== 'string') return true;
+  const lower = tzid.toLowerCase();
+  return lower.includes('jerusalem') || lower.includes('tel_aviv') || lower.includes('hebron');
+};
+
+export const isWithinJerusalemBounds = (latitude: number, longitude: number): boolean => {
+  return latitude >= 31.7 && latitude <= 31.88 && longitude >= 35.12 && longitude <= 35.28;
+};
+
+export const isWithinHaifaBounds = (latitude: number, longitude: number): boolean => {
+  return latitude >= 32.75 && latitude <= 32.85 && longitude >= 34.94 && longitude <= 35.06;
+};
+
+export const resolveDefaultCandleLightingMins = (
+  city?: string,
+  latitude?: number,
+  longitude?: number,
+  tzid?: string,
+): number => {
+  const il = isIsraelTimezone(tzid);
+  if (!il) {
+    return 18;
+  }
+  if (city && typeof city === 'string') {
+    const matched = cities.find((c) => c.name === city || c.hebrew_name === city);
+    if (matched) {
+      return matched.candleLightingMins;
+    }
+  }
+  if (typeof latitude === 'number' && typeof longitude === 'number' && !isNaN(latitude) && !isNaN(longitude)) {
+    if (isWithinJerusalemBounds(latitude, longitude)) {
+      return 40;
+    }
+    if (isWithinHaifaBounds(latitude, longitude)) {
+      return 30;
+    }
+  }
+  return 20;
+};
 
 export enum HallelType {
   NO_HALLEL = 0,
@@ -46,6 +88,7 @@ export class ZmanimWrapper {
   private zmanim: Zmanim;
   private language: string;
   private purimSettings: PurimSettings;
+  private candleLightingMins: number;
 
   constructor(
     nusach: Nusach,
@@ -55,12 +98,14 @@ export class ZmanimWrapper {
     language: string,
     purimSettings: PurimSettings,
     elevation?: number,
+    candleLightingMins?: number,
+    city?: string,
   ) {
     this.now = new Date();
     const DEBUG = false;
     // for debugging purposes, set the date to other date than today
     if (DEBUG) {
-      this.now.setDate(this.now.getDate() + 236);
+      this.now.setDate(this.now.getDate() - 1);
       this.now.setHours(8);
     }
     this.nusach = nusach || 'ashkenaz';
@@ -79,8 +124,29 @@ export class ZmanimWrapper {
     }
 
     // Create a location object based on safe latitude, longitude, and timezone
-    this.il = safeTzid.toLowerCase().includes('jerusalem');
-    this.location = new Location(safeLat, safeLng, this.il, safeTzid, undefined, undefined, undefined, safeElevation);
+    this.il = isIsraelTimezone(safeTzid);
+    const matchedCity = city ? cities.find((c) => c.name === city || c.hebrew_name === city) : undefined;
+    const resolvedCityName = matchedCity
+      ? matchedCity.name
+      : this.il && isWithinJerusalemBounds(safeLat, safeLng)
+        ? 'Jerusalem'
+        : this.il && isWithinHaifaBounds(safeLat, safeLng)
+          ? 'Haifa'
+          : undefined;
+    this.candleLightingMins =
+      typeof candleLightingMins === 'number' && !isNaN(candleLightingMins) && candleLightingMins > 0
+        ? candleLightingMins
+        : resolveDefaultCandleLightingMins(city, safeLat, safeLng, safeTzid);
+    this.location = new Location(
+      safeLat,
+      safeLng,
+      this.il,
+      safeTzid,
+      resolvedCityName,
+      undefined,
+      undefined,
+      safeElevation,
+    );
 
     try {
       this.hdate = Zmanim.makeSunsetAwareHDate(this.location, this.now, false);
@@ -115,6 +181,7 @@ export class ZmanimWrapper {
       start: this.hdate,
       end: end,
       candlelighting: true,
+      candleLightingMins: this.candleLightingMins,
       il: this.il,
       sedrot: true,
       noMinorFast: false,

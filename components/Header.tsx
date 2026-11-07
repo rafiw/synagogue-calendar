@@ -57,6 +57,8 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     settings.synagogueSettings.language,
     settings.zmanimSettings.purimSettings,
     settings.zmanimSettings.elevation,
+    settings.zmanimSettings.candleLightingMins,
+    settings.zmanimSettings.city,
   );
   const dayOfWeek = t(zmanim.greg().toLocaleString('en-US', { weekday: 'long' }).toLowerCase());
 

@@ -16,6 +16,7 @@
   "latitude": "Latitude",
   "longitude": "Longitude",
   "elevation": "Elevation (m)",
+  "candle_lighting_mins": "Candle Lighting (minutes before sunset)",
   "background": "Background",
   "save": "Save",
   "loading_settings": "loading settings...",

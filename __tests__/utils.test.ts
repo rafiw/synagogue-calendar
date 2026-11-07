@@ -225,6 +225,59 @@ describe('utils', () => {
       expect(merged.zmanimSettings.longitude).toBe(34.7818);
     });
 
+    it('should infer candleLightingMins when missing from saved settings (backward compatibility)', () => {
+      const jerusalemSaved = {
+        zmanimSettings: {
+          city: 'Jerusalem',
+          latitude: 31.7683,
+          longitude: 35.2137,
+          olson: 'Asia/Jerusalem',
+        },
+      };
+      expect(mergeSettings(jerusalemSaved).zmanimSettings.candleLightingMins).toBe(40);
+
+      const haifaSaved = {
+        zmanimSettings: {
+          city: 'חיפה',
+          latitude: 32.794,
+          longitude: 34.9896,
+          olson: 'Asia/Jerusalem',
+        },
+      };
+      expect(mergeSettings(haifaSaved).zmanimSettings.candleLightingMins).toBe(30);
+
+      const telAvivSaved = {
+        zmanimSettings: {
+          city: 'Tel Aviv',
+          latitude: 32.0853,
+          longitude: 34.7818,
+          olson: 'Asia/Tel_Aviv',
+        },
+      };
+      expect(mergeSettings(telAvivSaved).zmanimSettings.candleLightingMins).toBe(20);
+
+      const diasporaSaved = {
+        zmanimSettings: {
+          city: 'New York',
+          latitude: 40.7128,
+          longitude: -74.006,
+          olson: 'America/New_York',
+        },
+      };
+      expect(mergeSettings(diasporaSaved).zmanimSettings.candleLightingMins).toBe(18);
+
+      const customMinsSaved = {
+        zmanimSettings: {
+          city: 'Tel Aviv',
+          latitude: 32.0853,
+          longitude: 34.7818,
+          olson: 'Asia/Jerusalem',
+          candleLightingMins: 40,
+        },
+      };
+      expect(mergeSettings(customMinsSaved).zmanimSettings.candleLightingMins).toBe(40);
+    });
+
     it('should defensively guard arrays from non-array corruptions', () => {
       const corruptArrays = {
         classesSettings: {

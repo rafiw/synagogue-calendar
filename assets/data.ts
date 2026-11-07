@@ -3,19 +3,20 @@ type City = {
   name: string;
   latitude: number;
   longitude: number;
+  candleLightingMins: number;
 };
 
 export const cities: City[] = [
-  { hebrew_name: 'ירושלים', name: 'Jerusalem', latitude: 31.7683, longitude: 35.2137 },
-  { hebrew_name: 'תל-אביב', name: 'Tel Aviv', latitude: 32.0853, longitude: 34.7818 },
-  { hebrew_name: 'חיפה', name: 'Haifa', latitude: 32.794, longitude: 34.9896 },
-  { hebrew_name: 'ראשון לציון', name: 'Rishon Lezion', latitude: 31.9716, longitude: 34.7894 },
-  { hebrew_name: 'פתח תקווה', name: 'Petah Tikva', latitude: 32.084, longitude: 34.8878 },
-  { hebrew_name: 'אשדוד', name: 'Ashdod', latitude: 31.8014, longitude: 34.6436 },
-  { hebrew_name: 'נתניה', name: 'Netanya', latitude: 32.3215, longitude: 34.8532 },
-  { hebrew_name: 'באר שבע', name: 'Beer Sheva', latitude: 31.2518, longitude: 34.7913 },
-  { hebrew_name: 'בני ברק', name: 'Bnei Brak', latitude: 32.0833, longitude: 34.8396 },
-  { hebrew_name: 'חולון', name: 'Holon', latitude: 32.0108, longitude: 34.7794 },
+  { hebrew_name: 'ירושלים', name: 'Jerusalem', latitude: 31.7683, longitude: 35.2137, candleLightingMins: 40 },
+  { hebrew_name: 'תל-אביב', name: 'Tel Aviv', latitude: 32.0853, longitude: 34.7818, candleLightingMins: 20 },
+  { hebrew_name: 'חיפה', name: 'Haifa', latitude: 32.794, longitude: 34.9896, candleLightingMins: 30 },
+  { hebrew_name: 'ראשון לציון', name: 'Rishon Lezion', latitude: 31.9716, longitude: 34.7894, candleLightingMins: 20 },
+  { hebrew_name: 'פתח תקווה', name: 'Petah Tikva', latitude: 32.084, longitude: 34.8878, candleLightingMins: 20 },
+  { hebrew_name: 'אשדוד', name: 'Ashdod', latitude: 31.8014, longitude: 34.6436, candleLightingMins: 20 },
+  { hebrew_name: 'נתניה', name: 'Netanya', latitude: 32.3215, longitude: 34.8532, candleLightingMins: 20 },
+  { hebrew_name: 'באר שבע', name: 'Beer Sheva', latitude: 31.2518, longitude: 34.7913, candleLightingMins: 20 },
+  { hebrew_name: 'בני ברק', name: 'Bnei Brak', latitude: 32.0833, longitude: 34.8396, candleLightingMins: 20 },
+  { hebrew_name: 'חולון', name: 'Holon', latitude: 32.0108, longitude: 34.7794, candleLightingMins: 20 },
 ];
 
 export const backgroundImages = [

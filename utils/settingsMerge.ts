@@ -1,5 +1,6 @@
 import { cities } from '@assets/data';
 import { Settings } from '@utils/defs';
+import { resolveDefaultCandleLightingMins } from '@utils/zmanim_wrapper';
 
 export const defaultName = 'בית כנסת לדוגמא';
 
@@ -43,6 +44,7 @@ export const defaultSettings: Settings = {
     elevation: 0,
     olson: 'Asia/Jerusalem',
     il: true,
+    candleLightingMins: 40,
     purimSettings: {
       regular: true,
       shushan: false,
@@ -289,16 +291,27 @@ export const mergeSettings = (loaded: any, defaults: Settings = defaultSettings)
     const isValidElev = typeof z.elevation === 'number' && !isNaN(z.elevation);
     const isValidDisplayTime =
       typeof z.screenDisplayTime === 'number' && !isNaN(z.screenDisplayTime) && z.screenDisplayTime > 0;
+    const isValidCandleMins =
+      typeof z.candleLightingMins === 'number' && !isNaN(z.candleLightingMins) && z.candleLightingMins > 0;
+
+    const resolvedCity = typeof z.city === 'string' ? z.city : defaults.zmanimSettings.city;
+    const resolvedLat = isValidLat ? z.latitude : defaults.zmanimSettings.latitude;
+    const resolvedLng = isValidLng ? z.longitude : defaults.zmanimSettings.longitude;
+    const resolvedOlson =
+      typeof z.olson === 'string' && z.olson.trim() !== '' ? z.olson : defaults.zmanimSettings.olson;
 
     merged.zmanimSettings = {
       enable: typeof z.enable === 'boolean' ? z.enable : defaults.zmanimSettings.enable,
       screenDisplayTime: isValidDisplayTime ? z.screenDisplayTime : defaults.zmanimSettings.screenDisplayTime,
-      city: typeof z.city === 'string' ? z.city : defaults.zmanimSettings.city,
-      latitude: isValidLat ? z.latitude : defaults.zmanimSettings.latitude,
-      longitude: isValidLng ? z.longitude : defaults.zmanimSettings.longitude,
+      city: resolvedCity,
+      latitude: resolvedLat,
+      longitude: resolvedLng,
       elevation: isValidElev ? z.elevation : defaults.zmanimSettings.elevation,
-      olson: typeof z.olson === 'string' && z.olson.trim() !== '' ? z.olson : defaults.zmanimSettings.olson,
+      olson: resolvedOlson,
       il: typeof z.il === 'boolean' ? z.il : defaults.zmanimSettings.il,
+      candleLightingMins: isValidCandleMins
+        ? Math.trunc(z.candleLightingMins)
+        : resolveDefaultCandleLightingMins(resolvedCity, resolvedLat, resolvedLng, resolvedOlson),
       purimSettings: {
         regular: typeof purim?.regular === 'boolean' ? purim.regular : defaults.zmanimSettings.purimSettings.regular,
         shushan: typeof purim?.shushan === 'boolean' ? purim.shushan : defaults.zmanimSettings.purimSettings.shushan,

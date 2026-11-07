@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ZmanimWrapper, HallelType, FastDayType } from '../utils/zmanim_wrapper';
+import {
+  ZmanimWrapper,
+  HallelType,
+  FastDayType,
+  resolveDefaultCandleLightingMins,
+  isIsraelTimezone,
+  isWithinJerusalemBounds,
+} from '../utils/zmanim_wrapper';
 import { HDate, months } from '@hebcal/core';
 import { Nusach } from '../utils/defs';
 
@@ -271,6 +278,66 @@ describe('ZmanimWrapper', () => {
       // Will match format if there's havdala
       if (havdalaRT) {
         expect(havdalaRT).toMatch(/^\d{1,2}:\d{2}$/);
+      }
+    });
+
+    it('should resolve default candle lighting minutes accurately for Jerusalem, Haifa, Tel Aviv, and Diaspora', () => {
+      expect(resolveDefaultCandleLightingMins('Jerusalem', 31.7683, 35.2137, 'Asia/Jerusalem')).toBe(40);
+      expect(resolveDefaultCandleLightingMins('ירושלים', 31.7683, 35.2137, 'Asia/Jerusalem')).toBe(40);
+      expect(resolveDefaultCandleLightingMins('Haifa', 32.794, 34.9896, 'Asia/Jerusalem')).toBe(30);
+      expect(resolveDefaultCandleLightingMins('חיפה', 32.794, 34.9896, 'Asia/Jerusalem')).toBe(30);
+      expect(resolveDefaultCandleLightingMins('Tel Aviv', 32.0853, 34.7818, 'Asia/Jerusalem')).toBe(20);
+      expect(resolveDefaultCandleLightingMins('תל-אביב', 32.0853, 34.7818, 'Asia/Tel_Aviv')).toBe(20);
+      expect(resolveDefaultCandleLightingMins(undefined, 40.7128, -74.006, 'America/New_York')).toBe(18);
+    });
+
+    it('should detect custom coordinates inside Jerusalem and default to 40 minutes when city is not specified', () => {
+      // Ramot / Har Nof / Gilo coordinates inside Jerusalem
+      expect(isWithinJerusalemBounds(31.815, 35.195)).toBe(true);
+      expect(resolveDefaultCandleLightingMins(undefined, 31.815, 35.195, 'Asia/Jerusalem')).toBe(40);
+      // Selected Jerusalem with custom neighborhood coordinates
+      expect(resolveDefaultCandleLightingMins('Jerusalem', 31.815, 35.195, 'Asia/Jerusalem')).toBe(40);
+    });
+
+    it('should recognize both Asia/Jerusalem and Asia/Tel_Aviv as Israel timezones', () => {
+      expect(isIsraelTimezone('Asia/Jerusalem')).toBe(true);
+      expect(isIsraelTimezone('Asia/Tel_Aviv')).toBe(true);
+      expect(isIsraelTimezone('America/New_York')).toBe(false);
+    });
+
+    it('should calculate Jerusalem candle lighting 20 minutes earlier than a 20-minute offset at the same coordinates', () => {
+      const jerusalem40 = new ZmanimWrapper(
+        nusach,
+        31.7683,
+        35.2137,
+        'Asia/Jerusalem',
+        'he',
+        purimSettings,
+        0,
+        40,
+        'Jerusalem',
+      );
+      const jerusalem20 = new ZmanimWrapper(
+        nusach,
+        31.7683,
+        35.2137,
+        'Asia/Jerusalem',
+        'he',
+        purimSettings,
+        0,
+        20,
+        'Jerusalem',
+      );
+
+      const cl40 = jerusalem40.getCandleLighting();
+      const cl20 = jerusalem20.getCandleLighting();
+
+      if (cl40 && cl20) {
+        const toMins = (t: string) => {
+          const [h = 0, m = 0] = t.split(':').map(Number);
+          return h * 60 + m;
+        };
+        expect(toMins(cl20) - toMins(cl40)).toBe(20);
       }
     });
   });

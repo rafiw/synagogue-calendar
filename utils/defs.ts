@@ -131,6 +131,7 @@ export interface ZmanimSettings {
   elevation: number;
   olson: string;
   il: boolean;
+  candleLightingMins?: number;
   purimSettings: PurimSettings;
 }
 

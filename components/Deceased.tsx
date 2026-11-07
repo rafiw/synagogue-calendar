@@ -309,8 +309,8 @@ const Deceased: React.FC = () => {
     // so scale down proportionally to column count to prevent text from overflowing horizontally.
     const portraitColumnFactor = isPortrait
       ? tableColumnsCount > 1
-        ? 0.65 / Math.sqrt(tableColumnsCount)
-        : 0.78
+        ? 0.72 / Math.sqrt(tableColumnsCount)
+        : 0.88
       : 1.0;
     const tableScale = gridScale * heightScale * portraitColumnFactor;
 

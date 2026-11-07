@@ -248,10 +248,10 @@ export const useResponsiveSpacing = (baseSpacing: number): number => {
 export const useHeightScale = (): number => {
   const { width, height } = useEffectiveDimensions();
 
-  // Use the shorter dimension (Math.min(width, height)) so that rotating a TV 90 degrees
-  // into vertical/portrait mode keeps fonts proportional to the narrow screen width
-  // instead of inflating 2x based on the tall vertical height.
-  const baseDimension = Math.min(width, height);
+  // In portrait/vertical mode (height > width), use a balanced blend of width and height
+  // rather than purely Math.min(width, height) so fonts stay large and readable on vertical TVs
+  // without inflating 2x to the full vertical height.
+  const baseDimension = height > width ? width * 0.72 + height * 0.28 : height;
 
   return Math.min(Math.max(0.3, baseDimension / 670), 2.2);
 };

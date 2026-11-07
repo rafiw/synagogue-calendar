@@ -18,6 +18,7 @@ const Schedule: React.FC = () => {
   const { width, height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const [rtl, setRtl] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+  const [availableHeight, setAvailableHeight] = useState(0);
   const baseHeightScale = useHeightScale();
   const isSmallHeight = isPortraitLayout(settings.synagogueSettings.screenOrientation, width, height);
 
@@ -53,19 +54,64 @@ const Schedule: React.FC = () => {
     return () => clearInterval(timer);
   }, [pageDisplayTime, shouldPaginate, totalPages]);
 
-  // Auto-scale down if the currently displayed column has many prayers
+  // Dynamically calculate heightScale from the actual measured container height so that prayer
+  // schedule columns and fonts fill the available vertical room without overflowing.
+  const baseMainTitleFont = useResponsiveFontSize('displayMedium');
+  const baseItemFont = useResponsiveFontSize('headingMedium');
+  const basePadding = useResponsiveSpacing(12);
+  const baseMargin = useResponsiveSpacing(4);
+  const baseItemPadding = useResponsiveSpacing(6);
+
   const activePrayersCount = displayedColumns.reduce((max, col) => Math.max(max, col.prayers.length), 0);
-  const scaleAdjustment = activePrayersCount > 7 ? Math.max(0.65, 7 / activePrayersCount) : 1.0;
-  const heightScale = baseHeightScale * scaleAdjustment;
+  const stackedPrayersCount = displayedColumns.reduce((sum, col) => sum + col.prayers.length, 0);
+
+  const heightScale = useMemo(() => {
+    if (availableHeight > 100 && displayedColumns.length > 0) {
+      const isStacked = (isSmallHeight || shouldPaginate) && displayedColumns.length > 1;
+      const numCardsVertically = isStacked ? displayedColumns.length : 1;
+      const totalVerticalRows = isStacked ? stackedPrayersCount : Math.max(1, activePrayersCount);
+
+      // Unit height at scale = 1.0:
+      // Container padding + main title + indicator + card padding/title + rows * (text + itemPadding + margin)
+      const mainTitleUnit = baseMainTitleFont * 0.9 * 1.3 + basePadding + (shouldPaginate && totalPages > 1 ? 14 : 0);
+      const cardsChromeUnit = numCardsVertically * (basePadding * 3 + baseMargin * 2 + baseMainTitleFont * 0.8 * 1.3);
+      const rowsUnit = totalVerticalRows * (baseItemFont * 1.35 + baseItemPadding * 2 + baseMargin + 4);
+      const unitHeight = baseItemPadding * 2 + mainTitleUnit + cardsChromeUnit + rowsUnit;
+
+      const colCountHoriz = isSmallHeight || shouldPaginate ? 1 : Math.max(1, displayedColumns.length);
+      const maxHorizScale = (width / colCountHoriz) / (baseItemFont * 16);
+      const maxScaleCap = Math.min(maxHorizScale, baseHeightScale * 1.35);
+
+      return Math.min(maxScaleCap, Math.max(0.45, (availableHeight * 0.94) / unitHeight));
+    }
+
+    const scaleAdjustment = activePrayersCount > 7 ? Math.max(0.65, 7 / activePrayersCount) : 1.0;
+    return baseHeightScale * scaleAdjustment;
+  }, [
+    availableHeight,
+    displayedColumns.length,
+    isSmallHeight,
+    shouldPaginate,
+    stackedPrayersCount,
+    activePrayersCount,
+    baseMainTitleFont,
+    baseItemFont,
+    basePadding,
+    baseMargin,
+    baseItemPadding,
+    totalPages,
+    width,
+    baseHeightScale,
+  ]);
 
   // Responsive sizes
-  const mainTitleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale) * 0.9;
-  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale) * 0.8;
-  const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const padding = Math.round(useResponsiveSpacing(12) * heightScale);
-  const margin = Math.round(useResponsiveSpacing(4) * heightScale);
-  const emptyTextSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const itemPadding = Math.round(useResponsiveSpacing(6) * heightScale);
+  const mainTitleSize = Math.round(baseMainTitleFont * heightScale) * 0.9;
+  const titleSize = Math.round(baseMainTitleFont * heightScale) * 0.8;
+  const textSize = Math.round(baseItemFont * heightScale);
+  const padding = Math.round(basePadding * heightScale);
+  const margin = Math.round(baseMargin * heightScale);
+  const emptyTextSize = Math.round(baseItemFont * heightScale);
+  const itemPadding = Math.round(baseItemPadding * heightScale);
 
   const backgroundColor = 'bg-white/40';
   const headLineColor = 'text-gray-900';
@@ -137,7 +183,16 @@ const Schedule: React.FC = () => {
     );
 
   return (
-    <View className="flex-1" style={{ padding: itemPadding }}>
+    <View
+      className="flex-1"
+      style={{ padding: itemPadding }}
+      onLayout={(e) => {
+        const h = e.nativeEvent.layout.height;
+        if (h > 0 && Math.abs(h - availableHeight) > 2) {
+          setAvailableHeight(h);
+        }
+      }}
+    >
       {/* Headline */}
       {columnsWithPrayers.length > 0 && (
         <View style={{ marginBottom: padding }}>
@@ -159,7 +214,7 @@ const Schedule: React.FC = () => {
       )}
       {/* Row(s) for columns */}
       <View
-        className={`${isSmallHeight || shouldPaginate ? 'flex-col' : 'flex-row flex-wrap'} justify-center items-start`}
+        className={`flex-1 ${isSmallHeight || shouldPaginate ? 'flex-col' : 'flex-row flex-wrap'} justify-center items-stretch`}
       >
         {displayedColumns.map((column) => (
           <InfoGroup

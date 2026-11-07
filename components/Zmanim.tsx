@@ -44,6 +44,7 @@ const Zmanim: React.FC = () => {
   const isSmallWidth = isPortraitLayout(settings.synagogueSettings.screenOrientation, width, height);
 
   const [rtl, setRtl] = useState(false);
+  const [availableHeight, setAvailableHeight] = useState(0);
   const [timeTick, setTimeTick] = useState(() => Math.floor(Date.now() / 60000));
 
   useEffect(() => {
@@ -216,22 +217,78 @@ const Zmanim: React.FC = () => {
     ];
   }, [computedZmanim, t]);
 
-  // Adjust heightScale based on InfoGroup items array size and portrait stacking
+  // Dynamically calculate heightScale from the actual measured container height (or fallback to useHeightScale)
+  // so that cards and fonts fill the available vertical room without clipping or leaving empty space at the bottom.
   const baseHeightScale = useHeightScale();
+  const baseTitleFont = useResponsiveFontSize('displayMedium');
+  const baseItemFont = useResponsiveFontSize('headingMedium');
+  const basePadding = useResponsiveSpacing(12);
+  const baseMargin = useResponsiveSpacing(4);
+
   const nonNullTimeItemsCount = dayTimeItems.filter(Boolean).length;
-  const totalPortraitRows = dailyInfoItems.length + nonNullTimeItemsCount;
-  const maxLandscapeRows = Math.max(dailyInfoItems.length, Math.ceil(dayTimeItems.length / 2));
-  const portraitScaleFactor = isSmallWidth
-    ? Math.min(1.0, Math.max(0.65, 19 / Math.max(16, totalPortraitRows)))
-    : Math.min(0.82, Math.max(0.6, 5.6 / Math.max(7, maxLandscapeRows)));
-  const heightScale = baseHeightScale * portraitScaleFactor;
+  const landscapeTimeRows = Math.ceil(dayTimeItems.length / 2);
+
+  const heightScale = useMemo(() => {
+    if (availableHeight > 100) {
+      if (isSmallWidth) {
+        // Portrait: two stacked cards (InfoGroup + TimeGroup), 2 titles, all rows in 1 column
+        const totalRows = dailyInfoItems.length + nonNullTimeItemsCount;
+        // Unit height at scale = 1.0:
+        // Outer padding (basePadding) + 2 cards * (2 * basePadding + 2 * baseMargin + title line + marginBottom)
+        // + totalRows * (lineHeight ~1.35 * baseItemFont + 2 * 0.45 * basePadding)
+        const unitHeight =
+          basePadding * 5.8 +
+          baseMargin * 5 +
+          2 * (baseTitleFont * 1.3 + basePadding * 0.45) +
+          totalRows * (baseItemFont * 1.35 + basePadding * 0.9);
+        const maxWidthScale = baseHeightScale * 1.15;
+        return Math.min(maxWidthScale, Math.max(0.45, (availableHeight * 0.94) / unitHeight));
+      } else {
+        // Landscape: side-by-side cards; the taller card has max(dailyInfoItems.length, landscapeTimeRows) rows
+        const maxRows = Math.max(dailyInfoItems.length, landscapeTimeRows);
+        // Unit height at scale = 1.0:
+        // Outer padding (basePadding) + card padding (2 * basePadding) + margins (3 * baseMargin)
+        // + title (baseTitleFont * 1.3 + basePadding * 0.65) + maxRows * (baseItemFont * 1.35 + basePadding * 1.3)
+        const unitHeight =
+          basePadding * 3.65 +
+          baseMargin * 3 +
+          baseTitleFont * 1.3 +
+          maxRows * (baseItemFont * 1.35 + basePadding * 1.3);
+        // Also cap by horizontal width so 2 columns of Hebrew text + times in TimeGroup don't wrap onto 2 lines
+        const maxHorizontalScale = (width * 0.46) / (baseItemFont * 19);
+        return Math.min(maxHorizontalScale, Math.max(0.5, (availableHeight * 0.95) / unitHeight));
+      }
+    }
+
+    const totalPortraitRows = dailyInfoItems.length + nonNullTimeItemsCount;
+    const portraitScaleFactor = isSmallWidth
+      ? Math.min(1.0, Math.max(0.68, 17 / Math.max(16, totalPortraitRows)))
+      : dailyInfoItems.length > 10
+        ? 0.8
+        : dailyInfoItems.length > 8
+          ? 0.85
+          : 0.95;
+    return baseHeightScale * portraitScaleFactor;
+  }, [
+    availableHeight,
+    isSmallWidth,
+    dailyInfoItems.length,
+    nonNullTimeItemsCount,
+    landscapeTimeRows,
+    basePadding,
+    baseMargin,
+    baseTitleFont,
+    baseItemFont,
+    baseHeightScale,
+    width,
+  ]);
 
   // Responsive sizes with height adjustment
-  const titleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
-  const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const padding = Math.round(useResponsiveSpacing(12) * heightScale);
-  const itemVerticalPadding = Math.max(2, Math.round(padding * 0.45));
-  const margin = Math.round(useResponsiveSpacing(4) * heightScale);
+  const titleSize = Math.round(baseTitleFont * heightScale);
+  const textSize = Math.round(baseItemFont * heightScale);
+  const padding = Math.round(basePadding * heightScale);
+  const itemVerticalPadding = Math.max(2, Math.round(padding * (isSmallWidth ? 0.45 : 0.65)));
+  const margin = Math.round(baseMargin * heightScale);
 
   const InfoGroup = ({ title, items }: { title: string; items: { text: string }[] }) => (
     <View
@@ -276,7 +333,11 @@ const Zmanim: React.FC = () => {
       >
         {title}
       </Text>
-      <View className={isSmallWidth ? 'flex-col' : `flex-row${rtl ? '-reverse' : ''} flex-wrap`}>
+      <View
+        className={
+          isSmallWidth ? 'flex-col' : `flex-1 flex-row${rtl ? '-reverse' : ''} flex-wrap content-between items-center`
+        }
+      >
         {items.map((item, index) =>
           item ? (
             <Text
@@ -303,14 +364,31 @@ const Zmanim: React.FC = () => {
   }
 
   return (
-    <ScrollView className="flex-1" contentContainerStyle={{ padding: padding / 2 }}>
-      {/* Top Row */}
-      <View className={isSmallWidth ? 'flex-col' : 'flex-row justify-between'} style={{ marginBottom: margin }}>
-        <InfoGroup title={t('daily_info')} items={dailyInfoItems} />
+    <View
+      className="flex-1"
+      onLayout={(e) => {
+        const h = e.nativeEvent.layout.height;
+        if (h > 0 && Math.abs(h - availableHeight) > 2) {
+          setAvailableHeight(h);
+        }
+      }}
+    >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1, padding: padding / 2 }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Top Row */}
+        <View
+          className={isSmallWidth ? 'flex-col flex-1 justify-between' : 'flex-1 flex-row justify-between items-stretch'}
+          style={{ marginBottom: margin }}
+        >
+          <InfoGroup title={t('daily_info')} items={dailyInfoItems} />
 
-        <TimeGroup title={t('day_times')} items={dayTimeItems} />
-      </View>
-    </ScrollView>
+          <TimeGroup title={t('day_times')} items={dayTimeItems} />
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 

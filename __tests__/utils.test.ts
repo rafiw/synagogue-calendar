@@ -2,6 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getHebrewDayName, getSettings, isRTL, isRTL2, getNoScreenText, safeJsonParse } from '../utils/utils';
 import { mergeSettings } from '../utils/settingsMerge';
 import { isPortraitLayout, getEffectiveDimensions } from '../utils/responsive';
+import {
+  generateQrMatrix,
+  QRErrorCorrectLevel,
+  buildCredentialsSetupUrl,
+  parseCredentialsFromParams,
+} from '../utils/qrcode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 describe('utils', () => {
@@ -377,6 +383,73 @@ describe('utils', () => {
       expect(restored.zmanimSettings.longitude).toBe(35.21);
       // Fallback defaults should be preserved
       expect(restored.messagesSettings.enable).toBe(true);
+    });
+  });
+
+  describe('QR code and credentials helpers', () => {
+    it('generates valid square QR matrices across error correction levels and payload sizes', () => {
+      const mShort = generateQrMatrix('abc123', QRErrorCorrectLevel.L);
+      expect(mShort.length).toBe(21); // Type 1 = 21x21
+      expect(mShort[0]?.length).toBe(21);
+      // Top-left finder pattern corner and center should be dark
+      expect(mShort[0]?.[0]).toBe(true);
+      expect(mShort[3]?.[3]).toBe(true);
+
+      const mMedium = generateQrMatrix(
+        'https://rafiw.github.io/synagogue-calendar/settings/general?gistId=1234567890abcdef&githubKey=ghp_testkey123456&imgbbKey=imgbb_987654',
+        QRErrorCorrectLevel.M,
+      );
+      expect(mMedium.length).toBeGreaterThan(21);
+      expect(mMedium.length).toBe(mMedium[0]?.length);
+
+      // Large payload (Type >= 7 to cover setupTypeNumber and 16-bit length header)
+      const longPayload = 'https://example.com/' + 'a'.repeat(250);
+      const mLargeQ = generateQrMatrix(longPayload, QRErrorCorrectLevel.Q);
+      expect(mLargeQ.length).toBeGreaterThanOrEqual(45); // Type 7 is 45x45
+
+      const mHigh = generateQrMatrix(' UTF-8 שלום עולם ', QRErrorCorrectLevel.H);
+      expect(mHigh.length).toBeGreaterThanOrEqual(21);
+    });
+
+    it('builds setup URL with only non-empty credentials', () => {
+      const urlAll = buildCredentialsSetupUrl(
+        {
+          gistId: ' gist123 ',
+          githubKey: ' ghp_secret ',
+          imgbbApiKey: ' imgbb_key ',
+        },
+        'https://example.com/settings/general',
+      );
+      expect(urlAll).toBe(
+        'https://example.com/settings/general?gistId=gist123&githubKey=ghp_secret&imgbbKey=imgbb_key',
+      );
+
+      const urlEmpty = buildCredentialsSetupUrl({}, 'https://example.com/settings/general');
+      expect(urlEmpty).toBe('https://example.com/settings/general');
+    });
+
+    it('parses credentials from URL query params', () => {
+      expect(parseCredentialsFromParams({})).toBeNull();
+      expect(parseCredentialsFromParams({ gistId: '   ' })).toBeNull();
+
+      const parsed = parseCredentialsFromParams({
+        gistId: 'my-gist-id',
+        githubKey: ['ghp_token', 'ignored'],
+        imgbbKey: 'my-imgbb-key',
+      });
+      expect(parsed).toEqual({
+        gistId: 'my-gist-id',
+        githubKey: 'ghp_token',
+        imgbbApiKey: 'my-imgbb-key',
+      });
+
+      // Fallback to raw window.location.search when nested navigator drops params
+      const fromRawQuery = parseCredentialsFromParams({}, '?gistId=url_gist&githubKey=url_ghp&imgbbKey=url_imgbb');
+      expect(fromRawQuery).toEqual({
+        gistId: 'url_gist',
+        githubKey: 'url_ghp',
+        imgbbApiKey: 'url_imgbb',
+      });
     });
   });
 });

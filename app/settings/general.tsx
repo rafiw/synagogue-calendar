@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,15 +9,19 @@ import {
   TouchableOpacity,
   Image,
   Platform,
+  Modal,
 } from 'react-native';
+import { useLocalSearchParams, useGlobalSearchParams } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useSettings } from '@context/settingsContext';
 import { ScreenOrientationMode } from '@utils/defs';
 import { useTranslation } from 'react-i18next';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import ExternalLink from '@utils/PressableLink';
 import ColorPickerModal from '@components/ColorPickerModal';
+import QRCodeView from '@components/QRCodeView';
+import { buildCredentialsSetupUrl, parseCredentialsFromParams } from '@utils/qrcode';
 import { showAlert } from '@utils/alert';
 import { isRTL } from '@utils/utils';
 import {
@@ -185,17 +189,69 @@ const HelpSection = () => {
 };
 
 const GeneralSettingsTab = () => {
-  const { settings, updateSettings, isLoading, resetToDefaults, revertToPreviousSettings, hasBackupSettings } =
-    useSettings();
+  const {
+    settings,
+    updateSettings,
+    saveSettings,
+    isLoading,
+    resetToDefaults,
+    revertToPreviousSettings,
+    hasBackupSettings,
+  } = useSettings();
   const { t, i18n } = useTranslation();
+  const localParams = useLocalSearchParams();
+  const globalParams = useGlobalSearchParams();
+  const appliedQrParamsRef = useRef(false);
   const { height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const [background] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
   const [rtl, setRtl] = useState(false);
   const [hasBackup, setHasBackup] = useState(false);
   const [showBackground, setShowBackground] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showCredentialsQrModal, setShowCredentialsQrModal] = useState(false);
+  const [activeQrTab, setActiveQrTab] = useState<'quick' | 'gistId' | 'gistKey' | 'imgbbKey'>('quick');
   const heightScale = useHeightScale() * 0.5;
   const isSmallHeight = height < 600;
+
+  useEffect(() => {
+    if (isLoading || appliedQrParamsRef.current) return;
+    const mergedParams = { ...globalParams, ...localParams };
+    const parsed = parseCredentialsFromParams(mergedParams);
+    if (!parsed) return;
+
+    appliedQrParamsRef.current = true;
+    const updates: Partial<typeof settings> = {};
+    if (parsed.gistId !== undefined || parsed.githubKey !== undefined) {
+      updates.githubSettings = {
+        ...settings.githubSettings,
+        ...(parsed.gistId ? { gistId: parsed.gistId } : {}),
+        ...(parsed.githubKey ? { githubKey: parsed.githubKey } : {}),
+      };
+    }
+    if (parsed.imgbbApiKey !== undefined) {
+      updates.deceasedSettings = {
+        ...settings.deceasedSettings,
+        imgbbApiKey: parsed.imgbbApiKey,
+      };
+    }
+    updateSettings(updates);
+    void saveSettings();
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.history?.replaceState) {
+      const cleanUrl = window.location.pathname;
+      window.history.replaceState({}, '', cleanUrl);
+    }
+    showAlert(t('success'), t('qr_credentials_applied'));
+  }, [
+    globalParams,
+    isLoading,
+    localParams,
+    saveSettings,
+    settings.deceasedSettings,
+    settings.githubSettings,
+    t,
+    updateSettings,
+  ]);
 
   useEffect(() => {
     void hasBackupSettings().then(setHasBackup);
@@ -725,6 +781,21 @@ const GeneralSettingsTab = () => {
             />
           </View>
 
+          {/* Show QR Code for Keys Button */}
+          <TouchableOpacity
+            onPress={() => {
+              setActiveQrTab('quick');
+              setShowCredentialsQrModal(true);
+            }}
+            className="flex-row items-center justify-center bg-indigo-50 border border-indigo-200 rounded-xl active:opacity-80"
+            style={{ padding, gap: smallPadding }}
+          >
+            <Ionicons name="qr-code-outline" size={iconSize} color="#4f46e5" />
+            <Text className="font-bold text-indigo-700" style={{ fontSize: labelSize * 1.05 }}>
+              {t('show_credentials_qr')}
+            </Text>
+          </TouchableOpacity>
+
           {/* Background Accordion Toggle Button */}
           <TouchableOpacity
             onPress={() => setShowBackground(!showBackground)}
@@ -1146,6 +1217,124 @@ const GeneralSettingsTab = () => {
             : `${t('background_gradient_colors')} ${editingColorIndex + 1}`
         }
       />
+
+      {/* Credentials QR Code Modal */}
+      <Modal
+        visible={showCredentialsQrModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowCredentialsQrModal(false)}
+      >
+        <View className="flex-1 bg-black/60 items-center justify-center p-4">
+          <View
+            className="bg-white rounded-2xl w-full max-w-lg items-center shadow-2xl"
+            style={{ padding: padding * 1.5, gap: smallPadding * 1.5 }}
+          >
+            <View className="flex-row items-center justify-between w-full">
+              <View className="flex-row items-center" style={{ gap: smallPadding }}>
+                <Ionicons name="qr-code-outline" size={iconSize * 1.2} color="#4f46e5" />
+                <Text className="font-bold text-gray-800" style={{ fontSize: labelSize * 1.2 }}>
+                  {t('credentials_qr_title')}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowCredentialsQrModal(false)} style={{ padding: smallPadding / 2 }}>
+                <Feather name="x" size={iconSize * 1.2} color="#6b7280" />
+              </TouchableOpacity>
+            </View>
+
+            <Text className="text-gray-600 text-center" style={{ fontSize: textSize * 0.9 }}>
+              {t('credentials_qr_description')}
+            </Text>
+
+            {/* QR Mode Tabs */}
+            <View className="flex-row flex-wrap justify-center w-full" style={{ gap: smallPadding }}>
+              {(
+                [
+                  { id: 'quick', label: t('qr_tab_quick_setup') },
+                  { id: 'gistId', label: t('qr_tab_gist_id') },
+                  { id: 'gistKey', label: t('qr_tab_gist_key') },
+                  { id: 'imgbbKey', label: t('qr_tab_imgbb_key') },
+                ] as const
+              ).map((tab) => {
+                const isActive = activeQrTab === tab.id;
+                return (
+                  <TouchableOpacity
+                    key={tab.id}
+                    onPress={() => setActiveQrTab(tab.id)}
+                    className={`rounded-lg border ${
+                      isActive ? 'bg-indigo-600 border-indigo-600' : 'bg-gray-100 border-gray-300'
+                    }`}
+                    style={{ paddingHorizontal: smallPadding * 1.2, paddingVertical: smallPadding * 0.8 }}
+                  >
+                    <Text
+                      className={`font-semibold ${isActive ? 'text-white' : 'text-gray-700'}`}
+                      style={{ fontSize: textSize * 0.85 }}
+                    >
+                      {tab.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            {/* QR Display Area */}
+            {(() => {
+              const gistId = settings.githubSettings.gistId?.trim() || '';
+              const githubKey = settings.githubSettings.githubKey?.trim() || '';
+              const imgbbApiKey = settings.deceasedSettings.imgbbApiKey?.trim() || '';
+
+              const baseUrl =
+                Platform.OS === 'web' && typeof window !== 'undefined'
+                  ? `${window.location.origin}${window.location.pathname.replace(/\/settings(\/.*)?$/, '')}/settings/general`
+                  : 'https://rafiw.github.io/synagogue-calendar/settings/general';
+
+              let qrValue = '';
+              if (activeQrTab === 'quick') {
+                if (gistId || githubKey || imgbbApiKey) {
+                  qrValue = buildCredentialsSetupUrl({ gistId, githubKey, imgbbApiKey }, baseUrl);
+                }
+              } else if (activeQrTab === 'gistId') {
+                qrValue = gistId;
+              } else if (activeQrTab === 'gistKey') {
+                qrValue = githubKey;
+              } else if (activeQrTab === 'imgbbKey') {
+                qrValue = imgbbApiKey;
+              }
+
+              const qrSize = Math.min(260, Math.max(160, Math.round(height * 0.35)));
+
+              if (!qrValue) {
+                return (
+                  <View
+                    className="bg-gray-50 border border-dashed border-gray-300 rounded-xl items-center justify-center w-full"
+                    style={{ height: qrSize, padding }}
+                  >
+                    <Text className="text-gray-500 text-center" style={{ fontSize: textSize }}>
+                      {t('qr_empty_key')}
+                    </Text>
+                  </View>
+                );
+              }
+
+              return (
+                <View className="items-center justify-center p-2 bg-gray-50 rounded-xl border border-gray-200">
+                  <QRCodeView value={qrValue} size={qrSize} />
+                </View>
+              );
+            })()}
+
+            <TouchableOpacity
+              onPress={() => setShowCredentialsQrModal(false)}
+              className="w-full bg-indigo-600 rounded-xl items-center"
+              style={{ padding: smallPadding * 1.5 }}
+            >
+              <Text className="text-white font-semibold" style={{ fontSize: buttonTextSize }}>
+                {t('close')}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };

@@ -299,5 +299,15 @@
   "interval_day": "Every day",
   "interval_week": "Every week",
   "interval_month": "Every month",
-  "advanced_settings": "Advanced Settings"
+  "advanced_settings": "Advanced Settings",
+  "show_credentials_qr": "Show Setup QR Code for Phone",
+  "credentials_qr_title": "Scan with Phone to Apply Keys",
+  "credentials_qr_description": "Scan the Quick Setup QR code with your phone camera to open the app with these keys, or scan individual keys below.",
+  "qr_tab_quick_setup": "Quick Setup Link",
+  "qr_tab_gist_id": "Gist URL Part",
+  "qr_tab_gist_key": "Gist Key",
+  "qr_tab_imgbb_key": "ImgBB Key",
+  "qr_empty_key": "This key is not configured yet.",
+  "qr_credentials_applied": "Keys from QR code have been applied! Click Save to persist.",
+  "close": "Close"
 }

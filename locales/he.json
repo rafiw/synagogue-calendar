@@ -299,5 +299,15 @@
   "interval_day": "כל יום",
   "interval_week": "כל שבוע",
   "interval_month": "כל חודש",
-  "advanced_settings": "הגדרות מתקדמות"
+  "advanced_settings": "הגדרות מתקדמות",
+  "show_credentials_qr": "הצג קוד QR להגדרה בנייד",
+  "credentials_qr_title": "סרוק מהנייד להעתקת המפתחות",
+  "credentials_qr_description": "סרוק את קוד ה-QR להגדרה מהירה עם מצלמת הנייד לפתיחת האפליקציה עם המפתחות המוגדרים, או סרוק כל מפתח בנפרד.",
+  "qr_tab_quick_setup": "קישור הגדרה מהירה",
+  "qr_tab_gist_id": "כתובת Gist",
+  "qr_tab_gist_key": "מפתח אבטחה",
+  "qr_tab_imgbb_key": "מפתח ImgBB",
+  "qr_empty_key": "מפתח זה טרם הוגדר.",
+  "qr_credentials_applied": "המפתחות מקוד ה-QR הוזנו בהצלחה! לחץ על שמור לשמירת השינויים.",
+  "close": "סגור"
 }

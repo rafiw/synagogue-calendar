@@ -143,8 +143,8 @@ const Zmanim: React.FC = () => {
     };
   }, [i18n.isInitialized, zmanim]);
   const backgroundColor = 'bg-white/30';
-  const headLineColor = 'text-gray-800';
-  const textColor = 'text-gray-999';
+  const headLineColor = 'text-gray-900';
+  const textColor = 'text-gray-900';
   const dailyInfoItems = useMemo(() => {
     if (!computedZmanim) {
       return [];
@@ -239,7 +239,7 @@ const Zmanim: React.FC = () => {
       style={{ padding, margin }}
     >
       <Text
-        className={`font-bold ${headLineColor} text-center`}
+        className={`font-extrabold ${headLineColor} text-center`}
         style={{ fontSize: titleSize, marginBottom: itemVerticalPadding }}
       >
         {title}
@@ -247,7 +247,7 @@ const Zmanim: React.FC = () => {
       {items.map((item, index) => (
         <Text
           key={index}
-          className={`${textColor} text-center`}
+          className={`font-bold ${textColor} text-center`}
           style={{ fontSize: textSize, paddingVertical: itemVerticalPadding }}
         >
           {item.text}
@@ -271,7 +271,7 @@ const Zmanim: React.FC = () => {
       style={{ padding, margin }}
     >
       <Text
-        className={`font-bold ${headLineColor} text-center`}
+        className={`font-extrabold ${headLineColor} text-center`}
         style={{ fontSize: titleSize, marginBottom: itemVerticalPadding }}
       >
         {title}
@@ -281,7 +281,7 @@ const Zmanim: React.FC = () => {
           item ? (
             <Text
               key={index}
-              className={`${textColor} text-center ${isSmallWidth ? 'w-full' : 'w-1/2'}`}
+              className={`font-bold ${textColor} text-center ${isSmallWidth ? 'w-full' : 'w-1/2'}`}
               style={{ fontSize: textSize, paddingVertical: itemVerticalPadding }}
             >
               {item.text}

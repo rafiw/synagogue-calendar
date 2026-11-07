@@ -70,7 +70,7 @@ const DailyHalakha: React.FC = () => {
   const itemPadding = Math.round(useResponsiveSpacing(8) * heightScale);
 
   const backgroundColor = 'bg-white/40';
-  const textColor = 'text-gray-800';
+  const textColor = 'text-gray-900';
   const isIsrael = settings.zmanimSettings?.il || true;
   const showHolidayHalachot = settings.dailyHalakhaSettings?.showRelatedHolidaysHalachot || false;
   const holidayInfo = getHolidayInfo(showHolidayHalachot, isIsrael);
@@ -232,8 +232,8 @@ const DailyHalakha: React.FC = () => {
             <View className="flex-row items-center justify-center">
               {headersIdx[index] && headersIdx[index][1] !== '' && (
                 <Text
-                  className={`${textColor} text-center`}
-                  style={{ fontSize: textSize, lineHeight: textSize * 1.5, fontWeight: 'bold' }}
+                  className={`font-extrabold ${textColor} text-center`}
+                  style={{ fontSize: textSize, lineHeight: textSize * 1.5 }}
                 >
                   {headersIdx[index][1]}
                 </Text>
@@ -243,7 +243,10 @@ const DailyHalakha: React.FC = () => {
               className={`${backgroundColor} rounded-2xl shadow-lg border border-gray-200`}
               style={{ padding, marginBottom: margin, marginTop: margin }}
             >
-              <Text className={`${textColor} text-center`} style={{ fontSize: textSize, lineHeight: textSize * 1.5 }}>
+              <Text
+                className={`font-bold ${textColor} text-center`}
+                style={{ fontSize: textSize, lineHeight: textSize * 1.5 }}
+              >
                 {item}
               </Text>
             </View>

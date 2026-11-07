@@ -196,7 +196,7 @@ const Messages: React.FC = () => {
             style={{ paddingHorizontal: padding, paddingVertical: padding / 2 }}
           >
             <Ionicons name="notifications" size={iconSize} color="#3b82f6" />
-            <Text className="font-bold text-gray-800" style={{ fontSize: titleSize, marginLeft: padding / 2 }}>
+            <Text className="font-extrabold text-gray-900" style={{ fontSize: titleSize, marginLeft: padding / 2 }}>
               {t('msg_title')}
             </Text>
           </View>
@@ -229,7 +229,7 @@ const Messages: React.FC = () => {
           >
             <View className="flex-row items-start">
               <Text
-                className="flex-1 font-medium text-gray-800 leading-relaxed text-center"
+                className="flex-1 font-bold text-gray-900 leading-relaxed text-center"
                 style={{ fontSize: messageSize }}
               >
                 {message.text}

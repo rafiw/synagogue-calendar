@@ -72,17 +72,17 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   const elements = [
     <View key={1} className="flex">
-      <Text className="font-semibold text-gray-800" style={{ fontSize: dateSize, paddingHorizontal: padding }}>
+      <Text className="font-bold text-gray-900" style={{ fontSize: dateSize, paddingHorizontal: padding }}>
         {dayOfWeek} - {[zmanim.getHebrewDate(), ...zmanim.getHoliday()].filter(Boolean).join(' - ')}
       </Text>
     </View>,
     <View key={2} className="flex-1 items-center">
-      <Text className="font-bold text-gray-900" style={{ fontSize: titleSize }}>
+      <Text className="font-extrabold text-gray-900" style={{ fontSize: titleSize }}>
         {title}
       </Text>
     </View>,
     <View key={3} className="flex flex-row items-center">
-      <Text className="font-bold text-gray-800" style={{ fontSize: timeSize, marginHorizontal: padding * 2 }}>
+      <Text className="font-extrabold text-gray-900" style={{ fontSize: timeSize, marginHorizontal: padding * 2 }}>
         {currentTime}
       </Text>
     </View>,
@@ -121,7 +121,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           <View style={{ width: iconSize + padding * 2 }} />
           <View className="flex-1 items-center px-1">
             <Text
-              className="font-bold text-gray-900 text-center"
+              className="font-extrabold text-gray-900 text-center"
               style={{ fontSize: mobileTitleSize }}
               numberOfLines={2}
             >
@@ -148,7 +148,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           style={{ marginTop: Math.max(4, Math.round(padding * 0.5)) }}
         >
           <Text
-            className="font-semibold text-gray-800 flex-1"
+            className="font-bold text-gray-900 flex-1"
             style={{
               fontSize: mobileDateSize,
               textAlign: isRTL ? 'right' : 'left',
@@ -160,7 +160,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
             {dayOfWeek} - {[zmanim.getHebrewDate(), ...zmanim.getHoliday()].filter(Boolean).join(' - ')}
           </Text>
           <Text
-            className="font-bold text-gray-800"
+            className="font-extrabold text-gray-900"
             style={{
               fontSize: mobileTimeSize,
               marginLeft: isRTL ? 0 : 8,

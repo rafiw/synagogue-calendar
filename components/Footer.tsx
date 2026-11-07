@@ -19,7 +19,7 @@ const Footer: React.FC<FooterProps> = ({ footerText }) => {
       className="items-center justify-center bg-white/55 rounded-xl shadow-md border border-white/60"
       style={{ paddingVertical: paddingV, paddingHorizontal: paddingH }}
     >
-      <Text className="font-medium text-gray-800 text-center" style={{ fontSize: textSize }} numberOfLines={1}>
+      <Text className="font-bold text-gray-900 text-center" style={{ fontSize: textSize }} numberOfLines={1}>
         {footerText}
       </Text>
     </View>

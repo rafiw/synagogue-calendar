@@ -87,28 +87,31 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
           <MemorialCandle size={candleSize.simple} />
         </View>
         <View className="flex-1 justify-center items-center p-3">
-          <Text className="text-amber-100 font-bold text-center tracking-wide" style={{ fontSize: fontSize.name }}>
+          <Text className="text-amber-100 font-extrabold text-center tracking-wide" style={{ fontSize: fontSize.name }}>
             {person.name}
           </Text>
           <View className="w-10 h-0.5 bg-amber-600/50 my-2" />
           {(person.dateOfBirth || person.dateOfDeath) && (
-            <Text className="text-slate-300 text-center" style={{ fontSize: fontSize.date }}>
+            <Text className="text-slate-200 font-bold text-center" style={{ fontSize: fontSize.date }}>
               {person.dateOfBirth ? formatDate(person.dateOfBirth) : '-'} -{' '}
               {person.dateOfDeath ? formatDate(person.dateOfDeath) : '-'}
             </Text>
           )}
           {(person.hebrewDateOfBirth || person.hebrewDateOfDeath) && (
-            <Text className="text-amber-200/80 text-center mt-1 font-medium" style={{ fontSize: fontSize.hebrew }}>
+            <Text className="text-amber-200 font-bold text-center mt-1" style={{ fontSize: fontSize.hebrew }}>
               {person.hebrewDateOfBirth || '-'} - {person.hebrewDateOfDeath || '-'}
             </Text>
           )}
           {person.tribute && (
-            <Text className="text-slate-300 text-center mt-2 italic px-2" style={{ fontSize: fontSize.tribute }}>
+            <Text
+              className="text-slate-200 font-semibold text-center mt-2 italic px-2"
+              style={{ fontSize: fontSize.tribute }}
+            >
               "{person.tribute}"
             </Text>
           )}
           <View className="w-6 h-0.5 bg-amber-600/30 my-2" />
-          <Text className="text-amber-500 italic" style={{ fontSize: fontSize.footer }}>
+          <Text className="text-amber-500 font-bold italic" style={{ fontSize: fontSize.footer }}>
             ת.נ.צ.ב.ה
           </Text>
         </View>
@@ -127,7 +130,10 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
       <View className="flex-1">
         {/* Header with name */}
         <View className="bg-slate-700/50 border-b border-amber-600/30 py-2 px-3">
-          <Text className="text-amber-100 font-bold text-center tracking-wide" style={{ fontSize: fontSize.nameCard }}>
+          <Text
+            className="text-amber-100 font-extrabold text-center tracking-wide"
+            style={{ fontSize: fontSize.nameCard }}
+          >
             {person.name}
           </Text>
         </View>
@@ -138,7 +144,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
             {(person.dateOfBirth || person.hebrewDateOfBirth) && (
               <View className={`flex-row ${isRightToLeft ? 'flex-row-reverse' : 'flex-row'} items-center`}>
                 <Text
-                  className={`text-slate-300 ${isRightToLeft ? 'm-1' : 'ml-1'}`}
+                  className={`text-slate-200 font-bold ${isRightToLeft ? 'm-1' : 'ml-1'}`}
                   style={{ fontSize: fontSize.dateSmall }}
                 >
                   {person.dateOfBirth ? formatDate(person.dateOfBirth) : '-'}
@@ -149,7 +155,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
             {(person.dateOfDeath || person.hebrewDateOfDeath) && (
               <View className={`flex-row ${isRightToLeft ? 'flex-row-reverse' : 'flex-row'} items-center mt-1`}>
                 <Text
-                  className={`text-slate-300 ${isRightToLeft ? 'ml-1' : 'mr-1'}`}
+                  className={`text-slate-200 font-bold ${isRightToLeft ? 'ml-1' : 'mr-1'}`}
                   style={{ fontSize: fontSize.dateSmall }}
                 >
                   {person.dateOfDeath ? formatDate(person.dateOfDeath) : '-'}
@@ -161,7 +167,10 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
           {person.tribute && (
             <>
               <View className="w-6 h-0.5 bg-amber-600/20 my-1" />
-              <Text className="text-slate-400 text-center italic px-2" style={{ fontSize: fontSize.tribute }}>
+              <Text
+                className="text-slate-300 font-semibold text-center italic px-2"
+                style={{ fontSize: fontSize.tribute }}
+              >
                 "{person.tribute}"
               </Text>
             </>
@@ -170,7 +179,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
 
         {/* Footer */}
         <View className="bg-slate-700/30 border-t border-amber-600/20 py-1">
-          <Text className="text-amber-500 text-center italic" style={{ fontSize: fontSize.footer }}>
+          <Text className="text-amber-500 font-bold text-center italic" style={{ fontSize: fontSize.footer }}>
             ת.נ.צ.ב.ה
           </Text>
         </View>
@@ -198,7 +207,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
         <View className="flex-1 p-2">
           <View className="flex-1 justify-center items-center">
             <Text
-              className="text-amber-100 font-bold text-center tracking-wide"
+              className="text-amber-100 font-extrabold text-center tracking-wide"
               style={{ fontSize: fontSize.namePhoto }}
             >
               {person.name}
@@ -206,12 +215,12 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
             <View className="w-12 h-0.5 bg-amber-600/50 my-2" />
             <View className="items-center">
               {(person.dateOfBirth || person.dateOfDeath) && (
-                <Text className="text-slate-300 text-center" style={{ fontSize: fontSize.date }}>
+                <Text className="text-slate-200 font-bold text-center" style={{ fontSize: fontSize.date }}>
                   {person.dateOfBirth || '-'} - {person.dateOfDeath || '-'}
                 </Text>
               )}
               {(person.hebrewDateOfBirth || person.hebrewDateOfDeath) && (
-                <Text className="text-amber-200/80 text-center mt-1 font-medium" style={{ fontSize: fontSize.hebrew }}>
+                <Text className="text-amber-200 font-bold text-center mt-1" style={{ fontSize: fontSize.hebrew }}>
                   {person.hebrewDateOfBirth || '-'} - {person.hebrewDateOfDeath || '-'}
                 </Text>
               )}
@@ -219,7 +228,10 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
             {person.tribute && (
               <>
                 <View className="w-8 h-0.5 bg-amber-600/30 my-1" />
-                <Text className="text-slate-300 text-center italic px-2" style={{ fontSize: fontSize.tribute }}>
+                <Text
+                  className="text-slate-200 font-semibold text-center italic px-2"
+                  style={{ fontSize: fontSize.tribute }}
+                >
                   "{person.tribute}"
                 </Text>
               </>
@@ -229,7 +241,7 @@ const DeceasedCell: React.FC<DeceasedCellProps> = ({ person, fontSize, candleSiz
           <View className="flex-row items-center">
             <View style={{ width: candleSize.photoFooter }} />
             <View className="flex-1 items-center">
-              <Text className="text-amber-500 italic" style={{ fontSize: fontSize.footer }}>
+              <Text className="text-amber-500 font-bold italic" style={{ fontSize: fontSize.footer }}>
                 ת.נ.צ.ב.ה
               </Text>
             </View>

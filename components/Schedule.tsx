@@ -69,7 +69,7 @@ const Schedule: React.FC = () => {
 
   const backgroundColor = 'bg-white/40';
   const headLineColor = 'text-gray-900';
-  const textColor = 'text-gray-800';
+  const textColor = 'text-gray-900';
 
   const InfoGroup = ({
     title,
@@ -84,7 +84,10 @@ const Schedule: React.FC = () => {
       className={`${backgroundColor} rounded-2xl ${isSmallHeight || shouldPaginate ? 'w-full' : 'flex-1'} shadow-lg border border-gray-200`}
       style={{ padding, margin }}
     >
-      <Text className={`font-bold ${headLineColor} text-center`} style={{ fontSize: titleSize, marginBottom: padding }}>
+      <Text
+        className={`font-extrabold ${headLineColor} text-center`}
+        style={{ fontSize: titleSize, marginBottom: padding }}
+      >
         {title}
       </Text>
       {items.length === 0 ? (
@@ -100,13 +103,13 @@ const Schedule: React.FC = () => {
               style={{ paddingHorizontal: itemPadding, paddingVertical: itemPadding, marginBottom: margin }}
             >
               <View className={`flex-row justify-center gap-4 ${rtl ? 'space-x-reverse' : ''}`}>
-                <Text className={`${textColor} font-semibold`} style={{ fontSize: textSize }}>
+                <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
                   {item.name}
                 </Text>
-                <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
+                <Text className={`${textColor} font-extrabold`} style={{ fontSize: textSize }}>
                   -
                 </Text>
-                <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
+                <Text className={`${textColor} font-extrabold`} style={{ fontSize: textSize }}>
                   {item.time}
                 </Text>
               </View>
@@ -138,7 +141,7 @@ const Schedule: React.FC = () => {
       {/* Headline */}
       {columnsWithPrayers.length > 0 && (
         <View style={{ marginBottom: padding }}>
-          <Text className={`${headLineColor} font-bold text-center`} style={{ fontSize: mainTitleSize }}>
+          <Text className={`${headLineColor} font-extrabold text-center`} style={{ fontSize: mainTitleSize }}>
             {t('schedule_title')}
           </Text>
           {/* Page Indicators when cycling through columns */}

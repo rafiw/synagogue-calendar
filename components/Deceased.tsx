@@ -5,7 +5,7 @@ import { DeceasedPerson, Settings } from '@utils/defs';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import MemorialCandle from './MemorialCandle';
-import { isRTL2, safeJsonParse } from '@utils/utils';
+import { defaultPageDisplayTime, isRTL2, safeJsonParse } from '@utils/utils';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -346,16 +346,23 @@ const Deceased: React.FC = () => {
   }, [settings.deceasedSettings]);
 
   const cellsPerPage = tableRowsCount * tableColumnsCount;
+  const pageDisplayTime = settings.deceasedSettings?.screenDisplayTime || defaultPageDisplayTime;
+
+  useEffect(() => {
+    if (currentPage >= totalPages && totalPages > 0) {
+      setCurrentPage(0);
+    }
+  }, [currentPage, totalPages]);
 
   useEffect(() => {
     if (totalPages <= 1) return;
 
     const interval = setInterval(() => {
       setCurrentPage((prev) => (prev + 1) % totalPages);
-    }, 5000); // Change page every 5 seconds
+    }, pageDisplayTime * 1000);
 
     return () => clearInterval(interval);
-  }, [totalPages]);
+  }, [pageDisplayTime, totalPages]);
 
   if (settings.deceasedSettings.deceased.length === 0) {
     const emptyTextSize = Math.round(responsiveName * heightScale);

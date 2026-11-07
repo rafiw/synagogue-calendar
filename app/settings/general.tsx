@@ -612,6 +612,7 @@ const GeneralSettingsTab = () => {
               {t('synagogue_name')}
             </Text>
             <TextInput
+              nativeID="synagogue-name"
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
               value={settings.synagogueSettings.name}
@@ -629,6 +630,7 @@ const GeneralSettingsTab = () => {
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker
+                  nativeID="language-select"
                   selectedValue={settings.synagogueSettings.language}
                   onValueChange={(value) => void handleChangeLanguage(value)}
                   style={{ height: pickerHeight }}
@@ -645,6 +647,7 @@ const GeneralSettingsTab = () => {
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker
+                  nativeID="nusach-select"
                   selectedValue={settings.synagogueSettings.nusach}
                   onValueChange={handleChangeNusach}
                   style={{ height: pickerHeight }}
@@ -661,6 +664,7 @@ const GeneralSettingsTab = () => {
               </Text>
               <View className="border border-gray-300 rounded-lg bg-gray-50">
                 <Picker
+                  nativeID="screen-orientation-select"
                   selectedValue={settings.synagogueSettings.screenOrientation || 'auto'}
                   onValueChange={handleChangeScreenOrientation}
                   style={{ height: pickerHeight }}
@@ -697,6 +701,7 @@ const GeneralSettingsTab = () => {
             />
 
             <TextInput
+              nativeID="footer-text"
               className={`flex-1 border rounded-lg ${
                 settings.synagogueSettings.footerSettings?.enable
                   ? 'border-gray-300 bg-white text-gray-800'
@@ -718,6 +723,7 @@ const GeneralSettingsTab = () => {
               {t('gist_sha')}
             </Text>
             <TextInput
+              nativeID="gist-id"
               className="w-full border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
               value={settings.githubSettings.gistId}
@@ -744,6 +750,7 @@ const GeneralSettingsTab = () => {
             </Text>
             <PasswordFormWrapper>
               <TextInput
+                nativeID="github-key"
                 className="w-full border border-gray-300 rounded-lg bg-gray-50"
                 style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                 value={settings.githubSettings.githubKey}
@@ -769,6 +776,7 @@ const GeneralSettingsTab = () => {
               {t('imgbb_api_key_description')}
             </Text>
             <TextInput
+              nativeID="imgbb-api-key"
               className="border border-gray-300 rounded-lg bg-gray-50"
               style={{ padding: smallPadding * 1.5, fontSize: textSize }}
               placeholder={t('imgbb_api_key_placeholder')}
@@ -1144,6 +1152,7 @@ const GeneralSettingsTab = () => {
               </Text>
               <View className="bg-white border border-gray-300 rounded-lg overflow-hidden">
                 <Picker
+                  nativeID="update-interval-select"
                   selectedValue={
                     settings.synagogueSettings.autoUpdateSettings?.enable === false ||
                     settings.synagogueSettings.autoUpdateSettings?.checkIntervalMinutes === 0

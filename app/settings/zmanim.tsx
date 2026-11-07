@@ -361,6 +361,7 @@ const ZmanimSettingsTab = () => {
                   </Text>
                   <View className="border border-gray-300 rounded-lg bg-gray-50">
                     <Picker
+                      nativeID="location-select"
                       selectedValue={selectedLocation}
                       onValueChange={handleCityChange}
                       style={{ height: pickerHeight }}
@@ -385,7 +386,12 @@ const ZmanimSettingsTab = () => {
                     {t('olson')}
                   </Text>
                   <View className="border border-gray-300 rounded-lg bg-gray-50">
-                    <Picker selectedValue={olson} onValueChange={handleOlsonChange} style={{ height: pickerHeight }}>
+                    <Picker
+                      nativeID="olson-select"
+                      selectedValue={olson}
+                      onValueChange={handleOlsonChange}
+                      style={{ height: pickerHeight }}
+                    >
                       {olsons.map((olson) => (
                         <Picker.Item key={olson} label={olson} value={olson} />
                       ))}
@@ -403,6 +409,7 @@ const ZmanimSettingsTab = () => {
                       {t('latitude')}
                     </Text>
                     <TextInput
+                      nativeID="latitude-input"
                       className={`w-full border rounded-lg bg-gray-50 ${latError ? 'border-red-500' : 'border-gray-300'}`}
                       style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                       value={latText}
@@ -422,6 +429,7 @@ const ZmanimSettingsTab = () => {
                       {t('longitude')}
                     </Text>
                     <TextInput
+                      nativeID="longitude-input"
                       className={`w-full border rounded-lg bg-gray-50 ${lngError ? 'border-red-500' : 'border-gray-300'}`}
                       style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                       value={lngText}
@@ -444,6 +452,7 @@ const ZmanimSettingsTab = () => {
                       {t('elevation')}
                     </Text>
                     <TextInput
+                      nativeID="elevation-input"
                       className="w-full border border-gray-300 rounded-lg bg-gray-50"
                       style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                       value={elevText}
@@ -459,6 +468,7 @@ const ZmanimSettingsTab = () => {
                     </Text>
                     <View className="flex-row items-center" style={{ gap: smallPadding }}>
                       <TextInput
+                        nativeID="candle-lighting-mins-input"
                         className="flex-1 border border-gray-300 rounded-lg bg-gray-50"
                         style={{ padding: smallPadding * 1.5, fontSize: textSize }}
                         value={candleMinsText}

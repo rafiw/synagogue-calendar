@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
   const [currentTime, setCurrentTime] = useState(getCurrentTime(locale));
   const router = useRouter();
   const isRTL = isRTL2(settings.synagogueSettings.language);
-  const deviceType = useDeviceType();
+  const deviceType = useDeviceType(settings.synagogueSettings.screenOrientation);
   const heightScale = useHeightScale();
 
   // Responsive sizes - use smaller fonts for header on mobile/tablet

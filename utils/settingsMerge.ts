@@ -18,6 +18,7 @@ export const defaultSettings: Settings = {
     name: defaultName,
     language: 'he',
     nusach: 'ashkenaz',
+    screenOrientation: 'auto',
     backgroundSettings: {
       mode: 'gradient',
       imageUrl: '',
@@ -225,6 +226,9 @@ export const mergeSettings = (loaded: any, defaults: Settings = defaultSettings)
       name: typeof s.name === 'string' && s.name.trim() !== '' ? s.name : defaults.synagogueSettings.name,
       language: s.language === 'en' || s.language === 'he' ? s.language : defaults.synagogueSettings.language,
       nusach: s.nusach ? s.nusach : defaults.synagogueSettings.nusach,
+      screenOrientation: ['auto', 'horizontal', 'vertical'].includes(s.screenOrientation)
+        ? s.screenOrientation
+        : defaults.synagogueSettings.screenOrientation,
       backgroundSettings: {
         mode: ['solid', 'gradient', 'image'].includes(bg?.mode)
           ? bg.mode

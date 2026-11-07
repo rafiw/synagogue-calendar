@@ -8,19 +8,25 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Image,
-  useWindowDimensions,
   Platform,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { useSettings } from '@context/settingsContext';
+import { ScreenOrientationMode } from '@utils/defs';
 import { useTranslation } from 'react-i18next';
 import { Feather } from '@expo/vector-icons';
 import ExternalLink from '@utils/PressableLink';
 import ColorPickerModal from '@components/ColorPickerModal';
 import { showAlert } from '@utils/alert';
 import { isRTL } from '@utils/utils';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import {
+  useResponsiveFontSize,
+  useResponsiveIconSize,
+  useResponsiveSpacing,
+  useHeightScale,
+  useEffectiveDimensions,
+} from '@utils/responsive';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useAutoUpdate } from '@utils/useAutoUpdate';
 
@@ -182,10 +188,11 @@ const GeneralSettingsTab = () => {
   const { settings, updateSettings, isLoading, resetToDefaults, revertToPreviousSettings, hasBackupSettings } =
     useSettings();
   const { t, i18n } = useTranslation();
-  const { height } = useWindowDimensions();
+  const { height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const [background] = useState(settings.synagogueSettings.backgroundSettings.imageUrl || '');
   const [rtl, setRtl] = useState(false);
   const [hasBackup, setHasBackup] = useState(false);
+  const [showBackground, setShowBackground] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const heightScale = useHeightScale() * 0.5;
   const isSmallHeight = height < 600;
@@ -315,6 +322,10 @@ const GeneralSettingsTab = () => {
 
   const handleChangeNusach = (newNusach: 'ashkenaz' | 'sephardic') => {
     updateSettings({ synagogueSettings: { ...settings.synagogueSettings, nusach: newNusach } });
+  };
+
+  const handleChangeScreenOrientation = (newOrientation: ScreenOrientationMode) => {
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, screenOrientation: newOrientation } });
   };
 
   const handleBackgroundModeChange = (mode: 'image' | 'solid' | 'gradient') => {
@@ -587,6 +598,23 @@ const GeneralSettingsTab = () => {
                 </Picker>
               </View>
             </View>
+            {/* Screen Orientation */}
+            <View className={isSmallHeight ? 'flex-1' : 'w-full'} style={{ gap: smallPadding }}>
+              <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
+                {t('screen_orientation')}
+              </Text>
+              <View className="border border-gray-300 rounded-lg bg-gray-50">
+                <Picker
+                  selectedValue={settings.synagogueSettings.screenOrientation || 'auto'}
+                  onValueChange={handleChangeScreenOrientation}
+                  style={{ height: pickerHeight }}
+                >
+                  <Picker.Item label={t('orientation_auto')} value="auto" />
+                  <Picker.Item label={t('orientation_horizontal')} value="horizontal" />
+                  <Picker.Item label={t('orientation_vertical')} value="vertical" />
+                </Picker>
+              </View>
+            </View>
           </View>
 
           {/* Thin Footer Section - Single Line */}
@@ -697,237 +725,252 @@ const GeneralSettingsTab = () => {
             />
           </View>
 
-          {/* background */}
-          <View style={{ gap: margin }}>
-            <Text className="font-medium text-gray-600" style={{ fontSize: labelSize }}>
-              {t('background')}
-            </Text>
-
-            {/* Background Mode Selection */}
-            <View style={{ gap: smallPadding }}>
-              <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
-                {t('background_mode')}
+          {/* Background Accordion Toggle Button */}
+          <TouchableOpacity
+            onPress={() => setShowBackground(!showBackground)}
+            className="flex-row items-center justify-between bg-gray-100 border border-gray-300 rounded-xl active:opacity-80"
+            style={{ padding }}
+          >
+            <View className="flex-row items-center" style={{ gap: smallPadding }}>
+              <Feather name="image" size={iconSize} color="#4b5563" />
+              <Text className="font-bold text-gray-800" style={{ fontSize: labelSize * 1.1 }}>
+                {t('background')}
               </Text>
-              <View className="flex-row" style={{ gap: smallPadding }}>
-                <TouchableOpacity
-                  className={`flex-1 border rounded-lg ${backgroundMode === 'image' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
-                  style={{ padding: smallPadding * 1.5 }}
-                  onPress={() => handleBackgroundModeChange('image')}
-                >
-                  <Text
-                    className={`text-center ${backgroundMode === 'image' ? 'text-white font-semibold' : 'text-gray-700'}`}
-                    style={{ fontSize: textSize }}
-                  >
-                    {t('background_mode_image')}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className={`flex-1 border rounded-lg ${backgroundMode === 'solid' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
-                  style={{ padding: smallPadding * 1.5 }}
-                  onPress={() => handleBackgroundModeChange('solid')}
-                >
-                  <Text
-                    className={`text-center ${backgroundMode === 'solid' ? 'text-white font-semibold' : 'text-gray-700'}`}
-                    style={{ fontSize: textSize }}
-                  >
-                    {t('background_mode_solid')}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className={`flex-1 border rounded-lg ${backgroundMode === 'gradient' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
-                  style={{ padding: smallPadding * 1.5 }}
-                  onPress={() => handleBackgroundModeChange('gradient')}
-                >
-                  <Text
-                    className={`text-center ${backgroundMode === 'gradient' ? 'text-white font-semibold' : 'text-gray-700'}`}
-                    style={{ fontSize: textSize }}
-                  >
-                    {t('background_mode_gradient')}
-                  </Text>
-                </TouchableOpacity>
-              </View>
             </View>
+            <Feather name={showBackground ? 'chevron-up' : 'chevron-down'} size={iconSize} color="#4b5563" />
+          </TouchableOpacity>
 
-            {/* Image Background Settings */}
-            {backgroundMode === 'image' && (
-              <View style={{ gap: smallPadding * 1.5 }}>
-                {/* Custom Image Upload */}
-                <View style={{ gap: smallPadding }}>
-                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
-                    {t('background_custom_image')}
-                  </Text>
-                  {customImageUri ? (
-                    <View style={{ gap: smallPadding }}>
-                      <View className="rounded-lg border-2 border-gray-300 overflow-hidden">
-                        <Image
-                          source={{ uri: customImageUri }}
-                          className="w-full"
-                          style={{ height: imageHeight }}
-                          resizeMode="cover"
-                        />
+          {showBackground && (
+            <View
+              className="border border-gray-200 bg-white rounded-xl"
+              style={{ padding, gap: margin, marginTop: smallPadding }}
+            >
+              {/* Background Mode Selection */}
+              <View style={{ gap: smallPadding }}>
+                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                  {t('background_mode')}
+                </Text>
+                <View className="flex-row" style={{ gap: smallPadding }}>
+                  <TouchableOpacity
+                    className={`flex-1 border rounded-lg ${backgroundMode === 'image' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={() => handleBackgroundModeChange('image')}
+                  >
+                    <Text
+                      className={`text-center ${backgroundMode === 'image' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                      style={{ fontSize: textSize }}
+                    >
+                      {t('background_mode_image')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`flex-1 border rounded-lg ${backgroundMode === 'solid' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={() => handleBackgroundModeChange('solid')}
+                  >
+                    <Text
+                      className={`text-center ${backgroundMode === 'solid' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                      style={{ fontSize: textSize }}
+                    >
+                      {t('background_mode_solid')}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`flex-1 border rounded-lg ${backgroundMode === 'gradient' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={() => handleBackgroundModeChange('gradient')}
+                  >
+                    <Text
+                      className={`text-center ${backgroundMode === 'gradient' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                      style={{ fontSize: textSize }}
+                    >
+                      {t('background_mode_gradient')}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Image Background Settings */}
+              {backgroundMode === 'image' && (
+                <View style={{ gap: smallPadding * 1.5 }}>
+                  {/* Custom Image Upload */}
+                  <View style={{ gap: smallPadding }}>
+                    <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                      {t('background_custom_image')}
+                    </Text>
+                    {customImageUri ? (
+                      <View style={{ gap: smallPadding }}>
+                        <View className="rounded-lg border-2 border-gray-300 overflow-hidden">
+                          <Image
+                            source={{ uri: customImageUri }}
+                            className="w-full"
+                            style={{ height: imageHeight }}
+                            resizeMode="cover"
+                          />
+                        </View>
+                        <TouchableOpacity
+                          className="flex-row items-center justify-center bg-red-500 rounded-lg"
+                          style={{ padding: smallPadding * 1.5 }}
+                          onPress={handleRemoveCustomImage}
+                        >
+                          <Feather name="trash-2" size={iconSize} color="white" />
+                          <Text
+                            className="text-white font-semibold"
+                            style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}
+                          >
+                            {t('background_remove_custom')}
+                          </Text>
+                        </TouchableOpacity>
                       </View>
+                    ) : (
                       <TouchableOpacity
-                        className="flex-row items-center justify-center bg-red-500 rounded-lg"
-                        style={{ padding: smallPadding * 1.5 }}
-                        onPress={handleRemoveCustomImage}
+                        className="flex-row items-center justify-center border-2 border-dashed border-blue-400 rounded-lg bg-blue-50"
+                        style={{ padding }}
+                        onPress={() => void handlePickCustomImage()}
                       >
-                        <Feather name="trash-2" size={iconSize} color="white" />
+                        <Feather name="upload" size={iconSize} color="#3B82F6" />
                         <Text
-                          className="text-white font-semibold"
+                          className="text-blue-600 font-semibold"
                           style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}
                         >
-                          {t('background_remove_custom')}
+                          {t('background_upload_custom')}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                </View>
+              )}
+
+              {/* Solid Color Background Settings */}
+              {backgroundMode === 'solid' && (
+                <View style={{ gap: smallPadding }}>
+                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                    {t('background_solid_color')}
+                  </Text>
+                  <TouchableOpacity
+                    className="flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
+                    style={{ padding, gap: smallPadding }}
+                    onPress={() => openColorPicker(null, solidColor)}
+                  >
+                    <View
+                      className="rounded border-2 border-gray-400"
+                      style={{ backgroundColor: solidColor, width: 64 * heightScale, height: 64 * heightScale }}
+                    />
+                    <View className="flex-1">
+                      <Text className="text-gray-700 font-semibold" style={{ fontSize: textSize }}>
+                        {solidColor.toUpperCase()}
+                      </Text>
+                      <Text className="text-gray-500" style={{ fontSize: labelSize }}>
+                        {t('optional')}
+                      </Text>
+                    </View>
+                    <Feather name="edit-2" size={iconSize} color="#666" />
+                  </TouchableOpacity>
+                  {/* Preset Colors */}
+                  <View className="flex-row flex-wrap" style={{ gap: smallPadding }}>
+                    {['#E3F2FD', '#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5', '#2196F3', '#1E88E5', '#1976D2'].map(
+                      (color) => (
+                        <TouchableOpacity
+                          key={color}
+                          className="rounded border border-gray-300"
+                          style={{ backgroundColor: color, width: 40 * heightScale, height: 40 * heightScale }}
+                          onPress={() => handleSolidColorChange(color)}
+                        />
+                      ),
+                    )}
+                  </View>
+                </View>
+              )}
+
+              {/* Gradient Background Settings */}
+              {backgroundMode === 'gradient' && (
+                <View style={{ gap: smallPadding * 1.5 }}>
+                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                    {t('background_gradient_colors')}
+                  </Text>
+                  <View className="flex-row" style={{ gap: padding }}>
+                    {gradientColors.map((color: string, index: number) => (
+                      <View
+                        key={index}
+                        className="flex-1 flex-row items-stretch rounded-lg overflow-hidden border border-gray-300"
+                      >
+                        <TouchableOpacity
+                          className="flex-1 items-center justify-center"
+                          style={{ backgroundColor: color, paddingVertical: padding }}
+                          onPress={() => openColorPicker(index, color)}
+                        >
+                          <Feather name="edit-2" size={iconSize} color="rgba(255,255,255,0.8)" />
+                        </TouchableOpacity>
+                        {gradientColors.length > 2 && (
+                          <TouchableOpacity
+                            className="bg-red-500 items-center justify-center"
+                            style={{ paddingHorizontal: smallPadding * 1.5 }}
+                            onPress={() => handleRemoveGradientColor(index)}
+                          >
+                            <Feather name="x" size={iconSize * 0.8} color="white" />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    ))}
+                  </View>
+                  <TouchableOpacity
+                    className="bg-blue-500 rounded-lg"
+                    style={{ padding: smallPadding * 1.5 }}
+                    onPress={handleAddGradientColor}
+                  >
+                    <Text className="text-center text-white font-semibold" style={{ fontSize: buttonTextSize }}>
+                      {t('background_gradient_add_color')}
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Gradient Direction */}
+                  <View style={{ gap: smallPadding }}>
+                    <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                      {t('background_gradient_direction')}
+                    </Text>
+                    <View className="flex-row" style={{ gap: smallPadding }}>
+                      <TouchableOpacity
+                        className={`flex-1 border rounded-lg ${gradientDirection === 'vertical' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                        style={{ padding: smallPadding * 1.5 }}
+                        onPress={() => handleGradientDirectionChange('vertical')}
+                      >
+                        <Text
+                          className={`text-center ${gradientDirection === 'vertical' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                          style={{ fontSize: textSize }}
+                        >
+                          {t('background_gradient_direction_vertical')}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className={`flex-1 border rounded-lg ${gradientDirection === 'horizontal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                        style={{ padding: smallPadding * 1.5 }}
+                        onPress={() => handleGradientDirectionChange('horizontal')}
+                      >
+                        <Text
+                          className={`text-center ${gradientDirection === 'horizontal' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                          style={{ fontSize: textSize }}
+                        >
+                          {t('background_gradient_direction_horizontal')}
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className={`flex-1 border rounded-lg ${gradientDirection === 'diagonal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
+                        style={{ padding: smallPadding * 1.5 }}
+                        onPress={() => handleGradientDirectionChange('diagonal')}
+                      >
+                        <Text
+                          className={`text-center ${gradientDirection === 'diagonal' ? 'text-white font-semibold' : 'text-gray-700'}`}
+                          style={{ fontSize: textSize }}
+                        >
+                          {t('background_gradient_direction_diagonal')}
                         </Text>
                       </TouchableOpacity>
                     </View>
-                  ) : (
-                    <TouchableOpacity
-                      className="flex-row items-center justify-center border-2 border-dashed border-blue-400 rounded-lg bg-blue-50"
-                      style={{ padding }}
-                      onPress={() => void handlePickCustomImage()}
-                    >
-                      <Feather name="upload" size={iconSize} color="#3B82F6" />
-                      <Text
-                        className="text-blue-600 font-semibold"
-                        style={{ fontSize: buttonTextSize, marginLeft: smallPadding }}
-                      >
-                        {t('background_upload_custom')}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-              </View>
-            )}
-
-            {/* Solid Color Background Settings */}
-            {backgroundMode === 'solid' && (
-              <View style={{ gap: smallPadding }}>
-                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
-                  {t('background_solid_color')}
-                </Text>
-                <TouchableOpacity
-                  className="flex-row items-center border border-gray-300 rounded-lg bg-gray-50"
-                  style={{ padding, gap: smallPadding }}
-                  onPress={() => openColorPicker(null, solidColor)}
-                >
-                  <View
-                    className="rounded border-2 border-gray-400"
-                    style={{ backgroundColor: solidColor, width: 64 * heightScale, height: 64 * heightScale }}
-                  />
-                  <View className="flex-1">
-                    <Text className="text-gray-700 font-semibold" style={{ fontSize: textSize }}>
-                      {solidColor.toUpperCase()}
-                    </Text>
-                    <Text className="text-gray-500" style={{ fontSize: labelSize }}>
-                      {t('optional')}
-                    </Text>
-                  </View>
-                  <Feather name="edit-2" size={iconSize} color="#666" />
-                </TouchableOpacity>
-                {/* Preset Colors */}
-                <View className="flex-row flex-wrap" style={{ gap: smallPadding }}>
-                  {['#E3F2FD', '#BBDEFB', '#90CAF9', '#64B5F6', '#42A5F5', '#2196F3', '#1E88E5', '#1976D2'].map(
-                    (color) => (
-                      <TouchableOpacity
-                        key={color}
-                        className="rounded border border-gray-300"
-                        style={{ backgroundColor: color, width: 40 * heightScale, height: 40 * heightScale }}
-                        onPress={() => handleSolidColorChange(color)}
-                      />
-                    ),
-                  )}
-                </View>
-              </View>
-            )}
-
-            {/* Gradient Background Settings */}
-            {backgroundMode === 'gradient' && (
-              <View style={{ gap: smallPadding * 1.5 }}>
-                <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
-                  {t('background_gradient_colors')}
-                </Text>
-                <View className="flex-row" style={{ gap: padding }}>
-                  {gradientColors.map((color: string, index: number) => (
-                    <View
-                      key={index}
-                      className="flex-1 flex-row items-stretch rounded-lg overflow-hidden border border-gray-300"
-                    >
-                      <TouchableOpacity
-                        className="flex-1 items-center justify-center"
-                        style={{ backgroundColor: color, paddingVertical: padding }}
-                        onPress={() => openColorPicker(index, color)}
-                      >
-                        <Feather name="edit-2" size={iconSize} color="rgba(255,255,255,0.8)" />
-                      </TouchableOpacity>
-                      {gradientColors.length > 2 && (
-                        <TouchableOpacity
-                          className="bg-red-500 items-center justify-center"
-                          style={{ paddingHorizontal: smallPadding * 1.5 }}
-                          onPress={() => handleRemoveGradientColor(index)}
-                        >
-                          <Feather name="x" size={iconSize * 0.8} color="white" />
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                  ))}
-                </View>
-                <TouchableOpacity
-                  className="bg-blue-500 rounded-lg"
-                  style={{ padding: smallPadding * 1.5 }}
-                  onPress={handleAddGradientColor}
-                >
-                  <Text className="text-center text-white font-semibold" style={{ fontSize: buttonTextSize }}>
-                    {t('background_gradient_add_color')}
-                  </Text>
-                </TouchableOpacity>
-
-                {/* Gradient Direction */}
-                <View style={{ gap: smallPadding }}>
-                  <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
-                    {t('background_gradient_direction')}
-                  </Text>
-                  <View className="flex-row" style={{ gap: smallPadding }}>
-                    <TouchableOpacity
-                      className={`flex-1 border rounded-lg ${gradientDirection === 'vertical' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
-                      style={{ padding: smallPadding * 1.5 }}
-                      onPress={() => handleGradientDirectionChange('vertical')}
-                    >
-                      <Text
-                        className={`text-center ${gradientDirection === 'vertical' ? 'text-white font-semibold' : 'text-gray-700'}`}
-                        style={{ fontSize: textSize }}
-                      >
-                        {t('background_gradient_direction_vertical')}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className={`flex-1 border rounded-lg ${gradientDirection === 'horizontal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
-                      style={{ padding: smallPadding * 1.5 }}
-                      onPress={() => handleGradientDirectionChange('horizontal')}
-                    >
-                      <Text
-                        className={`text-center ${gradientDirection === 'horizontal' ? 'text-white font-semibold' : 'text-gray-700'}`}
-                        style={{ fontSize: textSize }}
-                      >
-                        {t('background_gradient_direction_horizontal')}
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className={`flex-1 border rounded-lg ${gradientDirection === 'diagonal' ? 'bg-blue-500 border-blue-500' : 'bg-gray-50 border-gray-300'}`}
-                      style={{ padding: smallPadding * 1.5 }}
-                      onPress={() => handleGradientDirectionChange('diagonal')}
-                    >
-                      <Text
-                        className={`text-center ${gradientDirection === 'diagonal' ? 'text-white font-semibold' : 'text-gray-700'}`}
-                        style={{ fontSize: textSize }}
-                      >
-                        {t('background_gradient_direction_diagonal')}
-                      </Text>
-                    </TouchableOpacity>
                   </View>
                 </View>
-              </View>
-            )}
-          </View>
+              )}
+            </View>
+          )}
         </View>
       </View>
 

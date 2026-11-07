@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { View, Text, Modal, TouchableOpacity } from 'react-native';
 import ColorPicker, { Panel1, Swatches, Preview, HueSlider } from 'reanimated-color-picker';
 import { useTranslation } from 'react-i18next';
+import { useEffectiveDimensions } from '@utils/responsive';
 
 interface ColorPickerModalProps {
   visible: boolean;
@@ -20,7 +21,7 @@ const ColorPickerModal: React.FC<ColorPickerModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [selectedColor, setSelectedColor] = useState(initialColor);
-  const { height } = useWindowDimensions();
+  const { height } = useEffectiveDimensions();
 
   // Compact mode for TV/small height screens
   const isCompact = height < 700;

@@ -1,10 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { FastDayType, HallelType, ZmanimWrapper } from '@utils/zmanim_wrapper';
 import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { isRTL } from '@utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import {
+  isPortraitLayout,
+  useEffectiveDimensions,
+  useResponsiveFontSize,
+  useResponsiveSpacing,
+  useHeightScale,
+} from '@utils/responsive';
 
 const getTachanunLabel = (
   haveTachanunShacharit: boolean,
@@ -34,8 +40,8 @@ const getTachanunLabel = (
 const Zmanim: React.FC = () => {
   const { t, i18n } = useTranslation();
   const { settings } = useSettings();
-  const { width } = useWindowDimensions();
-  const isSmallWidth = width < 500;
+  const { width, height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const isSmallWidth = isPortraitLayout(settings.synagogueSettings.screenOrientation, width, height);
 
   const [rtl, setRtl] = useState(false);
   const [timeTick, setTimeTick] = useState(() => Math.floor(Date.now() / 60000));

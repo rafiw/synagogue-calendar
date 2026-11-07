@@ -1,5 +1,5 @@
 import { useRef, useState, useCallback } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, useWindowDimensions, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 
 import { useSettings } from '@context/settingsContext';
@@ -12,7 +12,7 @@ import DeceasedSettingsTab from './deceased';
 import ScheduleSettingsTab from './schedule';
 import ZmanimSettingsTab from './zmanim';
 import DailyHalakhaSettingsTab from './dailyHalakha';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useEffectiveDimensions } from '@utils/responsive';
 
 const Tab = createMaterialTopTabNavigator();
 
@@ -29,12 +29,13 @@ const TAB_COMPONENTS: Record<TabKey, React.ComponentType> = {
 };
 
 export default function SettingsLayout() {
-  const { isLoading, saveSettings } = useSettings();
+  const { isLoading, saveSettings, settings } = useSettings();
   const { t } = useTranslation();
   const [settingsSaved, setSettingsSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('general');
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const { width, height } = useWindowDimensions();
+  const screenOrientation = settings.synagogueSettings.screenOrientation;
+  const { width, height } = useEffectiveDimensions(screenOrientation);
   const heightScale = useHeightScale() / 1.5;
 
   // Responsive sizes with height adjustment
@@ -45,8 +46,8 @@ export default function SettingsLayout() {
   const smallPadding = Math.round(useResponsiveSpacing(12) * heightScale);
   const sidebarWidth = Math.round(192 * heightScale);
 
-  // Use sidebar layout for TV/wide screens (height < 700 and width > height)
-  const isTVLayout = height < 700 && width > height;
+  // Use sidebar layout for TV/wide screens unless user forced vertical portrait layout
+  const isTVLayout = screenOrientation === 'vertical' ? false : height < 700 && width > height;
 
   const handleSave = useCallback(() => {
     void saveSettings();

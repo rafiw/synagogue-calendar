@@ -46,3 +46,18 @@ vi.mock('expo-updates', () => ({
   fetchUpdateAsync: vi.fn(() => Promise.resolve()),
   reloadAsync: vi.fn(() => Promise.resolve()),
 }));
+
+// Mock @react-native-community/netinfo
+vi.mock('@react-native-community/netinfo', () => ({
+  default: {
+    addEventListener: vi.fn(() => vi.fn()),
+    fetch: vi.fn(() => Promise.resolve({ isConnected: true, isInternetReachable: true })),
+  },
+}));
+
+// Mock expo-secure-store
+vi.mock('expo-secure-store', () => ({
+  getItemAsync: vi.fn(() => Promise.resolve(null)),
+  setItemAsync: vi.fn(() => Promise.resolve()),
+  deleteItemAsync: vi.fn(() => Promise.resolve()),
+}));

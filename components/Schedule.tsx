@@ -1,18 +1,24 @@
 import { useSettings } from '@context/settingsContext';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Text, View, useWindowDimensions } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { isRTL } from '@utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import {
+  isPortraitLayout,
+  useEffectiveDimensions,
+  useResponsiveFontSize,
+  useResponsiveSpacing,
+  useHeightScale,
+} from '@utils/responsive';
 import { getPrayerDisplayTime } from '@utils/scheduleHelpers';
 
 const Schedule: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
-  const { width } = useWindowDimensions();
+  const { width, height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const [rtl, setRtl] = useState(false);
   const heightScale = useHeightScale();
-  const isSmallHeight = width < 500;
+  const isSmallHeight = isPortraitLayout(settings.synagogueSettings.screenOrientation, width, height);
 
   // Responsive sizes
   const mainTitleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale) * 0.9;

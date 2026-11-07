@@ -1,4 +1,6 @@
 import { Platform, useWindowDimensions } from 'react-native';
+import { ScreenOrientationMode } from './defs';
+import { useOptionalSettings } from '@context/settingsContext';
 
 /**
  * Device type detection and responsive sizing utilities
@@ -7,11 +9,80 @@ import { Platform, useWindowDimensions } from 'react-native';
 
 export type DeviceType = 'mobile' | 'tablet' | 'desktop' | 'tv';
 
+export interface EffectiveDimensions {
+  width: number;
+  height: number;
+  physicalWidth: number;
+  physicalHeight: number;
+  isRotated: boolean;
+  rotationDegrees: '0deg' | '90deg';
+}
+
+/**
+ * Computes effective width/height and 90-degree rotation state based on screenOrientation setting
+ * and raw window dimensions. When a TV is physically rotated 90 degrees (portrait) without OS
+ * display rotation support, physicalWidth > physicalHeight while orientation is 'vertical',
+ * so we rotate the screen 90deg and swap width & height.
+ */
+export const getEffectiveDimensions = (
+  orientation: ScreenOrientationMode | undefined,
+  physicalWidth: number,
+  physicalHeight: number,
+): EffectiveDimensions => {
+  const shouldRotateToPortrait = orientation === 'vertical' && physicalWidth > physicalHeight;
+  const shouldRotateToLandscape = orientation === 'horizontal' && physicalHeight > physicalWidth;
+  const isRotated = shouldRotateToPortrait || shouldRotateToLandscape;
+
+  return {
+    width: isRotated ? physicalHeight : physicalWidth,
+    height: isRotated ? physicalWidth : physicalHeight,
+    physicalWidth,
+    physicalHeight,
+    isRotated,
+    rotationDegrees: isRotated ? '90deg' : '0deg',
+  };
+};
+
+/**
+ * Hook returning effective viewport dimensions after applying manual screenOrientation rotation.
+ */
+export const useEffectiveDimensions = (orientationOverride?: ScreenOrientationMode): EffectiveDimensions => {
+  const { width: physicalWidth, height: physicalHeight } = useWindowDimensions();
+  const optionalSettings = useOptionalSettings();
+  const orientation = orientationOverride ?? optionalSettings?.settings?.synagogueSettings?.screenOrientation;
+  return getEffectiveDimensions(orientation, physicalWidth, physicalHeight);
+};
+
+/**
+ * Helper to determine if layout should render in portrait (vertical) mode
+ * taking into account manual screenOrientation setting ('auto' | 'horizontal' | 'vertical').
+ */
+export const isPortraitLayout = (
+  orientation: ScreenOrientationMode | undefined,
+  width: number,
+  height: number,
+  autoThresholdWidth: number = 500,
+): boolean => {
+  if (orientation === 'vertical') return true;
+  if (orientation === 'horizontal') return false;
+  return width < autoThresholdWidth || height > width;
+};
+
 /**
  * Detects the device type based on screen width and platform
  */
-export const useDeviceType = (): DeviceType => {
-  const { width } = useWindowDimensions();
+export const useDeviceType = (orientationOverride?: ScreenOrientationMode): DeviceType => {
+  const optionalSettings = useOptionalSettings();
+  const orientation = orientationOverride ?? optionalSettings?.settings?.synagogueSettings?.screenOrientation;
+  const { width, height } = useEffectiveDimensions(orientation);
+
+  if (orientation === 'vertical') {
+    return 'mobile';
+  }
+  if (orientation === 'horizontal') {
+    if (Platform.isTV) return 'tv';
+    return width > 1280 ? 'desktop' : 'tablet';
+  }
 
   // Only actual Android TV platform should be treated as TV (10-foot UI)
   if (Platform.isTV) {
@@ -31,8 +102,8 @@ export const useDeviceType = (): DeviceType => {
     }
   }
 
-  // Standard CSS breakpoints based on viewport width
-  if (width < 768) {
+  // Standard CSS breakpoints based on viewport width or portrait aspect ratio
+  if (width < 768 || height > width) {
     return 'mobile';
   }
 
@@ -175,7 +246,7 @@ export const useResponsiveSpacing = (baseSpacing: number): number => {
  * Useful for TV and small screens to ensure content fits
  */
 export const useHeightScale = (): number => {
-  const { height } = useWindowDimensions();
+  const { height } = useEffectiveDimensions();
 
   // Base scale is height / 1000 (e.g., 1000px = 1.0, 500px = 0.5)
   // We cap it between 0.45 and 2.0 to avoid extreme sizes

@@ -7,7 +7,7 @@
  * (at your option) any later version.
  */
 
-import { View, Text, ActivityIndicator, I18nManager, useWindowDimensions } from 'react-native';
+import { View, Text, ActivityIndicator, I18nManager } from 'react-native';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { router } from 'expo-router';
 
@@ -17,7 +17,7 @@ import { useSettings } from '@context/settingsContext';
 import { defaultPageDisplayTime, getNoScreenText } from '@utils/utils';
 import { useScreenRotation } from '@utils/useScreenRotation';
 import { Message, Screen, Settings } from '@utils/defs';
-import { useResponsiveSpacing, useDeviceType } from '@utils/responsive';
+import { useResponsiveSpacing, useDeviceType, useEffectiveDimensions } from '@utils/responsive';
 import BackgroundWrapper from '@components/BackgroundWrapper';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import { isMessageActive, calculateMessagesSubPages } from '@utils/classesHelpers';
@@ -99,8 +99,8 @@ export default function App() {
   }, [currentScreenIndex, screens.length, applyUpdateNow]);
 
   // Responsive sizing based on device type - MUST call all hooks unconditionally
-  const deviceType = useDeviceType();
-  const { height } = useWindowDimensions();
+  const deviceType = useDeviceType(settings.synagogueSettings.screenOrientation);
+  const { height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const baseSpacing = useResponsiveSpacing(12);
 
   // Scale down for small height screens (like TV at 540px logical height)

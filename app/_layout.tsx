@@ -6,11 +6,15 @@ import { I18nextProvider } from 'react-i18next';
 import { useState, useEffect } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { initializeI18n, i18n } from '@utils/i18n';
+import { useEffectiveDimensions } from '@utils/responsive';
 import '../global.css';
 
 function AppContent() {
   const { settings, isLoading } = useSettings();
   const [isI18nInitialized, setIsI18nInitialized] = useState(false);
+  const { width, height, physicalWidth, physicalHeight, isRotated, rotationDegrees } = useEffectiveDimensions(
+    settings.synagogueSettings.screenOrientation,
+  );
 
   useEffect(() => {
     const initI18n = async () => {
@@ -30,21 +34,47 @@ function AppContent() {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <Stack>
-        <Stack.Screen
-          name="index"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="settings"
-          options={{
-            presentation: 'modal',
-            title: '',
-          }}
-        />
-      </Stack>
+      <View
+        style={
+          isRotated
+            ? {
+                width: physicalWidth,
+                height: physicalHeight,
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden',
+              }
+            : { flex: 1, width: '100%', height: '100%' }
+        }
+      >
+        <View
+          style={
+            isRotated
+              ? {
+                  width,
+                  height,
+                  transform: [{ rotate: rotationDegrees }],
+                }
+              : { flex: 1, width: '100%', height: '100%' }
+          }
+        >
+          <Stack>
+            <Stack.Screen
+              name="index"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="settings"
+              options={{
+                presentation: 'modal',
+                title: '',
+              }}
+            />
+          </Stack>
+        </View>
+      </View>
     </I18nextProvider>
   );
 }

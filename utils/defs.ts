@@ -110,6 +110,8 @@ export interface PurimSettings {
 
 export type Nusach = 'ashkenaz' | 'sephardic';
 
+export type ScreenOrientationMode = 'auto' | 'horizontal' | 'vertical';
+
 export type BackgroundMode = 'image' | 'solid' | 'gradient';
 
 export interface BackgroundSettings {
@@ -155,6 +157,7 @@ export interface SynagogueSettings {
   name: string;
   language: Language;
   nusach: Nusach;
+  screenOrientation?: ScreenOrientationMode;
   backgroundSettings: BackgroundSettings;
   footerSettings?: FooterSettings;
   autoUpdateSettings?: AutoUpdateSettings;

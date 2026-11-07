@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
 import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useEffectiveDimensions } from '@utils/responsive';
 import { NumberInput } from '@components/NumberInput';
 import { DailyHalakhaItem, loadDailyHalakhaData } from '@utils/dailyHalakhaDataLoader';
 
 const DailyHalakhaSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
-  const { height } = useWindowDimensions();
+  const { height } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const [bookTitles, setBookTitles] = useState<string[]>([]);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const heightScale = useHeightScale() * 0.5;

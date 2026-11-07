@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getHebrewDayName, getSettings, isRTL, isRTL2, getNoScreenText, safeJsonParse } from '../utils/utils';
 import { mergeSettings } from '../utils/settingsMerge';
+import { isPortraitLayout, getEffectiveDimensions } from '../utils/responsive';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 describe('utils', () => {
@@ -276,6 +277,59 @@ describe('utils', () => {
         },
       };
       expect(mergeSettings(customMinsSaved).zmanimSettings.candleLightingMins).toBe(40);
+    });
+
+    it('should preserve or default screenOrientation safely', () => {
+      expect(mergeSettings({}).synagogueSettings.screenOrientation).toBe('auto');
+      expect(
+        mergeSettings({ synagogueSettings: { screenOrientation: 'vertical' } }).synagogueSettings.screenOrientation,
+      ).toBe('vertical');
+      expect(
+        mergeSettings({ synagogueSettings: { screenOrientation: 'horizontal' } }).synagogueSettings.screenOrientation,
+      ).toBe('horizontal');
+      expect(
+        mergeSettings({ synagogueSettings: { screenOrientation: 'invalid' } }).synagogueSettings.screenOrientation,
+      ).toBe('auto');
+    });
+
+    it('should evaluate isPortraitLayout based on screenOrientation override or dimensions', () => {
+      // Forced vertical on wide screen
+      expect(isPortraitLayout('vertical', 1920, 1080)).toBe(true);
+      // Forced horizontal on narrow/portrait screen
+      expect(isPortraitLayout('horizontal', 390, 844)).toBe(false);
+      // Automatic mode
+      expect(isPortraitLayout('auto', 1920, 1080)).toBe(false);
+      expect(isPortraitLayout('auto', 1080, 1920)).toBe(true);
+      expect(isPortraitLayout(undefined, 390, 844)).toBe(true);
+    });
+
+    it('should compute getEffectiveDimensions with 90deg rotation and swapped dimensions for rotated TV', () => {
+      // TV physically rotated 90 degrees (OS reports 1920x1080 landscape, user selected 'vertical')
+      const rotatedVertical = getEffectiveDimensions('vertical', 1920, 1080);
+      expect(rotatedVertical).toEqual({
+        width: 1080,
+        height: 1920,
+        physicalWidth: 1920,
+        physicalHeight: 1080,
+        isRotated: true,
+        rotationDegrees: '90deg',
+      });
+
+      // Normal landscape TV with 'horizontal' or 'auto'
+      const normalLandscape = getEffectiveDimensions('horizontal', 1920, 1080);
+      expect(normalLandscape).toEqual({
+        width: 1920,
+        height: 1080,
+        physicalWidth: 1920,
+        physicalHeight: 1080,
+        isRotated: false,
+        rotationDegrees: '0deg',
+      });
+
+      const autoLandscape = getEffectiveDimensions('auto', 1920, 1080);
+      expect(autoLandscape.isRotated).toBe(false);
+      expect(autoLandscape.width).toBe(1920);
+      expect(autoLandscape.height).toBe(1080);
     });
 
     it('should defensively guard arrays from non-array corruptions', () => {

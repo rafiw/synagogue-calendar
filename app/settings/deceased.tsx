@@ -9,7 +9,6 @@ import {
   TextInput,
   Image,
   ScrollView,
-  useWindowDimensions,
   Modal,
   Platform,
   Share,
@@ -24,7 +23,13 @@ import { HDate } from '@hebcal/core';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import {
+  useResponsiveFontSize,
+  useResponsiveIconSize,
+  useResponsiveSpacing,
+  useHeightScale,
+  useEffectiveDimensions,
+} from '@utils/responsive';
 import { isValidDateString, validateDeceasedPersonDates } from '@utils/validation';
 
 // Local storage key for image delete URLs (not synced to GitHub for security)
@@ -842,7 +847,7 @@ const generateCSV = (people: DeceasedPerson[]): string => {
 const DeceasedSettingsTab = () => {
   const { settings, updateSettings, isLoading } = useSettings();
   const { t, i18n } = useTranslation();
-  const { height, width } = useWindowDimensions();
+  const { height, width } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
   const [showForm, setShowForm] = useState(false);
   const [showCsvHelp, setShowCsvHelp] = useState(false);
   const [editingPerson, setEditingPerson] = useState<DeceasedPerson | undefined>();

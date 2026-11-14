@@ -4,6 +4,7 @@ import { FastDayType, HallelType, ZmanimWrapper } from '@utils/zmanim_wrapper';
 import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
 import { isRTL } from '@utils/utils';
+import { CARD_SURFACE_CLASS, TEXT_SHADOW_STYLE } from '@utils/surfaceStyles';
 import {
   isPortraitLayout,
   useEffectiveDimensions,
@@ -143,7 +144,7 @@ const Zmanim: React.FC = () => {
       },
     };
   }, [i18n.isInitialized, zmanim]);
-  const backgroundColor = 'bg-white/30';
+  const backgroundColor = CARD_SURFACE_CLASS;
   const headLineColor = 'text-gray-900';
   const textColor = 'text-gray-900';
   const dailyInfoItems = useMemo(() => {
@@ -297,7 +298,7 @@ const Zmanim: React.FC = () => {
     >
       <Text
         className={`font-extrabold ${headLineColor} text-center`}
-        style={{ fontSize: titleSize, marginBottom: itemVerticalPadding }}
+        style={[{ fontSize: titleSize, marginBottom: itemVerticalPadding }, TEXT_SHADOW_STYLE]}
       >
         {title}
       </Text>
@@ -305,7 +306,7 @@ const Zmanim: React.FC = () => {
         <Text
           key={index}
           className={`font-bold ${textColor} text-center`}
-          style={{ fontSize: textSize, paddingVertical: itemVerticalPadding }}
+          style={[{ fontSize: textSize, paddingVertical: itemVerticalPadding }, TEXT_SHADOW_STYLE]}
         >
           {item.text}
         </Text>
@@ -329,7 +330,7 @@ const Zmanim: React.FC = () => {
     >
       <Text
         className={`font-extrabold ${headLineColor} text-center`}
-        style={{ fontSize: titleSize, marginBottom: itemVerticalPadding }}
+        style={[{ fontSize: titleSize, marginBottom: itemVerticalPadding }, TEXT_SHADOW_STYLE]}
       >
         {title}
       </Text>
@@ -343,7 +344,7 @@ const Zmanim: React.FC = () => {
             <Text
               key={index}
               className={`font-bold ${textColor} text-center ${isSmallWidth ? 'w-full' : 'w-1/2'}`}
-              style={{ fontSize: textSize, paddingVertical: itemVerticalPadding }}
+              style={[{ fontSize: textSize, paddingVertical: itemVerticalPadding }, TEXT_SHADOW_STYLE]}
             >
               {item.text}
             </Text>

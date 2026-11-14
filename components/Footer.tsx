@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { CARD_BORDER_CLASS, CARD_SURFACE_CLASS, TEXT_SHADOW_STYLE } from '@utils/surfaceStyles';
 
 interface FooterProps {
   footerText?: string;
@@ -16,10 +17,14 @@ const Footer: React.FC<FooterProps> = ({ footerText }) => {
 
   return (
     <View
-      className="items-center justify-center bg-white/55 rounded-xl shadow-md border border-white/60"
+      className={`items-center justify-center ${CARD_SURFACE_CLASS} rounded-xl shadow-md border ${CARD_BORDER_CLASS}`}
       style={{ paddingVertical: paddingV, paddingHorizontal: paddingH }}
     >
-      <Text className="font-bold text-gray-900 text-center" style={{ fontSize: textSize }} numberOfLines={1}>
+      <Text
+        className="font-bold text-gray-900 text-center"
+        style={[{ fontSize: textSize }, TEXT_SHADOW_STYLE]}
+        numberOfLines={1}
+      >
         {footerText}
       </Text>
     </View>

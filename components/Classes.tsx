@@ -1,13 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useSettings } from '@context/settingsContext';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Text, View } from 'react-native';
 import { daysOfWeek } from '@utils/classesHelpers';
 import { Class, Settings } from '@utils/defs';
 import { defaultPageDisplayTime, isRTL2, safeJsonParse } from '@utils/utils';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale, useResponsiveIconSize } from '@utils/responsive';
+import { CARD_SUBSURFACE_CLASS, TEXT_SHADOW_STYLE } from '@utils/surfaceStyles';
+import {
+  useEffectiveDimensions,
+  useResponsiveFontSize,
+  useResponsiveSpacing,
+  useHeightScale,
+  useResponsiveIconSize,
+} from '@utils/responsive';
 
 const classesPerPage = 3.0;
 export async function getSubPages(): Promise<number> {
@@ -25,17 +32,60 @@ const Classes: React.FC = () => {
   const { settings } = useSettings();
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(0);
-  const [PageDisplayTime] = useState(defaultPageDisplayTime);
+  const [availableHeight, setAvailableHeight] = useState(0);
+  const pageDisplayTime = settings.classesSettings?.screenDisplayTime || defaultPageDisplayTime;
 
-  const heightScale = useHeightScale();
+  const { width } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const baseHeightScale = useHeightScale();
+  const baseTitleFont = useResponsiveFontSize('headingLarge');
+  const baseHeaderFont = useResponsiveFontSize('headingMedium');
+  const baseTextFont = useResponsiveFontSize('bodyLarge');
+  const baseIconSize = useResponsiveIconSize('small');
+  const basePadding = useResponsiveSpacing(16);
+  const baseMargin = useResponsiveSpacing(40);
+
+  const startIndex = currentPage * classesPerPage;
+  const currentPageClasses = settings.classesSettings.classes.slice(startIndex, startIndex + classesPerPage);
+  const rowsOnPage = Math.max(1, currentPageClasses.length);
+
+  const hasLocation = settings.classesSettings.classes.some(
+    (c) => c?.location && typeof c.location === 'string' && c.location.trim() !== '',
+  );
+  const numCols = hasLocation ? 5 : 4;
+
+  const heightScale = useMemo(() => {
+    if (availableHeight > 100) {
+      // Unit height at scale = 1.0:
+      // Title badge + margin + table header + rowsOnPage * data row (assume ~1.8 lines per cell) + table margins
+      const titleUnit = baseTitleFont * 1.4 + basePadding * 0.5 + baseMargin * 0.25;
+      const headerUnit = baseHeaderFont * 1.4 + basePadding * 2;
+      const rowsUnit = rowsOnPage * (baseTextFont * 2.2 + basePadding * 2);
+      const unitHeight = titleUnit + headerUnit + rowsUnit + baseMargin * 1.2;
+
+      const maxHorizScale = width / numCols / (baseTextFont * 9);
+      return Math.min(maxHorizScale, baseHeightScale * 1.4, Math.max(0.5, (availableHeight * 0.92) / unitHeight));
+    }
+    return baseHeightScale;
+  }, [
+    availableHeight,
+    baseTitleFont,
+    baseHeaderFont,
+    baseTextFont,
+    basePadding,
+    baseMargin,
+    rowsOnPage,
+    width,
+    numCols,
+    baseHeightScale,
+  ]);
 
   // Responsive sizes
-  const titleSize = Math.round(useResponsiveFontSize('headingLarge') * heightScale);
-  const headerSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const textSize = Math.round(useResponsiveFontSize('bodyLarge') * heightScale);
-  const iconSize = Math.round(useResponsiveIconSize('small') * heightScale);
-  const padding = Math.round(useResponsiveSpacing(16) * heightScale);
-  const margin = Math.round(useResponsiveSpacing(40) * heightScale);
+  const titleSize = Math.round(baseTitleFont * heightScale);
+  const headerSize = Math.round(baseHeaderFont * heightScale);
+  const textSize = Math.round(baseTextFont * heightScale);
+  const iconSize = Math.round(baseIconSize * heightScale);
+  const padding = Math.round(basePadding * heightScale);
+  const margin = Math.round(baseMargin * heightScale * 0.6);
 
   const getDayNames = (dayNumbers: number[]): string => {
     return dayNumbers
@@ -53,19 +103,12 @@ const Classes: React.FC = () => {
           setCurrentPage((prev) => (prev + 1) % subPages);
         }
       });
-    }, PageDisplayTime * 1000);
+    }, pageDisplayTime * 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [pageDisplayTime]);
 
-  const getCurrentPageData = () => {
-    const startIndex = currentPage * classesPerPage;
-    return settings.classesSettings.classes.slice(startIndex, startIndex + classesPerPage);
-  };
-
-  const hasLocation = settings.classesSettings.classes.some(
-    (c) => c?.location && typeof c.location === 'string' && c.location.trim() !== '',
-  );
+  const getCurrentPageData = () => currentPageClasses;
 
   const header = [
     <Text
@@ -114,26 +157,40 @@ const Classes: React.FC = () => {
     header.reverse();
   }
   return (
-    <View>
+    <View
+      className="flex-1 justify-center"
+      onLayout={(e) => {
+        const h = e.nativeEvent.layout.height;
+        if (h > 0 && Math.abs(h - availableHeight) > 2) {
+          setAvailableHeight(h);
+        }
+      }}
+    >
       {settings.classesSettings.classes.length ? (
-        <View>
+        <View className="flex-1 justify-center">
           {/* Title Header */}
           <View
             className="flex-row items-center justify-center"
-            style={{ marginBottom: margin / 4, marginHorizontal: margin }}
+            style={{ marginBottom: margin / 3, marginHorizontal: margin }}
           >
             <View
-              className="flex-row items-center bg-white/55 rounded-xl shadow-lg"
+              className={`flex-row items-center ${CARD_SUBSURFACE_CLASS} rounded-xl shadow-lg`}
               style={{ paddingHorizontal: padding / 2, paddingVertical: padding / 4 }}
             >
               <Ionicons name="book" size={iconSize} color="#3b82f6" />
-              <Text className="font-bold text-gray-800" style={{ fontSize: titleSize, marginLeft: padding / 4 }}>
+              <Text
+                className="font-extrabold text-gray-900"
+                style={[{ fontSize: titleSize, marginLeft: padding / 4 }, TEXT_SHADOW_STYLE]}
+              >
                 {t('classes_title')}
               </Text>
             </View>
           </View>
 
-          <View className="border-2 border-grey-600/50 rounded-xl overflow-hidden shadow-md" style={{ margin }}>
+          <View
+            className="border-2 border-grey-600/50 rounded-xl overflow-hidden shadow-md"
+            style={{ marginHorizontal: margin }}
+          >
             {/* Header */}
             <View className="flex-row bg-gray-600/70 border-b-2 border-gray-800/50">{header}</View>
             {/* Data Rows */}
@@ -142,14 +199,14 @@ const Classes: React.FC = () => {
                 <Text
                   key={`${classItem.id}_day`}
                   className="flex-1 text-center font-bold text-gray-900"
-                  style={{ fontSize: textSize, padding }}
+                  style={[{ fontSize: textSize, padding }, TEXT_SHADOW_STYLE]}
                 >
                   {getDayNames(classItem?.day || [])}
                 </Text>,
                 <Text
                   key={`${classItem.id}_time`}
                   className="flex-1 text-center font-bold text-gray-900"
-                  style={{ fontSize: textSize, padding }}
+                  style={[{ fontSize: textSize, padding }, TEXT_SHADOW_STYLE]}
                 >
                   {isRTL2(settings.synagogueSettings.language)
                     ? `${classItem.end || ''}-${classItem.start || ''}`
@@ -158,14 +215,14 @@ const Classes: React.FC = () => {
                 <Text
                   key={`${classItem.id}_tutor`}
                   className="flex-1 text-center font-bold text-gray-900"
-                  style={{ fontSize: textSize, padding }}
+                  style={[{ fontSize: textSize, padding }, TEXT_SHADOW_STYLE]}
                 >
                   {classItem.tutor}
                 </Text>,
                 <Text
                   key={`${classItem.id}_subject`}
                   className="flex-1 text-center font-bold text-gray-900"
-                  style={{ fontSize: textSize, padding }}
+                  style={[{ fontSize: textSize, padding }, TEXT_SHADOW_STYLE]}
                 >
                   {classItem.subject}
                 </Text>,
@@ -176,7 +233,7 @@ const Classes: React.FC = () => {
                   <Text
                     key={`${classItem.id}_location`}
                     className="flex-1 text-center font-bold text-gray-900"
-                    style={{ fontSize: textSize, padding }}
+                    style={[{ fontSize: textSize, padding }, TEXT_SHADOW_STYLE]}
                   >
                     {classItem?.location || ''}
                   </Text>,
@@ -190,7 +247,7 @@ const Classes: React.FC = () => {
               return (
                 <View
                   key={classItem.id || `class_${index}`}
-                  className="flex-row border-b border-gray-200/50 bg-white/50"
+                  className={`flex-row border-b border-gray-200/50 ${CARD_SUBSURFACE_CLASS}`}
                 >
                   {rowData}
                 </View>

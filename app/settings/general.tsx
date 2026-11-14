@@ -14,7 +14,8 @@ import {
 import { useLocalSearchParams, useGlobalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useSettings } from '@context/settingsContext';
-import { ScreenOrientationMode } from '@utils/defs';
+import { BackgroundPresetId, ScreenOrientationMode } from '@utils/defs';
+import { BACKGROUND_PRESETS } from '@utils/backgroundAssets';
 import { useTranslation } from 'react-i18next';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import ExternalLink from '@utils/PressableLink';
@@ -365,6 +366,9 @@ const GeneralSettingsTab = () => {
   const [customImageUri, setCustomImageUri] = useState(
     settings.synagogueSettings.backgroundSettings.customImageUri || '',
   );
+  const [selectedPresetId, setSelectedPresetId] = useState<BackgroundPresetId | undefined>(
+    settings.synagogueSettings.backgroundSettings.presetId,
+  );
 
   // Color picker modal states
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -388,15 +392,39 @@ const GeneralSettingsTab = () => {
 
   const handleBackgroundModeChange = (mode: 'image' | 'solid' | 'gradient') => {
     setBackgroundMode(mode);
+    const existingImageUrl = customImageUri || settings.synagogueSettings.backgroundSettings.imageUrl || background;
+    const nextPresetId =
+      mode === 'image' && !selectedPresetId && !existingImageUrl ? BACKGROUND_PRESETS[0]?.id : selectedPresetId;
+    if (nextPresetId !== selectedPresetId) {
+      setSelectedPresetId(nextPresetId);
+    }
     const newBackgroundSettings = {
       ...settings.synagogueSettings.backgroundSettings,
       mode,
-      imageUrl: customImageUri || settings.synagogueSettings.backgroundSettings.imageUrl || background,
+      imageUrl: existingImageUrl,
       solidColor,
       gradientColors,
       gradientStart: getGradientStart(gradientDirection),
       gradientEnd: getGradientEnd(gradientDirection),
       customImageUri,
+      presetId: nextPresetId,
+    };
+    updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
+  };
+
+  const handleSelectPreset = (presetId: BackgroundPresetId) => {
+    setSelectedPresetId(presetId);
+    setCustomImageUri('');
+    const newBackgroundSettings = {
+      ...settings.synagogueSettings.backgroundSettings,
+      mode: 'image' as const,
+      presetId,
+      customImageUri: '',
+      imageUrl: '',
+      solidColor,
+      gradientColors,
+      gradientStart: getGradientStart(gradientDirection),
+      gradientEnd: getGradientEnd(gradientDirection),
     };
     updateSettings({ synagogueSettings: { ...settings.synagogueSettings, backgroundSettings: newBackgroundSettings } });
   };
@@ -529,6 +557,7 @@ const GeneralSettingsTab = () => {
       if (!result.canceled && result.assets[0]) {
         const imageUri = result.assets[0].uri;
         setCustomImageUri(imageUri);
+        setSelectedPresetId(undefined);
 
         // Update background settings with custom image
         const newBackgroundSettings = {
@@ -536,6 +565,7 @@ const GeneralSettingsTab = () => {
           mode: 'image' as const,
           imageUrl: imageUri,
           customImageUri: imageUri,
+          presetId: undefined,
           solidColor,
           gradientColors,
           gradientStart: getGradientStart(gradientDirection),
@@ -556,8 +586,9 @@ const GeneralSettingsTab = () => {
     const newBackgroundSettings = {
       ...settings.synagogueSettings.backgroundSettings,
       mode: 'image' as const,
-      imageUrl: background,
+      imageUrl: '',
       customImageUri: '',
+      presetId: selectedPresetId,
       solidColor,
       gradientColors,
       gradientStart: getGradientStart(gradientDirection),
@@ -880,6 +911,53 @@ const GeneralSettingsTab = () => {
               {/* Image Background Settings */}
               {backgroundMode === 'image' && (
                 <View style={{ gap: smallPadding * 1.5 }}>
+                  {/* Preset Wooden Frame Styles */}
+                  <View style={{ gap: smallPadding }}>
+                    <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>
+                      {t('background_frame_styles')}
+                    </Text>
+                    <View className="flex-row flex-wrap" style={{ gap: smallPadding }}>
+                      {BACKGROUND_PRESETS.map((preset) => {
+                        const isSelected = selectedPresetId === preset.id && !customImageUri;
+                        return (
+                          <TouchableOpacity
+                            key={preset.id}
+                            className={`rounded-lg border-2 overflow-hidden ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50'}`}
+                            style={{ width: '48%' }}
+                            onPress={() => handleSelectPreset(preset.id)}
+                          >
+                            <View className="relative">
+                              <Image
+                                source={preset.source}
+                                className="w-full"
+                                style={{ height: imageHeight * 0.65 }}
+                                resizeMode="stretch"
+                              />
+                              {isSelected && (
+                                <View
+                                  className="absolute top-1 right-1 bg-blue-500 rounded-full items-center justify-center"
+                                  style={{ width: iconSize * 1.2, height: iconSize * 1.2 }}
+                                >
+                                  <Feather name="check" size={iconSize * 0.75} color="white" />
+                                </View>
+                              )}
+                            </View>
+                            <Text
+                              className={`text-center font-medium ${isSelected ? 'text-blue-700 font-semibold' : 'text-gray-700'}`}
+                              style={{
+                                fontSize: textSize * 0.9,
+                                paddingVertical: smallPadding * 0.75,
+                                paddingHorizontal: smallPadding * 0.5,
+                              }}
+                            >
+                              {t(preset.labelKey)}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  </View>
+
                   {/* Custom Image Upload */}
                   <View style={{ gap: smallPadding }}>
                     <Text className="font-medium text-gray-500" style={{ fontSize: labelSize * 0.85 }}>

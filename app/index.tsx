@@ -19,6 +19,7 @@ import { useScreenRotation } from '@utils/useScreenRotation';
 import { Message, Screen, Settings } from '@utils/defs';
 import { isPortraitLayout, useResponsiveSpacing, useDeviceType, useEffectiveDimensions } from '@utils/responsive';
 import BackgroundWrapper from '@components/BackgroundWrapper';
+import { CARD_BORDER_CLASS, CARD_SURFACE_CLASS } from '@utils/surfaceStyles';
 import { calculateDeceasedPages } from '@utils/deceasedHelpers';
 import { isMessageActive, calculateMessagesSubPages } from '@utils/classesHelpers';
 import { calculateScheduleSubPages } from '@utils/scheduleHelpers';
@@ -236,7 +237,7 @@ export default function App() {
   return (
     <BackgroundWrapper settings={backgroundSettings}>
       {/* Subtle overlay for better content visibility */}
-      <View className="absolute inset-0 bg-black/10" />
+      <View className="absolute inset-0 bg-black/5" />
 
       <View className="flex-1" style={{ padding: containerPadding }}>
         {/* Header Section */}
@@ -246,7 +247,7 @@ export default function App() {
 
         {/* Main Content Section - Card Style (no backdrop-blur for RN compatibility) */}
         <View
-          className="flex-1 bg-white/40 shadow-2xl overflow-hidden border border-white/50"
+          className={`flex-1 ${CARD_SURFACE_CLASS} shadow-2xl overflow-hidden border ${CARD_BORDER_CLASS}`}
           style={{
             borderRadius,
             elevation: 8, // Android shadow

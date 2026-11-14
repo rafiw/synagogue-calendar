@@ -7,6 +7,12 @@ import { isRTL2 } from '@utils/utils';
 import { useTranslation } from 'react-i18next';
 import { ZmanimWrapper } from '@utils/zmanim_wrapper';
 import {
+  CARD_BORDER_CLASS,
+  CARD_SURFACE_CLASS,
+  HEADER_TEXT_FRAME_CLASS,
+  TEXT_SHADOW_STYLE,
+} from '@utils/surfaceStyles';
+import {
   useResponsiveFontSize,
   useResponsiveIconSize,
   useResponsiveSpacing,
@@ -70,21 +76,37 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
     return () => clearInterval(interval);
   }, [locale]);
 
+  const textFramePaddingY = Math.max(2, Math.round(padding * 0.35));
+
   const elements = [
-    <View key={1} className="flex">
-      <Text className="font-bold text-gray-900" style={{ fontSize: dateSize, paddingHorizontal: padding }}>
+    <View
+      key={1}
+      className={`flex ${HEADER_TEXT_FRAME_CLASS}`}
+      style={{ paddingHorizontal: padding, paddingVertical: textFramePaddingY }}
+    >
+      <Text className="font-bold text-gray-900" style={[{ fontSize: dateSize }, TEXT_SHADOW_STYLE]}>
         {dayOfWeek} - {[zmanim.getHebrewDate(), ...zmanim.getHoliday()].filter(Boolean).join(' - ')}
       </Text>
     </View>,
     <View key={2} className="flex-1 items-center">
-      <Text className="font-extrabold text-gray-900" style={{ fontSize: titleSize }}>
-        {title}
-      </Text>
+      <View
+        className={HEADER_TEXT_FRAME_CLASS}
+        style={{ paddingHorizontal: padding * 2, paddingVertical: textFramePaddingY }}
+      >
+        <Text className="font-extrabold text-gray-900" style={[{ fontSize: titleSize }, TEXT_SHADOW_STYLE]}>
+          {title}
+        </Text>
+      </View>
     </View>,
-    <View key={3} className="flex flex-row items-center">
-      <Text className="font-extrabold text-gray-900" style={{ fontSize: timeSize, marginHorizontal: padding * 2 }}>
-        {currentTime}
-      </Text>
+    <View key={3} className="flex flex-row items-center" style={{ marginHorizontal: padding }}>
+      <View
+        className={HEADER_TEXT_FRAME_CLASS}
+        style={{ paddingHorizontal: padding * 1.25, paddingVertical: textFramePaddingY }}
+      >
+        <Text className="font-extrabold text-gray-900" style={[{ fontSize: timeSize }, TEXT_SHADOW_STYLE]}>
+          {currentTime}
+        </Text>
+      </View>
     </View>,
     <View key={4} className="flex flex-row items-center">
       <TouchableOpacity
@@ -109,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
     return (
       <View
-        className="flex bg-white/40 backdrop-blur-sm shadow-2xl border border-white/50"
+        className={`flex ${CARD_SURFACE_CLASS} shadow-2xl border ${CARD_BORDER_CLASS}`}
         style={{
           paddingHorizontal: containerPaddingX,
           paddingVertical: containerPaddingY,
@@ -120,13 +142,18 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
         <View className={`flex flex-row items-center justify-between w-full ${isRTL ? 'flex-row-reverse' : ''}`}>
           <View style={{ width: iconSize + padding * 2 }} />
           <View className="flex-1 items-center px-1">
-            <Text
-              className="font-extrabold text-gray-900 text-center"
-              style={{ fontSize: mobileTitleSize }}
-              numberOfLines={2}
+            <View
+              className={HEADER_TEXT_FRAME_CLASS}
+              style={{ paddingHorizontal: padding * 1.5, paddingVertical: textFramePaddingY }}
             >
-              {title}
-            </Text>
+              <Text
+                className="font-extrabold text-gray-900 text-center"
+                style={[{ fontSize: mobileTitleSize }, TEXT_SHADOW_STYLE]}
+                numberOfLines={2}
+              >
+                {title}
+              </Text>
+            </View>
           </View>
           <TouchableOpacity
             onPress={() => {
@@ -147,28 +174,38 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
           className={`flex flex-row items-center justify-between w-full ${isRTL ? 'flex-row-reverse' : ''}`}
           style={{ marginTop: Math.max(4, Math.round(padding * 0.5)) }}
         >
-          <Text
-            className="font-bold text-gray-900 flex-1"
-            style={{
-              fontSize: mobileDateSize,
-              textAlign: isRTL ? 'right' : 'left',
-              paddingHorizontal: 2,
-            }}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+          <View
+            className={`flex-1 ${HEADER_TEXT_FRAME_CLASS}`}
+            style={{ paddingHorizontal: padding, paddingVertical: textFramePaddingY }}
           >
-            {dayOfWeek} - {[zmanim.getHebrewDate(), ...zmanim.getHoliday()].filter(Boolean).join(' - ')}
-          </Text>
-          <Text
-            className="font-extrabold text-gray-900"
+            <Text
+              className="font-bold text-gray-900"
+              style={[
+                {
+                  fontSize: mobileDateSize,
+                  textAlign: isRTL ? 'right' : 'left',
+                },
+                TEXT_SHADOW_STYLE,
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {dayOfWeek} - {[zmanim.getHebrewDate(), ...zmanim.getHoliday()].filter(Boolean).join(' - ')}
+            </Text>
+          </View>
+          <View
+            className={HEADER_TEXT_FRAME_CLASS}
             style={{
-              fontSize: mobileTimeSize,
+              paddingHorizontal: padding,
+              paddingVertical: textFramePaddingY,
               marginLeft: isRTL ? 0 : 8,
               marginRight: isRTL ? 8 : 0,
             }}
           >
-            {currentTime}
-          </Text>
+            <Text className="font-extrabold text-gray-900" style={[{ fontSize: mobileTimeSize }, TEXT_SHADOW_STYLE]}>
+              {currentTime}
+            </Text>
+          </View>
         </View>
       </View>
     );
@@ -179,7 +216,7 @@ const Header: React.FC<HeaderProps> = ({ title }) => {
 
   return (
     <View
-      className={`flex bg-white/40 backdrop-blur-sm shadow-2xl border border-white/50 ${style1}`}
+      className={`flex ${CARD_SURFACE_CLASS} shadow-2xl border ${CARD_BORDER_CLASS} ${style1}`}
       style={{
         paddingHorizontal: containerPaddingX,
         paddingVertical: containerPaddingY,

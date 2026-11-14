@@ -2,6 +2,7 @@ import React from 'react';
 import { View, ImageBackground, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BackgroundSettings } from '@utils/defs';
+import { getBackgroundPreset } from '@utils/backgroundAssets';
 
 interface BackgroundWrapperProps {
   settings: BackgroundSettings;
@@ -9,14 +10,26 @@ interface BackgroundWrapperProps {
 }
 
 const BackgroundWrapper: React.FC<BackgroundWrapperProps> = ({ settings, children }) => {
-  const { mode, imageUrl, solidColor, gradientColors, gradientStart, gradientEnd } = settings;
+  const { mode, imageUrl, customImageUri, presetId, solidColor, gradientColors, gradientStart, gradientEnd } = settings;
 
-  if (mode === 'image' && imageUrl) {
-    return (
-      <ImageBackground source={{ uri: imageUrl }} style={styles.container} resizeMode="cover">
-        {children}
-      </ImageBackground>
-    );
+  if (mode === 'image') {
+    const preset = getBackgroundPreset(presetId);
+    if (preset) {
+      return (
+        <ImageBackground source={preset.source} style={styles.container} resizeMode={preset.resizeMode}>
+          {children}
+        </ImageBackground>
+      );
+    }
+
+    const resolvedUri = customImageUri || imageUrl;
+    if (resolvedUri) {
+      return (
+        <ImageBackground source={{ uri: resolvedUri }} style={styles.container} resizeMode="cover">
+          {children}
+        </ImageBackground>
+      );
+    }
   }
 
   if (mode === 'solid') {

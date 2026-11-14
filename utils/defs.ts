@@ -114,6 +114,25 @@ export type ScreenOrientationMode = 'auto' | 'horizontal' | 'vertical';
 
 export type BackgroundMode = 'image' | 'solid' | 'gradient';
 
+export type BackgroundPresetId =
+  | 'classic_oak'
+  | 'dark_walnut'
+  | 'rustic_pine'
+  | 'mahogany_gold'
+  | 'carved_chestnut'
+  | 'carved_dark_oak'
+  | 'carved_honey';
+
+export const BACKGROUND_PRESET_IDS: BackgroundPresetId[] = [
+  'classic_oak',
+  'dark_walnut',
+  'rustic_pine',
+  'mahogany_gold',
+  'carved_chestnut',
+  'carved_dark_oak',
+  'carved_honey',
+];
+
 export interface BackgroundSettings {
   mode: BackgroundMode;
   imageUrl: string;
@@ -122,6 +141,7 @@ export interface BackgroundSettings {
   gradientStart?: { x: number; y: number };
   gradientEnd?: { x: number; y: number };
   customImageUri?: string;
+  presetId?: BackgroundPresetId;
 }
 
 export interface ZmanimSettings {

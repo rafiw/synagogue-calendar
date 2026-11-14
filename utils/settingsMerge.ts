@@ -1,5 +1,5 @@
 import { cities } from '@assets/data';
-import { Settings } from '@utils/defs';
+import { BACKGROUND_PRESET_IDS, BackgroundPresetId, Settings } from '@utils/defs';
 import { resolveDefaultCandleLightingMins } from '@utils/zmanim_wrapper';
 
 export const defaultName = 'בית כנסת לדוגמא';
@@ -249,6 +249,11 @@ export const mergeSettings = (loaded: any, defaults: Settings = defaultSettings)
           bg?.gradientEnd && typeof bg.gradientEnd.x === 'number' && typeof bg.gradientEnd.y === 'number'
             ? bg.gradientEnd
             : defaults.synagogueSettings.backgroundSettings.gradientEnd,
+        customImageUri: typeof bg?.customImageUri === 'string' ? bg.customImageUri : undefined,
+        presetId:
+          typeof bg?.presetId === 'string' && BACKGROUND_PRESET_IDS.includes(bg.presetId as BackgroundPresetId)
+            ? (bg.presetId as BackgroundPresetId)
+            : undefined,
       },
       footerSettings: {
         enable: typeof footer?.enable === 'boolean' ? footer.enable : defaults.synagogueSettings.footerSettings.enable,

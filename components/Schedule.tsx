@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { defaultPageDisplayTime, isRTL } from '@utils/utils';
+import { CARD_SUBSURFACE_CLASS, CARD_SURFACE_CLASS, TEXT_SHADOW_STYLE } from '@utils/surfaceStyles';
 import {
   isPortraitLayout,
   useEffectiveDimensions,
@@ -79,7 +80,7 @@ const Schedule: React.FC = () => {
       const unitHeight = baseItemPadding * 2 + mainTitleUnit + cardsChromeUnit + rowsUnit;
 
       const colCountHoriz = isSmallHeight || shouldPaginate ? 1 : Math.max(1, displayedColumns.length);
-      const maxHorizScale = (width / colCountHoriz) / (baseItemFont * 16);
+      const maxHorizScale = width / colCountHoriz / (baseItemFont * 16);
       const maxScaleCap = Math.min(maxHorizScale, baseHeightScale * 1.35);
 
       return Math.min(maxScaleCap, Math.max(0.45, (availableHeight * 0.94) / unitHeight));
@@ -113,7 +114,7 @@ const Schedule: React.FC = () => {
   const emptyTextSize = Math.round(baseItemFont * heightScale);
   const itemPadding = Math.round(baseItemPadding * heightScale);
 
-  const backgroundColor = 'bg-white/40';
+  const backgroundColor = CARD_SURFACE_CLASS;
   const headLineColor = 'text-gray-900';
   const textColor = 'text-gray-900';
 
@@ -132,7 +133,7 @@ const Schedule: React.FC = () => {
     >
       <Text
         className={`font-extrabold ${headLineColor} text-center`}
-        style={{ fontSize: titleSize, marginBottom: padding }}
+        style={[{ fontSize: titleSize, marginBottom: padding }, TEXT_SHADOW_STYLE]}
       >
         {title}
       </Text>
@@ -145,14 +146,14 @@ const Schedule: React.FC = () => {
           {items.map((item, index) => (
             <View
               key={index}
-              className="bg-white/60 rounded-xl shadow-sm border border-gray-500"
+              className={`${CARD_SUBSURFACE_CLASS} rounded-xl shadow-sm border border-gray-500`}
               style={{ paddingHorizontal: itemPadding, paddingVertical: itemPadding, marginBottom: margin }}
             >
               <View className={`flex-row justify-center gap-4 ${rtl ? 'space-x-reverse' : ''}`}>
-                <Text className={`${textColor} font-bold`} style={{ fontSize: textSize }}>
+                <Text className={`${textColor} font-bold`} style={[{ fontSize: textSize }, TEXT_SHADOW_STYLE]}>
                   {item.name}
                 </Text>
-                <Text className={`${textColor} font-extrabold`} style={{ fontSize: textSize }}>
+                <Text className={`${textColor} font-extrabold`} style={[{ fontSize: textSize }, TEXT_SHADOW_STYLE]}>
                   -
                 </Text>
                 <Text className={`${textColor} font-extrabold`} style={{ fontSize: textSize }}>

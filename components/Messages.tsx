@@ -6,7 +6,14 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ImageBackground, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { defaultPageDisplayTime, safeJsonParse } from '@utils/utils';
-import { useResponsiveFontSize, useResponsiveIconSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { CARD_SUBSURFACE_CLASS, TEXT_SHADOW_STYLE } from '@utils/surfaceStyles';
+import {
+  useEffectiveDimensions,
+  useResponsiveFontSize,
+  useResponsiveIconSize,
+  useResponsiveSpacing,
+  useHeightScale,
+} from '@utils/responsive';
 import { Message, Settings } from '@utils/defs';
 import {
   isMessageActive,
@@ -35,21 +42,11 @@ const Messages: React.FC = () => {
   const { settings } = useSettings();
   const { t, i18n } = useTranslation();
   const [currentPage, setCurrentPage] = useState(0);
-  const heightScale = useHeightScale();
+  const [availableHeight, setAvailableHeight] = useState(0);
+  const { width } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const baseHeightScale = useHeightScale();
 
   const pageDisplayTime = settings.messagesSettings.screenDisplayTime || defaultPageDisplayTime;
-
-  // Responsive sizes with height adjustment
-  const titleSize = Math.round(useResponsiveFontSize('displayLarge') * heightScale) * 0.6;
-  const messageSize = Math.round(useResponsiveFontSize('headingLarge') * heightScale) * 0.9;
-  const eventTextSize = Math.max(34, Math.round(useResponsiveFontSize('displayLarge') * heightScale) * 1.25);
-  const emptyTitleSize = Math.round(useResponsiveFontSize('displayMedium') * heightScale);
-  const emptyDescSize = Math.round(useResponsiveFontSize('bodyLarge') * heightScale);
-  const buttonTextSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const iconSize = Math.round(useResponsiveIconSize('large') * heightScale) * 0.6;
-  const iconLargeSize = Math.round(useResponsiveIconSize('xxlarge') * heightScale) * 0.8;
-  const padding = Math.round(useResponsiveSpacing(24) * heightScale);
-  const margin = Math.round(useResponsiveSpacing(24) * heightScale);
 
   // Filter to only show active messages
   const activeMessages = useMemo(() => {
@@ -61,6 +58,45 @@ const Messages: React.FC = () => {
   }, [activeMessages]);
 
   const totalPages = messagePages.length;
+  const currentPageData = messagePages[currentPage] || messagePages[0];
+
+  const baseTitleFont = useResponsiveFontSize('displayLarge');
+  const baseMsgFont = useResponsiveFontSize('headingLarge');
+  const baseEmptyTitleFont = useResponsiveFontSize('displayMedium');
+  const baseEmptyDescFont = useResponsiveFontSize('bodyLarge');
+  const baseBtnFont = useResponsiveFontSize('headingMedium');
+  const baseIconLarge = useResponsiveIconSize('large');
+  const baseIconXXLarge = useResponsiveIconSize('xxlarge');
+  const baseSpacing = useResponsiveSpacing(24);
+
+  const heightScale = useMemo(() => {
+    if (availableHeight > 100 && currentPageData && currentPageData.type === 'standard') {
+      const msgs = currentPageData.messages;
+      const msgCount = Math.max(1, msgs.length);
+      const charsPerLine = Math.max(25, Math.floor((width * 0.78) / (baseMsgFont * 0.9 * 0.55)));
+      const totalLines = msgs.reduce((sum, m) => sum + Math.max(1, Math.ceil((m.text || '').length / charsPerLine)), 0);
+
+      const headerUnit = baseTitleFont * 0.6 * 1.3 + baseSpacing * 2 + (totalPages > 1 ? 18 : 0);
+      const cardsChromeUnit = msgCount * (baseSpacing * 3);
+      const textUnit = totalLines * (baseMsgFont * 0.9 * 1.6);
+      const unitHeight = baseSpacing * 2 + headerUnit + cardsChromeUnit + textUnit * 1.1;
+
+      return Math.min(baseHeightScale * 1.4, Math.max(0.5, (availableHeight * 0.92) / unitHeight));
+    }
+    return baseHeightScale;
+  }, [availableHeight, currentPageData, width, baseMsgFont, baseTitleFont, baseSpacing, totalPages, baseHeightScale]);
+
+  // Responsive sizes with height adjustment
+  const titleSize = Math.round(baseTitleFont * heightScale) * 0.6;
+  const messageSize = Math.round(baseMsgFont * heightScale) * 0.9;
+  const eventTextSize = Math.max(34, Math.round(baseTitleFont * baseHeightScale) * 1.25);
+  const emptyTitleSize = Math.round(baseEmptyTitleFont * baseHeightScale);
+  const emptyDescSize = Math.round(baseEmptyDescFont * baseHeightScale);
+  const buttonTextSize = Math.round(baseBtnFont * baseHeightScale);
+  const iconSize = Math.round(baseIconLarge * heightScale) * 0.6;
+  const iconLargeSize = Math.round(baseIconXXLarge * baseHeightScale) * 0.8;
+  const padding = Math.round(baseSpacing * heightScale);
+  const margin = Math.round(baseSpacing * heightScale);
 
   useEffect(() => {
     // Reset to first page if current page is out of bounds
@@ -120,8 +156,6 @@ const Messages: React.FC = () => {
       </View>
     );
   }
-
-  const currentPageData = messagePages[currentPage] || messagePages[0];
 
   if (!currentPageData) {
     return null;
@@ -187,16 +221,28 @@ const Messages: React.FC = () => {
 
   // Standard Messages Page
   return (
-    <View className="flex-1" style={{ paddingHorizontal: padding, paddingVertical: padding }}>
+    <View
+      className="flex-1"
+      style={{ paddingHorizontal: padding, paddingVertical: padding }}
+      onLayout={(e) => {
+        const h = e.nativeEvent.layout.height;
+        if (h > 0 && Math.abs(h - availableHeight) > 2) {
+          setAvailableHeight(h);
+        }
+      }}
+    >
       {/* Header Section */}
       <View style={{ marginBottom: margin }}>
         <View className="flex-row items-center justify-center mb-2">
           <View
-            className="flex-row items-center bg-white/55 rounded-xl shadow-lg"
+            className={`flex-row items-center ${CARD_SUBSURFACE_CLASS} rounded-xl shadow-lg`}
             style={{ paddingHorizontal: padding, paddingVertical: padding / 2 }}
           >
             <Ionicons name="notifications" size={iconSize} color="#3b82f6" />
-            <Text className="font-extrabold text-gray-900" style={{ fontSize: titleSize, marginLeft: padding / 2 }}>
+            <Text
+              className="font-extrabold text-gray-900"
+              style={[{ fontSize: titleSize, marginLeft: padding / 2 }, TEXT_SHADOW_STYLE]}
+            >
               {t('msg_title')}
             </Text>
           </View>
@@ -218,19 +264,19 @@ const Messages: React.FC = () => {
       {/* Messages List */}
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ justifyContent: 'center', paddingVertical: 10 }}
+        contentContainerStyle={{ flexGrow: 1, justifyContent: 'space-evenly', paddingVertical: 10 }}
         showsVerticalScrollIndicator={false}
       >
         {currentPageData.messages.map((message) => (
           <View
             key={message.id}
-            className="bg-white/55 rounded-2xl shadow-lg border-l-4 border-blue-500"
+            className={`${CARD_SUBSURFACE_CLASS} rounded-2xl shadow-lg border-l-4 border-blue-500`}
             style={{ marginBottom: margin, padding }}
           >
             <View className="flex-row items-start">
               <Text
                 className="flex-1 font-bold text-gray-900 leading-relaxed text-center"
-                style={{ fontSize: messageSize }}
+                style={[{ fontSize: messageSize }, TEXT_SHADOW_STYLE]}
               >
                 {message.text}
               </Text>

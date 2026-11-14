@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { useSettings } from '@context/settingsContext';
 import { useTranslation } from 'react-i18next';
-import { useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
+import { useEffectiveDimensions, useResponsiveFontSize, useResponsiveSpacing, useHeightScale } from '@utils/responsive';
 import { HDate, months, getHolidaysOnDate } from '@hebcal/core';
 import { DailyHalakhaItem, loadDailyHalakhaData } from '@utils/dailyHalakhaDataLoader';
+import { CARD_SURFACE_CLASS, TEXT_SHADOW_STYLE } from '@utils/surfaceStyles';
 
 const START_DATE = new HDate(1, months.TISHREI, 5786);
 
@@ -61,15 +62,15 @@ const DailyHalakha: React.FC = () => {
   const [items, setItems] = useState<string[]>([]);
   const [idxPairsName, setIdxPairsName] = useState<[number, number, string][]>([]);
   const [loading, setLoading] = useState(true);
-  const heightScale = useHeightScale();
+  const [availableHeight, setAvailableHeight] = useState(0);
+  const { width } = useEffectiveDimensions(settings.synagogueSettings.screenOrientation);
+  const baseHeightScale = useHeightScale();
+  const baseTextFont = useResponsiveFontSize('headingMedium');
+  const basePadding = useResponsiveSpacing(12);
+  const baseMargin = useResponsiveSpacing(4);
+  const baseItemPadding = useResponsiveSpacing(8);
 
-  // Responsive sizes
-  const textSize = Math.round(useResponsiveFontSize('headingMedium') * heightScale);
-  const padding = Math.round(useResponsiveSpacing(12) * heightScale);
-  const margin = Math.round(useResponsiveSpacing(4) * heightScale);
-  const itemPadding = Math.round(useResponsiveSpacing(8) * heightScale);
-
-  const backgroundColor = 'bg-white/40';
+  const backgroundColor = CARD_SURFACE_CLASS;
   const textColor = 'text-gray-900';
   const isIsrael = settings.zmanimSettings?.il || true;
   const showHolidayHalachot = settings.dailyHalakhaSettings?.showRelatedHolidaysHalachot || false;
@@ -205,6 +206,36 @@ const DailyHalakha: React.FC = () => {
     headersIdx = getHeadersIdxForRange(startIndex % items.length, itemsPerDay);
   }
 
+  // Dynamically compute heightScale based on availableHeight and total text lines across today's halakhot
+  const nonEmptyHeadersCount = headersIdx.filter(([, name]) => name !== '').length;
+  const totalChars = todayItems.reduce((sum, item) => sum + item.length, 0);
+  const charsPerLineAtBase = Math.max(25, Math.floor((width * 0.82) / (baseTextFont * 0.55)));
+  const estimatedLines = Math.max(
+    todayItems.length,
+    todayItems.reduce((sum, item) => sum + Math.max(1, Math.ceil(item.length / charsPerLineAtBase)), 0),
+  );
+
+  let heightScale = baseHeightScale;
+  if (availableHeight > 100 && todayItems.length > 0 && totalChars > 0) {
+    // Unit height at scale = 1.0:
+    // Outer padding + headers + cards * (2 * basePadding + 2 * baseMargin) + estimatedLines * (baseTextFont * 1.5)
+    const chromeUnit =
+      basePadding +
+      baseItemPadding * 2 +
+      nonEmptyHeadersCount * (baseTextFont * 1.5) +
+      todayItems.length * (basePadding * 2 + baseMargin * 2 + 4);
+    const textUnit = estimatedLines * (baseTextFont * 1.5);
+    // Since scaling font by S also increases line wrapping slightly (~S^1.35 for text height), solve conservatively:
+    const rawScale = (availableHeight * 0.92) / (chromeUnit + textUnit * 1.15);
+    heightScale = Math.min(baseHeightScale * 1.35, Math.max(0.5, rawScale));
+  }
+
+  // Responsive sizes
+  const textSize = Math.round(baseTextFont * heightScale);
+  const padding = Math.round(basePadding * heightScale);
+  const margin = Math.round(baseMargin * heightScale);
+  const itemPadding = Math.round(baseItemPadding * heightScale);
+
   if (items.length === 0) {
     return (
       <View className="flex-1 justify-center items-center" style={{ padding }}>
@@ -225,15 +256,24 @@ const DailyHalakha: React.FC = () => {
     );
   }
   return (
-    <View className="flex-1" style={{ padding: padding / 2 }}>
-      <View className="flex-1" style={{ padding: itemPadding }}>
+    <View
+      className="flex-1"
+      style={{ padding: padding / 2 }}
+      onLayout={(e) => {
+        const h = e.nativeEvent.layout.height;
+        if (h > 0 && Math.abs(h - availableHeight) > 2) {
+          setAvailableHeight(h);
+        }
+      }}
+    >
+      <View className="flex-1 justify-evenly" style={{ padding: itemPadding }}>
         {todayItems.map((item, index) => (
           <View key={index}>
             <View className="flex-row items-center justify-center">
               {headersIdx[index] && headersIdx[index][1] !== '' && (
                 <Text
                   className={`font-extrabold ${textColor} text-center`}
-                  style={{ fontSize: textSize, lineHeight: textSize * 1.5 }}
+                  style={[{ fontSize: textSize, lineHeight: textSize * 1.5 }, TEXT_SHADOW_STYLE]}
                 >
                   {headersIdx[index][1]}
                 </Text>
@@ -245,7 +285,7 @@ const DailyHalakha: React.FC = () => {
             >
               <Text
                 className={`font-bold ${textColor} text-center`}
-                style={{ fontSize: textSize, lineHeight: textSize * 1.5 }}
+                style={[{ fontSize: textSize, lineHeight: textSize * 1.5 }, TEXT_SHADOW_STYLE]}
               >
                 {item}
               </Text>
